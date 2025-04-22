@@ -19,6 +19,9 @@ import NotFoundPage from './components/NotFoundPage';
 import { useSelector,useDispatch } from 'react-redux'; 
 import { fetchUserInfo,logout } from './state/slices/authSlice';
 import GameGrid from './components/Games';
+import DepositPage from './components/Deposit';
+import WithdrawalPage from './components/Withdawls';
+import CreditBalancePage from './components/CreditBalancePage';
 
 
 // Define theme (or import it)
@@ -111,6 +114,30 @@ const App = () => {
               element={
                 <PrivateRoute>
                   <GameGrid />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/deposits"
+              element={
+                <PrivateRoute>
+                  <DepositPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/withdrawals"
+              element={
+                <PrivateRoute>
+                  <WithdrawalPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/credits"
+              element={
+                <PrivateRoute>
+                  <CreditBalancePage />
                 </PrivateRoute>
               }
             />

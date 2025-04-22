@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TableContainer,
   Table,
@@ -12,156 +12,264 @@ import {
   Typography,
   TextField,
   Grid,
+  Card,
+  CardContent,
+  Chip,
+  IconButton,
+  CircularProgress,
+  Tooltip,
 } from '@mui/material';
-import { fetchGamesByDateRange } from '../state/slices/gameSlice'; // Adjust the import path as necessary
-
+import {
+  SportsEsports as GameIcon,
+  Group as PlayersIcon,
+  AttachMoney as MoneyIcon,
+  DateRange,
+  Refresh,
+  Search as SearchIcon,
+} from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
-
-import GameDetail from './GameDetail'; // Adjust the import path as necessary
-
+import { fetchGamesByDateRange } from '../state/slices/gameSlice';
+import GameDetail from './GameDetail';
 
 const GameGrid = () => {
-
   const dispatch = useDispatch();
   const { games, loading, error } = useSelector((state) => state.games);
-
   const [selectedGame, setSelectedGame] = useState(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  useEffect(() => {
+    dispatch(fetchGamesByDateRange({
+      startDate: null,
+      endDate: null,
+    }));
+  }, []);
 
-    useEffect(() => {
-        // Fetch games when the component mounts or when startDate/endDate changes
-        dispatch(fetchGamesByDateRange({
-            startDate: null,
-            endDate: null,
-        }));
-    },[]);
-
-  // For future Redux integration: dispatch fetchGamesByDateRange with startDate and endDate
   const handleDateFilter = () => {
     dispatch(fetchGamesByDateRange({
-        startDate: startDate ? new Date(startDate) : null,
-        endDate: endDate ? new Date(endDate) : null,
-      }));
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null,
+    }));
+  };
+
+  // Calculate summary statistics
+  const gameSummary = {
+    totalGames: games?.length || 0,
+    totalBets: games?.reduce((sum, game) => sum + game.bet_amount, 0) || 0,
+    completedGames: games?.filter(game => game.game_completed).length || 0,
+    totalPlayers: games?.reduce((sum, game) => sum + game.number_of_players, 0) || 0,
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-      <Typography variant="h5" fontWeight="bold" mb={3}>
-        {`Game Transactions (${games?.length || 0} games)`}
-      </Typography>
-    {/* Loading and Error States */}
-    {loading && (
-        <Typography variant="body2" color="text.secondary" align="center" mb={2}>
-            Loading games...
+    <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
+      {/* Header */}
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" fontWeight="600">
+          Game Transactions
         </Typography>
-    )}
-    {error && (
-        <Typography variant="body2" color="error" align="center" mb={2}>
-            {`Error: ${error}`}
-        </Typography>
-    )}
-      {/* Date Range Filter */}
-      <Grid container spacing={2} mb={3}>
-        <Grid item xs={12} sm={5}>
-          <TextField
-            label="Start Date"
-            type="datetime-local"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            sx={{ bgcolor: 'white', borderRadius: 1 }}
-          />
+        <Button
+          startIcon={<Refresh />}
+          variant="outlined"
+          onClick={handleDateFilter}
+          disabled={loading}
+        >
+          Refresh Data
+        </Button>
+      </Box>
+
+      {/* Summary Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'primary.lighter' }}>
+                <GameIcon sx={{ color: 'primary.main' }} />
+              </Box>
+              <Box>
+                <Typography color="textSecondary" variant="body2">Total Games</Typography>
+                <Typography variant="h4" sx={{ mt: 0.5 }}>{gameSummary.totalGames}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
         </Grid>
-        <Grid item xs={12} sm={5}>
-          <TextField
-            label="End Date"
-            type="datetime-local"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            sx={{ bgcolor: 'white', borderRadius: 1 }}
-          />
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'success.lighter' }}>
+                <MoneyIcon sx={{ color: 'success.main' }} />
+              </Box>
+              <Box>
+                <Typography color="textSecondary" variant="body2">Total Bets</Typography>
+                <Typography variant="h4" sx={{ mt: 0.5 }}>${gameSummary.totalBets.toFixed(2)}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
         </Grid>
-        <Grid item xs={12} sm={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleDateFilter}
-            disabled={!startDate || !endDate}
-            fullWidth
-            sx={{ height: '100%' }}
-          >
-            Filter
-          </Button>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'warning.lighter' }}>
+                <PlayersIcon sx={{ color: 'warning.main' }} />
+              </Box>
+              <Box>
+                <Typography color="textSecondary" variant="body2">Total Players</Typography>
+                <Typography variant="h4" sx={{ mt: 0.5 }}>{gameSummary.totalPlayers}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'info.lighter' }}>
+                <GameIcon sx={{ color: 'info.main' }} />
+              </Box>
+              <Box>
+                <Typography color="textSecondary" variant="body2">Completed Games</Typography>
+                <Typography variant="h4" sx={{ mt: 0.5 }}>{gameSummary.completedGames}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
+
+      {/* Date Filter */}
+      <Card elevation={0} sx={{ mb: 4, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+        <CardContent>
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <TextField
+                label="Start Date"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                fullWidth
+                size="small"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                label="End Date"
+                type="datetime-local"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                fullWidth
+                size="small"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Button
+                variant="contained"
+                onClick={handleDateFilter}
+                disabled={!startDate || !endDate || loading}
+                startIcon={<DateRange />}
+                fullWidth
+                sx={{ height: '40px' }}
+              >
+                Apply Filter
+              </Button>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {/* Error State */}
+      {error && (
+        <Card sx={{ mb: 3, bgcolor: 'error.lighter', border: 1, borderColor: 'error.light' }}>
+          <CardContent>
+            <Typography color="error" variant="body2">{error}</Typography>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Table */}
       <TableContainer
         component={Paper}
+        elevation={0}
         sx={{
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           borderRadius: 2,
+          border: 1,
+          borderColor: 'divider',
         }}
       >
-        <Table sx={{ minWidth: 650 }} aria-label="game transactions table">
+        <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-              <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Game ID</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Players</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Bet Amount</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Completed</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Game ID</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Date</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Players</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Bet Amount</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {games?.length > 0 ? (
-              games?.map((game) => (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                  <CircularProgress size={32} />
+                  <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+                    Loading games...
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : games?.length > 0 ? (
+              games.map((game) => (
                 <TableRow
                   key={game.game_id}
                   hover
-                  sx={{
-                    '&:hover': { backgroundColor: '#f9f9f9' },
-                    transition: 'background-color 0.2s',
-                  }}
                 >
-                  <TableCell component="th" scope="row" sx={{ py: 1.5 }}>
-                    {game.game_id}
+                  <TableCell>{game.game_id}</TableCell>
+                  <TableCell>{new Date(game.date).toLocaleString()}</TableCell>
+                  <TableCell>
+                    <Chip
+                      icon={<PlayersIcon sx={{ fontSize: 16 }} />}
+                      label={game.number_of_players}
+                      size="small"
+                      variant="outlined"
+                    />
                   </TableCell>
                   <TableCell>
-                    {new Date(game.date).toLocaleString()}
+                    <Chip
+                      icon={<MoneyIcon sx={{ fontSize: 16 }} />}
+                      label={`$${game.bet_amount.toFixed(2)}`}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
                   </TableCell>
-                  <TableCell>{game.number_of_players}</TableCell>
-                  <TableCell>${game.bet_amount.toFixed(2)}</TableCell>
                   <TableCell>
-                    <Typography
-                      variant="body2"
-                      color={game.game_completed ? 'success.main' : 'error.main'}
-                    >
-                      {game.game_completed ? 'Yes' : 'No'}
-                    </Typography>
+                    <Chip
+                      label={game.game_completed ? 'Completed' : 'In Progress'}
+                      size="small"
+                      color={game.game_completed ? 'success' : 'warning'}
+                    />
                   </TableCell>
                   <TableCell>
                     <Button
                       variant="outlined"
-                      color="primary"
                       size="small"
                       onClick={() => setSelectedGame(game)}
+                      startIcon={<SearchIcon />}
                     >
-                      Details
+                      View Details
                     </Button>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                  <Typography variant="body1" color="text.secondary">
                     No games found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Try adjusting your date range filters
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -169,6 +277,7 @@ const GameGrid = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
       {selectedGame && (
         <GameDetail
           game={selectedGame}

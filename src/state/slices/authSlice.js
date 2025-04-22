@@ -81,8 +81,8 @@ const authSlice = createSlice({
         })
         .addCase(loginUser.rejected, (state, action) => {
             state.loading = false;
-            
             state.error = action.payload?.detail;
+            console.log(action.payload);
           })
           .addCase(fetchUserInfo.pending, (state) => {
             state.loading = true; // Or a separate loading state for user info

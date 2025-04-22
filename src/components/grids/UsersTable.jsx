@@ -1,188 +1,225 @@
 import React, { useState } from 'react';
 import {
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  IconButton,
-  TextField,
-  InputAdornment,
   Box,
+  Card,
+  CardContent,
+  Grid,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
   TablePagination,
+  TableRow,
+  TextField,
   Typography,
+  useTheme,
 } from '@mui/material';
-import { Edit as EditIcon, Search as SearchIcon } from '@mui/icons-material';
+import {
+  Edit as EditIcon,
+  Search as SearchIcon,
+  Person as PersonIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+} from '@mui/icons-material';
 
-// --- Helper component for styled header cells (alternative to sx prop) ---
-// import { styled } from '@mui/material/styles';
-// const StyledTableCell = styled(TableCell)(({ theme }) => ({
-//   fontWeight: 600,
-//   fontSize: '0.8rem', // Slightly smaller header font
-//   color: theme.palette.text.secondary,
-//   textTransform: 'uppercase',
-//   letterSpacing: '0.5px',
-//   borderBottom: `1px solid ${theme.palette.divider}`,
-//   padding: '10px 16px', // Custom padding
-// }));
-// --- End Helper ---
-
-
-const UsersTable = ({ users, handleEdit }) => {
-  // State for search query and pagination
+const UsersTable = ({ users = [], handleEdit }) => {
+  const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // Filter users based on search query (phone or username)
-  const filteredUsers = users?.filter(
+  const filteredUsers = users.filter(
     (user) =>
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.phone.toLowerCase().includes(searchQuery.toLowerCase())
+      user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.phone?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle pagination
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to first page
+    setPage(0);
   };
 
-  // Calculate paginated data
   const paginatedUsers = filteredUsers.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
+  const totalUsers = users.length;
+  const activeUsers = users.filter((user) => user.is_active).length;
+  const inactiveUsers = totalUsers - activeUsers;
+
   return (
-    // Apply a better font family to the whole container if not set globally
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto'}}>
+    <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
+      {/* Summary Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={4}>
+          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ 
+                p: 1.5, 
+                borderRadius: '50%', 
+                bgcolor: 'primary.lighter',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <PersonIcon sx={{ fontSize: 24, color: 'primary.main' }} />
+              </Box>
+              <Box>
+                <Typography color="textSecondary" variant="body2">Total Users</Typography>
+                <Typography variant="h4" sx={{ mt: 0.5 }}>{totalUsers}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ 
+                p: 1.5, 
+                borderRadius: '50%', 
+                bgcolor: 'success.lighter',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CheckCircleIcon sx={{ fontSize: 24, color: 'success.main' }} />
+              </Box>
+              <Box>
+                <Typography color="textSecondary" variant="body2">Active Users</Typography>
+                <Typography variant="h4" sx={{ mt: 0.5 }}>{activeUsers}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ 
+                p: 1.5, 
+                borderRadius: '50%', 
+                bgcolor: 'error.lighter',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CancelIcon sx={{ fontSize: 24, color: 'error.main' }} />
+              </Box>
+              <Box>
+                <Typography color="textSecondary" variant="body2">Inactive Users</Typography>
+                <Typography variant="h4" sx={{ mt: 0.5 }}>{inactiveUsers}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
       {/* Search Bar */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder="Search by username or phone"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" /> {/* Subtle icon color */}
-              </InputAdornment>
-            ),
-            sx: { borderRadius: 2 } // Slightly rounded search bar
-          }}
-          sx={{ width: 300 }}
-        />
-      </Box>
+      <TextField
+        fullWidth
+        variant="outlined"
+        size="small"
+        placeholder="Search by username or phone"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon color="action" />
+            </InputAdornment>
+          ),
+        }}
+        sx={{ maxWidth: 400, mb: 3 }}
+      />
 
       {/* Table */}
       <TableContainer
         component={Paper}
-        variant="outlined" // Use outlined variant for a subtle border instead of shadow
+        elevation={0}
         sx={{
-          // boxShadow: '0 4px 12px rgba(0,0,0,0.05)', // Softer shadow if preferred over outlined
-          borderRadius: 2, // Keep or adjust border radius
-          mt: 2,
-          // overflow: 'hidden', // Ensures border radius clips content if needed
+          borderRadius: 2,
+          border: 1,
+          borderColor: 'divider',
         }}
       >
-        <Table sx={{ minWidth: 650 }} aria-label="users table">
+        <Table>
           <TableHead>
-            {/* Use a subtle background color from the theme */}
-            <TableRow sx={{ backgroundColor: (theme) => theme.palette.grey[100] }}>
-              {/* Apply enhanced styles to header cells */}
-              <TableCell sx={{ fontWeight: 600, padding: '12px 16px', borderBottom: 'none' }}>ID</TableCell>
-              <TableCell sx={{ fontWeight: 600, padding: '12px 16px', borderBottom: 'none' }}>Username</TableCell>
-              <TableCell sx={{ fontWeight: 600, padding: '12px 16px', borderBottom: 'none' }}>Phone</TableCell>
-              <TableCell sx={{ fontWeight: 600, padding: '12px 16px', borderBottom: 'none' }}>Role</TableCell>
-              <TableCell sx={{ fontWeight: 600, padding: '12px 16px', borderBottom: 'none' }}>Agent ID</TableCell>
-              <TableCell sx={{ fontWeight: 600, padding: '12px 16px', borderBottom: 'none' }}>Active</TableCell>
-              <TableCell sx={{ fontWeight: 600, padding: '12px 16px', borderBottom: 'none' }}>Actions</TableCell>
-              {/* Or use the StyledTableCell helper component if defined */}
-              {/* <StyledTableCell>ID</StyledTableCell> */}
-              {/* ... other StyledTableCells */}
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Username</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Phone</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Agent ID</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedUsers.length > 0 ? (
-              paginatedUsers.map((user, index) => (
-                <TableRow
-                  key={user._id}
-                  hover // Keep hover effect
-                  sx={{
-                    // Zebra Stripping
-                    '&:nth-of-type(odd)': {
-                      backgroundColor: (theme) => theme.palette.action.hover,
-                    },
-                    // Remove border for the last row
-                    '&:last-child td, &:last-child th': { border: 0 },
-                    // Adjust hover style if needed
-                     '&:hover': { backgroundColor: (theme) => theme.palette.grey[200] },
-
-                  }}
-                >
-                  {/* Apply consistent padding and vertical alignment to body cells */}
-                  <TableCell component="th" scope="row" sx={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '0.9rem' }}>
-                    {user._id}
-                  </TableCell>
-                  <TableCell sx={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '0.9rem' }}>{user.username}</TableCell>
-                  <TableCell sx={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '0.9rem' }}>{user.phone}</TableCell>
-                  <TableCell sx={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '0.9rem' }}>{user.role}</TableCell>
-                  <TableCell sx={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '0.9rem' }}>{user.agent_id}</TableCell>
-                  <TableCell sx={{ padding: '12px 16px', verticalAlign: 'middle', fontSize: '0.9rem' }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 500, // Make status text slightly bolder
-                        color: user.is_active ? 'success.dark' : 'error.dark', // Use darker status colors for better contrast
-                         // Optional: Use a badge-like style
-                         // backgroundColor: user.is_active ? 'success.light' : 'error.light',
-                         // color: user.is_active ? 'success.dark' : 'error.dark',
-                         // padding: '2px 8px',
-                         // borderRadius: '12px',
-                         // display: 'inline-block'
-                      }}
-                    >
-                      {user.is_active ? 'Active' : 'Inactive'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ padding: '8px 16px', verticalAlign: 'middle' }}> {/* Less padding for actions */}
-                    <IconButton onClick={() => handleEdit(user)} color="primary" size="small"> {/* Smaller icon button */}
-                      <EditIcon fontSize="small"/>
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}> {/* More padding when empty */}
-                    No users found matching your search criteria.
-                  </Typography>
+            {paginatedUsers.map((user) => (
+              <TableRow
+                key={user._id}
+                hover
+                sx={{
+                  '&:last-child td, &:last-child th': { border: 0 },
+                }}
+              >
+                <TableCell>{user.username}</TableCell>
+                <TableCell>{user.phone}</TableCell>
+                <TableCell>{user.role}</TableCell>
+                <TableCell>{user.agent_id}</TableCell>
+                <TableCell>
+                  <Box
+                    sx={{
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 2,
+                      display: 'inline-block',
+                      bgcolor: user.is_active ? 'success.lighter' : 'error.lighter',
+                      color: user.is_active ? 'success.main' : 'error.main',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {user.is_active ? 'Active' : 'Inactive'}
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleEdit(user)}
+                    size="small"
+                    sx={{ color: 'primary.main' }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
                 </TableCell>
               </TableRow>
-            )}
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* Pagination */}
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
         component="div"
         count={filteredUsers.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        sx={{ mt: 2, borderTop: (theme) => `1px solid ${theme.palette.divider}` }} // Add separator line
+        rowsPerPageOptions={[5, 10, 25]}
+        sx={{
+          borderTop: 1,
+          borderColor: 'divider',
+          mt: 2,
+        }}
       />
     </Box>
   );
