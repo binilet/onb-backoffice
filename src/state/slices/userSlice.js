@@ -26,7 +26,7 @@ export const get_users_by_role_user = createAsyncThunk(
       });
       return response.data;
     } catch (err) {
-      console.log(err);
+      //console.log(err);
       return thunkAPI.rejectWithValue(
         err.response?.data?.detail || "users not found!"
       );
@@ -47,6 +47,20 @@ export const get_users_by_role_agent = createAsyncThunk(
             return thunkAPI.rejectWithValue(err.response?.data?.detail || 'users not found!');
         }
     }
+);
+
+export const generate_referral_link = createAsyncThunk(
+  "/users/generate_referral_link",
+  async (phone, thunkAPI) => {
+    try {
+      const response = await axiosInstance.get("/users/generate-referral", {
+        params: { phone },
+      });
+      return response.data.referralUrl;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.detail || 'Error generating referral URL');
+    }
+  }
 );
 
 
@@ -102,6 +116,9 @@ const usersSlice = createSlice({
         loading:false,
         error:null,
         update_status:null,
+        referralUrl:null,
+        referralUrlLoading:false,
+        referralUrlError:null
     },
     reducers:{
         logout(state){
@@ -113,6 +130,9 @@ const usersSlice = createSlice({
             state.update_status = null;
             state.error = null;
             state.loading = false;
+            state.referralUrl = null;
+            state.referralUrlError=null;
+            state.referralUrlLoading = false;
         }
     },
     extraReducers:(builder)=>{
@@ -190,6 +210,18 @@ const usersSlice = createSlice({
             //state.update_status = "failed";
             state.error = 'failed to update user';
             //console.log(action.payload);
+          })
+          .addCase(generate_referral_link.pending, (state) => {
+            state.referralUrlLoading = true;
+            state.referralUrlError = null;
+          })
+          .addCase(generate_referral_link.fulfilled, (state, action) => {
+            state.referralUrlLoading = false;
+            state.referralUrl = action.payload;
+          })
+          .addCase(generate_referral_link.rejected, (state, action) => {
+            state.referralUrlLoading = false;
+            state.referralUrlError = action.payload;
           });
     }
 });
