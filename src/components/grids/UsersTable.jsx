@@ -53,7 +53,7 @@ const UsersTable = ({ users = [], handleEdit }) => {
   );
 
   const totalUsers = users.length;
-  const activeUsers = users.filter((user) => user.is_active).length;
+  const activeUsers = users.filter((user) => user.isActive).length;
   const inactiveUsers = totalUsers - activeUsers;
 
   return (
@@ -159,6 +159,7 @@ const UsersTable = ({ users = [], handleEdit }) => {
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Phone</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Role</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Agent ID</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Admin ID</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Status</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Actions</TableCell>
             </TableRow>
@@ -175,7 +176,8 @@ const UsersTable = ({ users = [], handleEdit }) => {
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.phone}</TableCell>
                 <TableCell>{user.role}</TableCell>
-                <TableCell>{user.agent_id}</TableCell>
+                <TableCell>{user.agentId}</TableCell>
+                <TableCell>{user.adminId}</TableCell>
                 <TableCell>
                   <Box
                     sx={{
@@ -183,13 +185,13 @@ const UsersTable = ({ users = [], handleEdit }) => {
                       py: 0.5,
                       borderRadius: 2,
                       display: 'inline-block',
-                      bgcolor: user.is_active ? 'success.lighter' : 'error.lighter',
-                      color: user.is_active ? 'success.main' : 'error.main',
+                      bgcolor: user.isActive ? 'success.lighter' : 'error.lighter',
+                      color: user.isActive ? 'success.main' : 'error.main',
                       fontSize: '0.875rem',
                       fontWeight: 500,
                     }}
                   >
-                    {user.is_active ? 'Active' : 'Inactive'}
+                    {user.isActive ? 'Active' : 'Inactive'}
                   </Box>
                 </TableCell>
                 <TableCell>

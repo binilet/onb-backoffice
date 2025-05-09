@@ -9,13 +9,15 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
   import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
   const UserFormModal = ({ openModal, handleCloseModal,editingUser, isMobile}) => {
+    
     const dispatch = useDispatch();
     
     const [id, setId] = React.useState(editingUser? editingUser._id : '');
-    const [agent_id, setAgentId] = React.useState(editingUser? editingUser.agent_id : '');
-    const [agent_percent, setAgentPercent] = React.useState(editingUser? editingUser.agent_percent : '');
+    const [agent_id, setAgentId] = React.useState(editingUser? editingUser.agentId : '');
+    const [admin_id, setAdminId] = React.useState(editingUser? editingUser.adminId : '');
+    const [cutPercent, setCutPercent] = React.useState(editingUser? editingUser.agentPercent : '');
     const [verified, setVerified] = React.useState(editingUser? editingUser.verified : false);
-    const [isActive, setIsActive] = React.useState(editingUser? editingUser.is_active : false);
+    const [isActive, setIsActive] = React.useState(editingUser? editingUser.isActive : false);
     const [role, setRole] = React.useState(editingUser? editingUser.role : 'user');
     const [username, setUsername] = React.useState(editingUser? editingUser.username : '');
     const [phone, setPhone] = React.useState(
@@ -28,17 +30,18 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
     useEffect(()=>{
       if(editingUser){
         setId(editingUser._id);
-        setAgentPercent(editingUser.agent_percent);
+        setCutPercent(editingUser.agentPercent);
         setVerified(editingUser.verified);
-        setIsActive(editingUser.is_active);
+        setIsActive(editingUser.isActive);
         setRole(editingUser.role);
         setUsername(editingUser.username);
         setPhone(editingUser.phone);
-        setBanUntil(editingUser.ban_until);
-        setAgentId(editingUser.agent_id);
+        setBanUntil(editingUser.banUntil);
+        setAgentId(editingUser.agentId);
+        setAdminId(editingUser.adminId);
       }else{
         setId('');
-        setAgentPercent('');
+        setCutPercent('');
         setVerified(false);
         setIsActive(false);
         setRole('');
@@ -46,6 +49,7 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
         setPhone('');
         setBanUntil('');
         setAgentId('');
+        setAdminId('');
       } 
       setStatus(null);
     },[editingUser]);
@@ -65,21 +69,31 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
         setStatus("Id not set. please refresh the page and try again.");
         return;
       }
-
       if(!role){
         setStatus("Please select a role");
         return;
       }
 
+      let adminPercent = 0;
+      let agentPercent = 0;
+
+      if(role === 'admin'){
+        adminPercent = cutPercent;
+      }else if(role === 'agent'){
+        agentPercent = cutPercent;
+      }
+
       const userData = {
-        agent_percent,
+        agentPercent,
         verified,
         isActive,
         role,
         username,
         phone,
         ban_until,
-        agent_id,
+        agentId:agent_id,
+        adminId:admin_id,
+        adminPercent,
       };
   
       if (editingUser) {
@@ -169,13 +183,47 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
             />
 
+<TextField
+              name="agent phone"
+              label="Agent Phone"
+              fullWidth
+              value={agent_id}
+              onChange={()=>setAgentId(event.target.value)}
+              readOnly
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
+
+              <TextField
+              name="adminPhone"
+              label="Admin Phone"
+              fullWidth
+              value={admin_id}
+              onChange={()=>setAdminId(event.target.value)}
+              readOnly
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
+
             <TextField
               name="cut"
               label="Cut"
               type="number"
               fullWidth
-              value={agent_percent}
-              onChange={()=>setAgentPercent(event.target.value)}
+              value={cutPercent}
+              onChange={()=>setCutPercent(event.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -198,6 +246,7 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
                 sx={{ borderRadius: 2 }}
               >
                 <MenuItem value="agent">agent</MenuItem>
+                <MenuItem value="admin">admin</MenuItem>
                 <MenuItem value="user">user</MenuItem>
                 {/* <MenuItem value="admin">Admin</MenuItem> */}
               </Select>
@@ -270,8 +319,8 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
               <Switch
                 checked={isActive}
                 onChange={()=>setIsActive(event.target.checked)}
-                inputProps={{ "aria-label": "is_active" }}
-                name="is_active"
+                inputProps={{ "aria-label": "isActive" }}
+                name="isActive"
               />
             </Grid>
             <Grid item xs={6}>

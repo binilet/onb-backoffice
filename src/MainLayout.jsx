@@ -58,159 +58,173 @@ const MainLayout = ({
   };
 
    const drawer = (
-      
-      <Box
-        sx={{
-          width: drawerWidth,
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          bgcolor: 'background.paper',
-          boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.05)',
-          borderRadius: '0 0px 16px 0',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Top Logo Area */}
-        <Box>
-          <Box 
-            sx={{ 
-              p: 2, 
-              background: sidebarGradient,
-              mb: 2,
-            }}
-          >
-            <Typography 
-              variant="h6" 
-              fontWeight={700} 
-              sx={{ 
-                color: 'white', 
-                letterSpacing: '0.5px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
-              <BusinessIcon /> Hagere-Online
-            </Typography>
-          </Box>
-          
-          {/* Navigation Menu */}
-          <Box sx={{ px: 2 }}>
-            {/* You can use a custom component for menu items */}
-            <SidebarItem
-            icon={<QueryStatsIcon />}
-            text="Dashboard"
-            to="/"
-            active={location.pathname === '/'}
-          />
-          <SidebarItem
-            icon={<PeopleAltIcon />}
-            text="Users"
-            to="/users"
-            active={location.pathname === '/users'}
-          />
-          <SidebarItem
-            icon={<GroupWorkIcon />}
-            text="Agents"
-            to="/agents"
-            active={location.pathname === '/agents'}
-          />
-          <SidebarItem
-            icon={<RocketLaunchIcon />}
-            text="Games"
-            to="/games"
-            active={location.pathname === '/games'}
-          />
-          
-          <Typography 
-            variant="caption" 
-            color="text.secondary" 
-            sx={{ px: 1.5, py: 1, mt: 2, display: 'block', fontWeight: 600, textTransform: 'uppercase' }}
-          >
-            Finance
-          </Typography>
-          
-          <SidebarItem
-            icon={<MonetizationOnIcon />}
-            text="Credits"
-            to="/credits"
-            active={location.pathname === '/credits'}
-          />
-          <SidebarItem
-            icon={<SavingsIcon />}
-            text="Deposits"
-            to="/deposits"
-            active={location.pathname === '/deposits'}
-          />
-          <SidebarItem
-            icon={<ShoppingCartCheckoutIcon />}
-            text="Withdrawals"
-            to="/withdrawals"
-            active={location.pathname === '/withdrawals'}
-          />
-          </Box>
-        </Box>
-        
-        {/* Bottom Profile Area */}
-        <Box 
-          sx={{ 
-            p: 2.5, 
-            mx: 2,
-            mb: 2,
-            bgcolor: theme.palette.background.default,
-            borderRadius: 2,
-            boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.05)',
-          }}
-        >
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar 
-              sx={{ 
-                bgcolor: theme.palette.secondary.main,
-                boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.15)',
-                width: 42,
-                height: 42,
-                fontSize: '1.2rem',
-                fontWeight: 600
-              }}
-            >
-              {avatarLetter}
-            </Avatar>
-            <Box flexGrow={1}>
-              <Typography variant="subtitle1" fontWeight={600} noWrap>
-                {username}
-              </Typography>
-              <Typography 
-                variant="caption" 
-                color="text.secondary" 
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  gap: 0.5
-                }}
-              >
-                <CircleIcon sx={{ fontSize: '8px', color: theme.palette.success.main }} />
-                {role}
-              </Typography>
-            </Box>
-            <Tooltip title="Logout">
-              <IconButton 
-                onClick={handleLogout} 
-                sx={{ 
-                  color: theme.palette.error.main,
-                  '&:hover': {
-                    bgcolor: alpha(theme.palette.error.main, 0.1)
-                  }
-                }}
-              >
-                <LogoutIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Box>
-      </Box>
-    );
+     <Box
+       sx={{
+         width: drawerWidth,
+         height: "100vh",
+         display: "flex",
+         flexDirection: "column",
+         justifyContent: "space-between",
+         bgcolor: "background.paper",
+         boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.05)",
+         borderRadius: "0 0px 16px 0",
+         overflow: "hidden",
+       }}
+     >
+       {/* Top Logo Area */}
+       <Box>
+         <Box
+           sx={{
+             p: 2,
+             background: sidebarGradient,
+             mb: 2,
+           }}
+         >
+           <Typography
+             variant="h6"
+             fontWeight={700}
+             sx={{
+               color: "white",
+               letterSpacing: "0.5px",
+               display: "flex",
+               alignItems: "center",
+               gap: 1,
+             }}
+           >
+             <BusinessIcon /> Hagere-Online
+           </Typography>
+         </Box>
+
+         {/* Navigation Menu */}
+         <Box sx={{ px: 2 }}>
+           {/* You can use a custom component for menu items */}
+           <SidebarItem
+             icon={<QueryStatsIcon />}
+             text="Dashboard"
+             to="/"
+             active={location.pathname === "/"}
+           />
+           <SidebarItem
+             icon={<PeopleAltIcon />}
+             text="Users"
+             to="/users"
+             active={location.pathname === "/users"}
+           />
+           {role === "system" && (
+             <SidebarItem
+               icon={<GroupWorkIcon />}
+               text="Agents"
+               to="/agents"
+               active={location.pathname === "/agents"}
+             />
+           )}
+           <SidebarItem
+             icon={<RocketLaunchIcon />}
+             text="Games"
+             to="/games"
+             active={location.pathname === "/games"}
+           />
+
+           {role === "system" && (
+             <>
+               <Typography
+                 variant="caption"
+                 color="text.secondary"
+                 sx={{
+                   px: 1.5,
+                   py: 1,
+                   mt: 2,
+                   display: "block",
+                   fontWeight: 600,
+                   textTransform: "uppercase",
+                 }}
+               >
+                 Finance
+               </Typography>
+
+               <SidebarItem
+                 icon={<MonetizationOnIcon />}
+                 text="Credits"
+                 to="/credits"
+                 active={location.pathname === "/credits"}
+               />
+               <SidebarItem
+                 icon={<SavingsIcon />}
+                 text="Deposits"
+                 to="/deposits"
+                 active={location.pathname === "/deposits"}
+               />
+               <SidebarItem
+                 icon={<ShoppingCartCheckoutIcon />}
+                 text="Withdrawals"
+                 to="/withdrawals"
+                 active={location.pathname === "/withdrawals"}
+               />
+             </>
+           )}
+         </Box>
+       </Box>
+
+       {/* Bottom Profile Area */}
+       <Box
+         sx={{
+           p: 2.5,
+           mx: 2,
+           mb: 2,
+           bgcolor: theme.palette.background.default,
+           borderRadius: 2,
+           boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.05)",
+         }}
+       >
+         <Stack direction="row" spacing={2} alignItems="center">
+           <Avatar
+             sx={{
+               bgcolor: theme.palette.secondary.main,
+               boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.15)",
+               width: 42,
+               height: 42,
+               fontSize: "1.2rem",
+               fontWeight: 600,
+             }}
+           >
+             {avatarLetter}
+           </Avatar>
+           <Box flexGrow={1}>
+             <Typography variant="subtitle1" fontWeight={600} noWrap>
+               {username}
+             </Typography>
+             <Typography
+               variant="caption"
+               color="text.secondary"
+               sx={{
+                 display: "flex",
+                 alignItems: "center",
+                 gap: 0.5,
+               }}
+             >
+               <CircleIcon
+                 sx={{ fontSize: "8px", color: theme.palette.success.main }}
+               />
+               {role}
+             </Typography>
+           </Box>
+           <Tooltip title="Logout">
+             <IconButton
+               onClick={handleLogout}
+               sx={{
+                 color: theme.palette.error.main,
+                 "&:hover": {
+                   bgcolor: alpha(theme.palette.error.main, 0.1),
+                 },
+               }}
+             >
+               <LogoutIcon />
+             </IconButton>
+           </Tooltip>
+         </Stack>
+       </Box>
+     </Box>
+   );
   
 
 

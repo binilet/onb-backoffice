@@ -74,13 +74,15 @@ export const updateUser = createAsyncThunk(
         username: updates.username ?? null,
         role: updates.role ?? null,
         phone: updates.phone ?? null,
-        agent_id: updates.agent_id ?? null,
-        agent_percent: updates.agent_percent ?? null,
-        is_active: updates.isActive ?? null, // Map isActive to is_active
-        ban_until: updates.ban_until
+        agentId: updates.agentId ?? null,
+        agentPercent: updates.agentPercent ?? null,
+        isActive: updates.isActive ?? null, // Map isActive to is_active
+        banUntil: updates.ban_until
           ? new Date(updates.ban_until).toISOString() // Convert to ISO 8601
           : null,
         verified: updates.verified ?? null,
+        adminId:updates.adminId,
+        adminPercent:updates.adminPercent
       };
 
       // Remove null or undefined fields to match exclude_unset=True

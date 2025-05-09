@@ -29,7 +29,10 @@ import {
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGamesByDateRange } from '../state/slices/gameSlice';
+import { fetchWinningDistributions,selectWinningDistributions,selectWinningsError,selectWinningsLoading,resetDistributions } from '../state/slices/distributionSlice';
 import GameDetail from './GameDetail';
+import WinningDistributionDialog from './modals/WinningDistributionDialog';
+import ApprovalSummaryDialog from './modals/DistributionApprovalDialog';
 
 const GameGrid = () => {
   const dispatch = useDispatch();
@@ -38,12 +41,24 @@ const GameGrid = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  const [gameDistribution, setGameDistribution] = useState(null);
+  
+  const winningsLoading = useSelector(selectWinningsLoading);
+  const winningsError = useSelector(selectWinningsError); 
+  const winningDistributions = useSelector(selectWinningDistributions); 
+
+
   useEffect(() => {
     dispatch(fetchGamesByDateRange({
       startDate: null,
       endDate: null,
     }));
   }, []);
+
+  useEffect(() => {
+    if(winningDistributions && winningDistributions.length > 0)
+      setGameDistribution(true);
+  },[winningDistributions]);
 
   const handleDateFilter = () => {
     dispatch(fetchGamesByDateRange({
@@ -55,13 +70,45 @@ const GameGrid = () => {
   // Calculate summary statistics
   const gameSummary = {
     totalGames: games?.length || 0,
-    totalBets: games?.reduce((sum, game) => sum + game.bet_amount, 0) || 0,
+    totalBets: games?.reduce((sum, game) => sum + (game.bet_amount*game.number_of_players), 0) || 0,
     completedGames: games?.filter(game => game.game_completed).length || 0,
     totalPlayers: games?.reduce((sum, game) => sum + game.number_of_players, 0) || 0,
   };
 
+  const handleGameDistribution = (game,redistribute) => {
+    //alert('Distributing winnings for game: ' + game.game_id);
+    dispatch(fetchWinningDistributions({ gameId: game.game_id,redistribute: redistribute?true:false }));
+  }
+
+  const handleCloseGameDistribution = () => {
+    setGameDistribution(false);
+    setSelectedGame(null);
+    setApprovalDialogOpen(false);
+    dispatch(resetDistributions())
+  }
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [approvalNote, setApprovalNote] = useState('');
+
+  const handleConfirmApproval = () => {
+    console.log('Approval confirmed for game:', selectedGame);
+    alert('Approval confirmed for game: ' + selectedGame);
+  }
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
+      <WinningDistributionDialog 
+      open={gameDistribution} 
+      onClose={handleCloseGameDistribution} 
+      data={winningDistributions} 
+      onApproveAll={()=>setApprovalDialogOpen(true)}/>
+      
+      <ApprovalSummaryDialog
+        open={approvalDialogOpen}
+        onClose={() => setApprovalDialogOpen(false)}
+        itemsToApprove={winningDistributions}
+        approvalNote={approvalNote}
+        setApprovalNote={setApprovalNote}
+        onConfirmApproval={handleConfirmApproval}
+      />
       {/* Header */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h4" fontWeight="600">
@@ -257,7 +304,17 @@ const GameGrid = () => {
                       onClick={() => setSelectedGame(game)}
                       startIcon={<SearchIcon />}
                     >
-                      View Details
+                      View
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleGameDistribution(game)}
+                      startIcon={<SearchIcon />}
+                    >
+                      Distribute
                     </Button>
                   </TableCell>
                 </TableRow>

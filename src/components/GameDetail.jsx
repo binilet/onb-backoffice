@@ -288,7 +288,7 @@ const GameDetail = ({ game, open, onClose }) => {
                     Cut Percent
                   </Typography>
                   <Typography variant="body1" fontWeight="medium">
-                    {(game.cut_percent * 100).toFixed(2)}%
+                    {(game.cut_percent).toFixed(2)}%
                   </Typography>
                 </Box>
               </DetailSection>

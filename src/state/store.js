@@ -5,6 +5,7 @@ import gameReducer from './slices/gameSlice';
 import depositReducer from './slices/depositSlice';
 import withdrawlReducer from './slices/withdrawls';
 import creditBalanceReducer from './slices/creditBalanceSlice';
+import winningDistributionReducer from "./slices/distributionSlice";
 
 const store = configureStore({
   reducer:{
@@ -14,6 +15,7 @@ const store = configureStore({
     deposits:depositReducer,
     withdrawals:withdrawlReducer,
     creditBalances:creditBalanceReducer,
+    winningDistributions:winningDistributionReducer,
   }
 });
 export default store;

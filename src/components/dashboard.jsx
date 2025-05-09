@@ -93,13 +93,13 @@ const SummaryCard = ({ title, amount, trend, color }) => (
       <Typography variant="h4" sx={{ my: 1, fontWeight: 700 }}>
         ${amount.toLocaleString()}
       </Typography>
-      <Typography variant="body2" sx={{ 
+      {/* <Typography variant="body2" sx={{ 
         color: trend > 0 ? 'success.main' : 'error.main',
         display: 'flex',
         alignItems: 'center'
       }}>
         {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}% from previous period
-      </Typography>
+      </Typography> */}
     </CardContent>
   </Card>
 );
@@ -170,7 +170,7 @@ const DashboardComponent = () => {
 
       <Grid container spacing={3}>
         {/* Main Transaction Overview Chart */}
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Paper sx={{ p: 2, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Transaction Overview
@@ -202,7 +202,7 @@ const DashboardComponent = () => {
               </AreaChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         {/* User Role Distribution */}
         <Grid item xs={12} md={4}>
@@ -228,7 +228,7 @@ const DashboardComponent = () => {
         </Grid>
 
         {/* Bet Type Distribution */}
-        <Grid item xs={12} md={4}>
+        {/* <Grid item xs={12} md={4}>
           <Paper sx={{ p: 2, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', borderRadius: 2, height: '100%' }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Bet Type Distribution
@@ -255,10 +255,10 @@ const DashboardComponent = () => {
               </RadialBarChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         {/* User Activity by Hour */}
-        <Grid item xs={12} md={4}>
+        {/* <Grid item xs={12} md={4}>
           <Paper sx={{ p: 2, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', borderRadius: 2, height: '100%' }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               User Activity by Hour
@@ -273,10 +273,10 @@ const DashboardComponent = () => {
               </BarChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         {/* Transaction History Line Chart */}
-        <Grid item xs={12} md={8}>
+        {/* <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Transaction History
@@ -293,10 +293,10 @@ const DashboardComponent = () => {
               </LineChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         {/* User Spending Bubble Chart */}
-        <Grid item xs={12} md={4}>
+        {/* <Grid item xs={12} md={4}>
           <Paper sx={{ p: 2, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               User Spending Analysis
@@ -312,10 +312,10 @@ const DashboardComponent = () => {
               </ScatterChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         {/* Profit/Loss Chart */}
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Paper sx={{ p: 2, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Weekly Profit & Loss
@@ -332,7 +332,7 @@ const DashboardComponent = () => {
               </BarChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid>
+        </Grid> */}
       </Grid>
     </Box>
   );

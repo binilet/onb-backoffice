@@ -36,10 +36,9 @@ const drawerWidth = 240; // Define drawer width
 
 
 const App = () => {
+  
   const [drawerOpen, setDrawerOpen] = useState(true); // Keep drawer open by default on desktop?
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
- 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
@@ -96,7 +95,7 @@ const App = () => {
             <Route
               path="/agents"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['system']}>
                   <Agents />
                 </PrivateRoute>
               }

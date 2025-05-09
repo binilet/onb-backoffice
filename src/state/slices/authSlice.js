@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
 
 export const loginUser = createAsyncThunk(
     'auth/loginUser',
-    async(obj,{ dispatch })=>{
+    async(obj,thunkAPI )=>{
         try{
             const params = new URLSearchParams();
             params.append('grant_type','password');
@@ -23,8 +23,8 @@ export const loginUser = createAsyncThunk(
 
             return response.data;
         }catch(err){
-            //console.log(err);
-            return dispatch.rejectWithValue(err.response?.data?.detail || 'Login Failed');
+            console.log(err.response?.data?.detail || 'Login Failed');
+            return thunkAPI.rejectWithValue(err.response?.data?.detail || 'Login Failed');
         }
     }
 );
@@ -81,7 +81,7 @@ const authSlice = createSlice({
         })
         .addCase(loginUser.rejected, (state, action) => {
             state.loading = false;
-            state.error = action.payload?.detail;
+            state.error = action.payload;
             console.log(action.payload);
           })
           .addCase(fetchUserInfo.pending, (state) => {
