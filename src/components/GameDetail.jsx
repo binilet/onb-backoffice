@@ -69,7 +69,7 @@ const StyledChip = styled(Chip)(({ theme }) => ({
 const GameDetail = ({ game, open, onClose }) => {
   // Calculate profit/loss value and color
   const calculateProfitLoss = () => {
-    const profit = game.player_winning - game.bet_amount;
+    const profit = (game.cut_amount);
     const color = profit >= 0 ? 'success.main' : 'error.main';
     const sign = profit >= 0 ? '+' : '';
     return { value: `${sign}$${profit.toFixed(2)}`, color };
@@ -181,7 +181,7 @@ const GameDetail = ({ game, open, onClose }) => {
                   <Grid item xs={12} sm={6}>
                     <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
                       <Typography variant="body2" color="text.secondary" gutterBottom>
-                        Net Profit/Loss
+                        Gross Profit
                       </Typography>
                       <Typography variant="h5" fontWeight="bold" color={profitLoss.color}>
                         {profitLoss.value}

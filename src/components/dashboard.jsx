@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Box, Typography, Grid, Paper, Card, CardContent, useTheme, useMediaQuery, Tabs, Tab } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadialBarChart, RadialBar, ScatterChart, Scatter, ZAxis } from 'recharts';
 
+import { useSelector,useDispatch } from 'react-redux';
+import { selectSummaryDistributions,selectWinningDistributionsByRange,selectWinningsLoading,selectWinningsError, fetchDistributionSummary } from '../state/slices/distributionSlice';
+import DistributionListPanel from './grids/DashboardDistributions';
 // Mock data (replace with actual data from your backend)
 const transactionData = [
   { date: 'Aug 1', totalBet: 1000, totalWinning: 800, cutAmount: 200 },
@@ -91,7 +94,7 @@ const SummaryCard = ({ title, amount, trend, color }) => (
         {title}
       </Typography>
       <Typography variant="h4" sx={{ my: 1, fontWeight: 700 }}>
-        ${amount.toLocaleString()}
+        ${amount?.toLocaleString()}
       </Typography>
       {/* <Typography variant="body2" sx={{ 
         color: trend > 0 ? 'success.main' : 'error.main',
@@ -124,18 +127,71 @@ const DashboardComponent = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [timeRange, setTimeRange] = useState(0);
+  
+  const dispatch = useDispatch();
+  
+  const loading = useSelector(selectWinningsLoading);
+  const error = useSelector(selectWinningsError);
+  const summaryFromDB = useSelector(selectSummaryDistributions);
+  const distributions = useSelector(selectWinningDistributionsByRange);
+  const [isReloadClicked, setIsReloadClicked] = useState(false);
+  
+  const [summaries, setSummaries] = useState([
+    { title: "Today", amount: 0},
+    { title: "Week To Date", amount: 0},
+    { title: "Month To Date", amount: 0},
+    { title: "Year To Date", amount: 0 }
+  ]);
 
-  // Calculate summary amounts with trends
-  const summaries = [
-    { title: "Today", amount: 1100, trend: 5.2, color: '#4361ee' },
-    { title: "Week To Date", amount: 5500, trend: 12.3, color: '#3a0ca3' },
-    { title: "Month To Date", amount: 22000, trend: -3.5, color: '#7209b7' },
-    { title: "Year To Date", amount: 135000, trend: 24.8, color: '#f72585' }
-  ];
+
+  useEffect(() => {
+    dispatch(fetchDistributionSummary())
+  },[]);
+
+  useEffect(() => {
+    if (summaryFromDB) {
+      const newSummaries = [
+        { title: "Today", amount: summaryFromDB.today },
+        { title: "Week To Date", amount: summaryFromDB.weekToDate },
+        { title: "Month To Date", amount: summaryFromDB.monthToDate },
+        { title: "Year To Date", amount: summaryFromDB.yearToDate }
+      ];
+      setSummaries(newSummaries);
+    }
+  }, [summaryFromDB]);
+
 
   const handleTimeRangeChange = (event, newValue) => {
     setTimeRange(newValue);
   };
+
+  const aggregateByDate = (distributions) => {
+    const aggregatedData = distributions.reduce((acc, distribution) => {
+      // Format date to group by (only year, month, day)
+      const date = new Date(distribution.date).toLocaleDateString();
+  
+      if (!acc[date]) {
+        acc[date] = {
+          date: date,
+          betAmount: 0,
+          distributable: 0,
+          amount: 0
+        };
+      }
+  
+      // Sum the values for each day
+      acc[date].betAmount += distribution.betAmount;
+      acc[date].distributable += distribution.distributable;
+      acc[date].amount += distribution.amount;
+  
+      return acc;
+    }, {});
+  
+    // Convert the aggregated object to an array
+    return Object.values(aggregatedData);
+  };
+
+  const chartData = aggregateByDate(distributions);
 
   return (
     <Box sx={{ flexGrow: 1, p: { xs: 1, sm: 2, md: 3 }, bgcolor: '#f5f7fa' }}>
@@ -161,51 +217,69 @@ const DashboardComponent = () => {
 
       {/* Summary Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        {summaries.map((summary, index) => (
+        {summaries?.map((summary, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <SummaryCard {...summary} />
           </Grid>
         ))}
       </Grid>
+ 
 
       <Grid container spacing={3}>
+
+      <Grid item xs={12}>
+        <DistributionListPanel />
+      </Grid>
+
         {/* Main Transaction Overview Chart */}
-        {/* <Grid item xs={12}>
-          <Paper sx={{ p: 2, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-              Transaction Overview
-            </Typography>
-            <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={transactionData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
-                <defs>
-                  <linearGradient id="totalBet" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4361ee" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#4361ee" stopOpacity={0.1}/>
-                  </linearGradient>
-                  <linearGradient id="totalWinning" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3a0ca3" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#3a0ca3" stopOpacity={0.1}/>
-                  </linearGradient>
-                  <linearGradient id="cutAmount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7209b7" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#7209b7" stopOpacity={0.1}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Area type="monotone" dataKey="totalBet" stroke="#4361ee" fillOpacity={1} fill="url(#totalBet)" />
-                <Area type="monotone" dataKey="totalWinning" stroke="#3a0ca3" fillOpacity={1} fill="url(#totalWinning)" />
-                <Area type="monotone" dataKey="cutAmount" stroke="#7209b7" fillOpacity={1} fill="url(#cutAmount)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid> */}
+       
+
+<ResponsiveContainer width="100%" height={400}>
+  <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+    <defs>
+      <linearGradient id="bet" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%" stopColor="#1e90ff" stopOpacity={0.8} />
+        <stop offset="95%" stopColor="#1e90ff" stopOpacity={0.1} />
+      </linearGradient>
+      <linearGradient id="winning" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%" stopColor="#28a745" stopOpacity={0.8} />
+        <stop offset="95%" stopColor="#28a745" stopOpacity={0.1} />
+      </linearGradient>
+      <linearGradient id="cut" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%" stopColor="#ff7f50" stopOpacity={0.8} />
+        <stop offset="95%" stopColor="#ff7f50" stopOpacity={0.1} />
+      </linearGradient>
+    </defs>
+
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="date" />
+    <YAxis />
+    <Tooltip />
+    <Legend />
+
+    <Area type="monotone" dataKey="betAmount" stroke="#1e90ff" fill="url(#bet)" name="Total Bet" />
+    <Area type="monotone" dataKey="totalWinning" stroke="#28a745" fill="url(#winning)" name="Total Winning" />
+    <Area type="monotone" dataKey="amount" stroke="#ff7f50" fill="url(#cut)" name="Your Amount" />
+  </AreaChart>
+</ResponsiveContainer>
+
+<ResponsiveContainer width="100%" height={400}>
+  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="date" />
+    <YAxis />
+    <Tooltip />
+    <Legend />
+    
+    <Bar dataKey="betAmount" fill="#1e88e5" name="Total Bet" />
+    <Bar dataKey="distributable" fill="#43a047" name="Distributable" />
+    <Bar dataKey="amount" fill="#fb8c00" name="Your Cut" />
+  </BarChart>
+</ResponsiveContainer>
+      
 
         {/* User Role Distribution */}
-        <Grid item xs={12} md={4}>
+        {/* <Grid item xs={12} md={4}>
           <Paper sx={{ p: 2, boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)', borderRadius: 2, height: '100%' }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               User Role Distribution
@@ -225,7 +299,7 @@ const DashboardComponent = () => {
               </PieChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         {/* Bet Type Distribution */}
         {/* <Grid item xs={12} md={4}>

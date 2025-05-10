@@ -11,7 +11,7 @@ import Notifications from '@mui/icons-material/Notifications'; // Assuming you u
 import AccountCircle from '@mui/icons-material/AccountCircle'; // Assuming you use this
 import { useTheme } from '@mui/material/styles'; // Import useTheme to access theme
 import { useLocation } from 'react-router-dom'; // For location tracking
-import { useSelector } from 'react-redux'; // For Redux state management
+import { useSelector,useDispatch } from 'react-redux'; // For Redux state management
 import SidebarItem from './components/sidebar'; // Adjust path (assuming this component exists)
 
 import {  Avatar, Stack } from '@mui/material';
@@ -43,7 +43,7 @@ const MainLayout = ({
 }) => {
   const theme = useTheme(); // Get theme object for transitions and breakpoints
   const location = useLocation(); // For tracking current route
-
+  const dispatch = useDispatch(); // For dispatching actions
   
   const user = useSelector((state) => state.auth._current_user || {});
   const username = user.username || 'Guest';
