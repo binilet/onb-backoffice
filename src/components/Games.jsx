@@ -29,7 +29,7 @@ import {
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGamesByDateRange } from '../state/slices/gameSlice';
-import { fetchWinningDistributions,selectWinningDistributions,selectWinningsError,selectWinningsLoading,resetDistributions } from '../state/slices/distributionSlice';
+import { resetApproval,approveDistribution,fetchWinningDistributions,selectWinningDistributions,selectWinningsError,selectWinningsLoading,resetDistributions } from '../state/slices/distributionSlice';
 import GameDetail from './GameDetail';
 import WinningDistributionDialog from './modals/WinningDistributionDialog';
 import ApprovalSummaryDialog from './modals/DistributionApprovalDialog';
@@ -90,20 +90,28 @@ const GameGrid = () => {
   const [approvalNote, setApprovalNote] = useState('');
 
   const handleConfirmApproval = () => {
-    console.log('Approval confirmed for game:', selectedGame);
-    alert('Approval confirmed for game: ' + selectedGame);
+    let game_id = (winningDistributions[0].gameId);
+    if(game_id)
+      dispatch(approveDistribution({ game_id: game_id }));
   }
+  const handleApprovalDialogClose = () => {
+    setApprovalDialogOpen(false);
+    dispatch(resetApproval())
+  }
+
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
       <WinningDistributionDialog 
       open={gameDistribution} 
       onClose={handleCloseGameDistribution} 
       data={winningDistributions} 
-      onApproveAll={()=>setApprovalDialogOpen(true)}/>
+      onApproveAll={()=>setApprovalDialogOpen(true)}
+      handleRedistribute={handleGameDistribution}
+      />
       
       <ApprovalSummaryDialog
         open={approvalDialogOpen}
-        onClose={() => setApprovalDialogOpen(false)}
+        onClose={handleApprovalDialogClose}
         itemsToApprove={winningDistributions}
         approvalNote={approvalNote}
         setApprovalNote={setApprovalNote}
@@ -252,6 +260,7 @@ const GameGrid = () => {
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Players</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Bet Amount</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Detail</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Actions</TableCell>
             </TableRow>
           </TableHead>

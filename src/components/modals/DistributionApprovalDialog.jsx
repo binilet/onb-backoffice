@@ -19,9 +19,12 @@ import {
   Button,
   TextField,
   IconButton,
-  Divider
+  Divider,Alert
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
+
+import {useSelector} from 'react-redux';
+import {selectApprovalLoading,selectApprovalError,selectIsApproved} from '../../state/slices/distributionSlice';
 
 const ApprovalSummaryDialog = ({ 
   open, 
@@ -32,6 +35,11 @@ const ApprovalSummaryDialog = ({
   setApprovalNote 
 }) => {
   // Group data by phone and role
+  
+  const approvalLoading = useSelector(selectApprovalLoading);
+  const approvalError = useSelector(selectApprovalError);
+  const isApproved = useSelector(selectIsApproved);
+  
   const groupedData = useMemo(() => {
     // By Phone
     const byPhone = itemsToApprove.reduce((acc, item) => {
@@ -210,7 +218,7 @@ const ApprovalSummaryDialog = ({
         </TableContainer>
 
         {/* Approval Note */}
-        <Box mt={2}>
+        {/* <Box mt={2}>
           <TextField
             label="Approval Note"
             variant="outlined"
@@ -221,22 +229,38 @@ const ApprovalSummaryDialog = ({
             onChange={(e) => setApprovalNote(e.target.value)}
             placeholder="Add a note for this approval (optional)"
           />
-        </Box>
+        </Box> */}
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
-          Cancel
-        </Button>
-        <Button 
-          onClick={() => onConfirmApproval(itemsToApprove, approvalNote)} 
-          color="primary" 
-          variant="contained"
-          disabled={itemsToApprove.length === 0}
-        >
-          Confirm Approval
-        </Button>
-      </DialogActions>
+      <DialogActions sx={{ flexDirection: 'column', alignItems: 'stretch', px: 3, pb: 2, pt: 1 }}>
+  {/* Error or Success Alert */}
+  {approvalError && (
+    <Alert severity="error" sx={{ mb: 2 }}>
+      {approvalError}
+    </Alert>
+  )}
+  {isApproved && (
+    <Alert severity="success" sx={{ mb: 2 }}>
+      Approval Successful!
+    </Alert>
+  )}
+
+  {/* Action Buttons */}
+  <Box display="flex" justifyContent="flex-end" gap={1}>
+    <Button onClick={onClose} color="inherit">
+      Cancel
+    </Button>
+    <Button
+      onClick={() => onConfirmApproval(itemsToApprove, approvalNote)}
+      color="primary"
+      variant="contained"
+      disabled={itemsToApprove.length === 0 || approvalLoading}
+    >
+      {approvalLoading ? 'Approving...' : 'Confirm Approve'}
+    </Button>
+  </Box>
+</DialogActions>
+
     </Dialog>
   );
 };

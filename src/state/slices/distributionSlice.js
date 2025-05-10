@@ -62,16 +62,31 @@ export const fetchDistributionByDateRange = createAsyncThunk(
   }
 );
 
+export const approveDistribution = createAsyncThunk(
+  'winnings/approveDistribution',
+  async ({game_id}, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/games/update_distribution/${game_id}`);
+      
+      return response.data;
+    } catch (error) {
+        console.log(error);
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+  }
+);
+
 const winningsSlice = createSlice({
   name: "winnings",
   initialState: {
-    
     distributions: [],//this is for a single game
     distributionSummary:[],
     allDistributions: [],//this is for all games
-    
     loading: false,
     error: null,
+    approvalLoading: false,
+    approvalError: null,
+    isApproved:null
   },
   reducers: {
     resetDistributions: (state) => {
@@ -79,6 +94,13 @@ const winningsSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
+    resetApproval:(state)=>{
+     
+        state.approvalLoading= false,
+        state.approvalError= null,
+        state.isApproved=null
+      
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -119,7 +141,20 @@ const winningsSlice = createSlice({
       .addCase(fetchDistributionByDateRange.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(approveDistribution.pending, (state) => {
+        state.approvalLoading = true;
+        state.approvalError = null;
+      }).addCase(approveDistribution.fulfilled, (state, action) => {
+        state.approvalLoading = false;
+        state.isApproved = action.payload;
+        
+        if(!action.payload)
+          state.approvalError = 'not approved';
+      }).addCase(approveDistribution.rejected, (state, action) => {
+        state.approvalLoading = false;
+        state.approvalError = action.payload;
+      })
       
 
   },
@@ -128,9 +163,12 @@ const winningsSlice = createSlice({
 export const selectWinningDistributions = (state) => state.winningDistributions.distributions;
 export const selectSummaryDistributions = (state) => state.winningDistributions.distributionSummary;
 export const selectWinningDistributionsByRange = (state) => state.winningDistributions.allDistributions;
-
 export const selectWinningsLoading = (state) => state.winningDistributions.loading;
 export const selectWinningsError = (state) => state.winningDistributions.error;
 
-export const { resetDistributions } = winningsSlice.actions;
+export const selectApprovalLoading = (state) => state.winningDistributions.approvalLoading;
+export const selectApprovalError = (state) => state.winningDistributions.approvalError;
+export const selectIsApproved = (state) => state.winningDistributions.isApproved;
+
+export const { resetDistributions,resetApproval } = winningsSlice.actions;
 export default winningsSlice.reducer;
