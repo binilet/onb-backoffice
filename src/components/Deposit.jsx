@@ -37,7 +37,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import { fetchSantimDepositsByDateRange, fetchSantimDepositStatusesByDateRange, clearDeposits } from '../state/slices/depositSlice';
+import { fetchDepositRequestsByDateRange, fetchDepositStatusesByDateRange, clearDeposits } from '../state/slices/depositSlice';
 
 const DepositPage = () => {
   const dispatch = useDispatch();
@@ -67,9 +67,9 @@ const DepositPage = () => {
     setEndDate(formattedEndDate);
 
     if (tabValue === 0) {
-      dispatch(fetchSantimDepositsByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
+      dispatch(fetchDepositRequestsByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
     } else {
-      dispatch(fetchSantimDepositStatusesByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
+      dispatch(fetchDepositStatusesByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
     }
 
     return () => {
@@ -85,9 +85,9 @@ const DepositPage = () => {
     const end = endDate ? new Date(endDate) : null;
     
     if (newValue === 0) {
-      dispatch(fetchSantimDepositsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchDepositRequestsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     } else {
-      dispatch(fetchSantimDepositStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchDepositStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     }
   };
 
@@ -97,9 +97,9 @@ const DepositPage = () => {
     const end = endDate ? new Date(endDate) : null;
     
     if (tabValue === 0) {
-      dispatch(fetchSantimDepositsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchDepositRequestsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     } else {
-      dispatch(fetchSantimDepositStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchDepositStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     }
   };
 
@@ -109,9 +109,9 @@ const DepositPage = () => {
     const end = endDate ? new Date(endDate) : null;
     
     if (tabValue === 0) {
-      dispatch(fetchSantimDepositsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchDepositRequestsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     } else {
-      dispatch(fetchSantimDepositStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchDepositStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     }
   };
 
@@ -635,7 +635,7 @@ const DepositPage = () => {
                           size="small"
                           sx={{ 
                             fontWeight: 'bold', 
-                            bgcolor: getStatusColor(status.Status),
+                            bgcolor: getStatusColor(status.status),
                             color: 'white' 
                           }}
                         />

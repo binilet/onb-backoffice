@@ -17,17 +17,25 @@ axiosInstance.interceptors.request.use(
     }
 )
 
-export const fetchSantimDepositsByDateRange = createAsyncThunk(
-  'santimDeposits/fetchSantimDepositsByDateRange',
+export const fetchDepositRequestsByDateRange = createAsyncThunk(
+  'santimDeposits/fetchDepositRequestsByDateRange',
   async ({ startDate, endDate, skip = 0, limit = 10 }, { rejectWithValue }) => {
     try {
       const params = { skip, limit };
       if (startDate) params.start_date = startDate.toISOString();
       if (endDate) params.end_date = endDate.toISOString();
 
-      const response = await axiosInstance.get('/santim_deposit/request/by_date_range/', {
+      //santim
+      // const response = await axiosInstance.get('/santim_deposit/request/by_date_range/', {
+      //   params,
+      // });
+
+      //addis pay
+      const response = await axiosInstance.get('/addispay_deposit/request/by_date_range/', {
         params,
       });
+
+
       return response.data;
     } catch (err) {
       console.error('Fetch santim deposits error:', err.response?.data);
@@ -36,17 +44,24 @@ export const fetchSantimDepositsByDateRange = createAsyncThunk(
   }
 );
 
-export const fetchSantimDepositStatusesByDateRange = createAsyncThunk(
-  'santimDepositStatuses/fetchSantimDepositStatusesByDateRange',
+export const fetchDepositStatusesByDateRange = createAsyncThunk(
+  'santimDepositStatuses/fetchDepositStatusesByDateRange',
   async ({ startDate, endDate, skip = 0, limit = 10 }, { rejectWithValue }) => {
     try {
       const params = { skip, limit };
       if (startDate) params.start_date = startDate.toISOString();
       if (endDate) params.end_date = endDate.toISOString();
 
-      const response = await axiosInstance.get('/santim_deposit/status/by_date_range/', {
+      //santim
+      // const response = await axiosInstance.get('/santim_deposit/status/by_date_range/', {
+      //   params,
+      // });
+
+      //addis pay
+      const response = await axiosInstance.get('/addispay_deposit/callback/by_date_range/', {
         params,
       });
+
       return response.data;
     } catch (err) {
       console.error('Fetch santim deposit statuses error:', err.response?.data);
@@ -73,28 +88,28 @@ const santimDepositSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchSantimDepositsByDateRange.pending, (state) => {
+      .addCase(fetchDepositRequestsByDateRange.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchSantimDepositsByDateRange.fulfilled, (state, action) => {
+      .addCase(fetchDepositRequestsByDateRange.fulfilled, (state, action) => {
         state.loading = false;
         state.depositRequests = action.payload;
       })
-      .addCase(fetchSantimDepositsByDateRange.rejected, (state, action) => {
+      .addCase(fetchDepositRequestsByDateRange.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch deposits';
         state.depositRequests = [];
       })
-      .addCase(fetchSantimDepositStatusesByDateRange.pending, (state) => {
+      .addCase(fetchDepositStatusesByDateRange.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchSantimDepositStatusesByDateRange.fulfilled, (state, action) => {
+      .addCase(fetchDepositStatusesByDateRange.fulfilled, (state, action) => {
         state.loading = false;
         state.depositStatuses = action.payload;
       })
-      .addCase(fetchSantimDepositStatusesByDateRange.rejected, (state, action) => {
+      .addCase(fetchDepositStatusesByDateRange.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch deposit statuses';
         state.depositStatuses = [];
