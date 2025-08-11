@@ -52,7 +52,6 @@ const Agents = () => {
 
 
   const handleEdit = (user) => {
-    console.log(user);
     dispatch(resetStatus())
     setEditingUser(user);
     setNewUser(user);

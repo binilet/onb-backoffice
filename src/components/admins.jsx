@@ -1,16 +1,16 @@
-// Users.jsx
-import React,{useState,useEffect} from 'react';
-import { useSelector,useDispatch } from 'react-redux';
-import { Box, Typography,useTheme,useMediaQuery } from '@mui/material';
+import React, { useState,useEffect } from 'react';
+import {
+  Box, Typography,
+   useMediaQuery, useTheme,
+} from '@mui/material';
 import UsersTable from './grids/UsersTable';
 import UserFormModal from './modals/userFormModal';
-// import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line } from 'recharts';
+import { get_users_by_role_admin,resetStatus } from '../state/slices/userSlice';
+import { useSelector,useDispatch } from 'react-redux';
 
-import { get_users_by_role_user,resetStatus } from '../state/slices/userSlice';
-
-const Users = () => {
+const Admins = () => {
   const dispatch = useDispatch();
-  const _users = useSelector((state) => state.users.users);
+  const _users = useSelector((state) => state.users.admins);
   const [users, setUsers] = useState(_users);
   const [openModal, setOpenModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -23,18 +23,26 @@ const Users = () => {
     owner: '',
     remark: '',
   });
+
+   useEffect(()=>{
+      dispatch(get_users_by_role_admin());
+    },[])
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  useEffect(()=>{
-    dispatch(get_users_by_role_user());
-  },[])
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => {
     setOpenModal(false);
     setEditingUser(null);
-
+    setNewUser({
+      username: '',
+      phone: '',
+      role: '',
+      isActive: true,
+      owner: '',
+      remark: '',
+    });
   };
 
   const handleInputChange = (e) => {
@@ -42,17 +50,20 @@ const Users = () => {
     setNewUser({ ...newUser, [name]: value });
   };
 
-  const handleEdit = async(user) => {
+
+  const handleEdit = (user) => {
     dispatch(resetStatus())
-    await setEditingUser(user);
+    setEditingUser(user);
+    setNewUser(user);
     setOpenModal(true);
   };
 
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, textAlign: 'center' }}>
-        Users Management
+      <Typography variant="h4" gutterBottom sx={{mb: 3, textAlign: 'center' }}>
+        Admin Management
       </Typography>
+
       <UsersTable users={_users} handleEdit={handleEdit} />
 
       <UserFormModal openModal={openModal}
@@ -65,4 +76,4 @@ const Users = () => {
   );
 };
 
-export default Users;
+export default Admins;

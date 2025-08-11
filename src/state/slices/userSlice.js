@@ -17,12 +17,39 @@ axiosInstance.interceptors.request.use(
     }
 )
 
+axios.interceptors.response.use(
+    (response) => { 
+      if (response.status === 401) {
+        sessionStorage.removeItem('token');
+        window.location.href = '/login';
+        return Promise.reject({ message: 'Unauthorized' });
+      }
+      return response;
+    });
+
 export const get_users_by_role_user = createAsyncThunk(
   "/users/get_users_by_role_user",
   async (_, thunkAPI) => {
     try {
       const response = await axiosInstance.get("/users/all_users_by_role", {
         params: { role: 'user' },
+      });
+      return response.data;
+    } catch (err) {
+      //console.log(err);
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.detail || "users not found!"
+      );
+    }
+  }
+);
+
+export const get_users_by_role_admin = createAsyncThunk(
+  "/users/get_users_by_role_admin",
+  async (_, thunkAPI) => {
+    try {
+      const response = await axiosInstance.get("/users/all_users_by_role", {
+        params: { role: 'admin' },
       });
       return response.data;
     } catch (err) {
@@ -115,6 +142,7 @@ const usersSlice = createSlice({
     initialState:{
         users:[],
         agents:[],
+        admins:[],
         loading:false,
         error:null,
         update_status:null,
@@ -161,6 +189,18 @@ const usersSlice = createSlice({
             state.agents = action.payload;
           })
           .addCase(get_users_by_role_agent.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+          })
+          .addCase(get_users_by_role_admin.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+          })
+          .addCase(get_users_by_role_admin.fulfilled, (state, action) => {
+            state.loading = false;
+            state.admins = action.payload;
+          })
+          .addCase(get_users_by_role_admin.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload;
           })

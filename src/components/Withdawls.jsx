@@ -34,14 +34,15 @@ import SummarizeIcon from '@mui/icons-material/Summarize';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
+import ThumbsUpDownIcon from '@mui/icons-material/ThumbsUpDown';
 import PaymentIcon from '@mui/icons-material/Payment';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import { fetchSantimWithdrawalsByDateRange, fetchSantimWithdrawalStatusesByDateRange, clearWithdrawals, clearStatuses } from '../state/slices/withdrawls';
+import { fetchWithdrawalRequestByDateRange, fetchWithdrawalCallbackByDateRange,fetchWithdrawalResponseByDateRange, clearWithdrawals, clearStatuses,clearResponses } from '../state/slices/withdrawls';
 
 const WithdrawalPage = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
-  const { withdrawals, statuses } = useSelector((state) => state.withdrawals);
+  const { withdrawals, statuses, responses } = useSelector((state) => state.withdrawals);
   
   const [tabValue, setTabValue] = useState(0);
   const [startDate, setStartDate] = useState('');
@@ -66,14 +67,17 @@ const WithdrawalPage = () => {
     setEndDate(formattedEndDate);
 
     if (tabValue === 0) {
-      dispatch(fetchSantimWithdrawalsByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
-    } else {
-      dispatch(fetchSantimWithdrawalStatusesByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
+      dispatch(fetchWithdrawalRequestByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
+    } else if(tabValue === 1) {
+      dispatch(fetchWithdrawalCallbackByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
+    }else{
+      dispatch(fetchWithdrawalResponseByDateRange({ startDate: today, endDate: endOfDay, skip: 0, limit: 10 }));
     }
 
     return () => {
       dispatch(clearWithdrawals());
       dispatch(clearStatuses());
+      dispatch(clearResponses());
     };
   }, [dispatch]);
 
@@ -85,9 +89,12 @@ const WithdrawalPage = () => {
     const end = endDate ? new Date(endDate) : null;
     
     if (newValue === 0) {
-      dispatch(fetchSantimWithdrawalsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
-    } else {
-      dispatch(fetchSantimWithdrawalStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchWithdrawalRequestByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+    } else if (newValue === 1) {
+      dispatch(fetchWithdrawalCallbackByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+    }else{
+      //fetchWithdrawalResponseByDateRange
+      dispatch(fetchWithdrawalResponseByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     }
   };
 
@@ -97,9 +104,13 @@ const WithdrawalPage = () => {
     const end = endDate ? new Date(endDate) : null;
     
     if (tabValue === 0) {
-      dispatch(fetchSantimWithdrawalsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
-    } else {
-      dispatch(fetchSantimWithdrawalStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchWithdrawalRequestByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+    } else if( tabValue === 1) {
+      dispatch(fetchWithdrawalCallbackByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+    }
+    else{
+      //fetchWithdrawalResponseByDateRange
+      dispatch(fetchWithdrawalResponseByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     }
   };
 
@@ -109,9 +120,12 @@ const WithdrawalPage = () => {
     const end = endDate ? new Date(endDate) : null;
     
     if (tabValue === 0) {
-      dispatch(fetchSantimWithdrawalsByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
-    } else {
-      dispatch(fetchSantimWithdrawalStatusesByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+      dispatch(fetchWithdrawalRequestByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+    } else if(tabValue === 1) {
+      dispatch(fetchWithdrawalCallbackByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
+    }else{
+      //fetchWithdrawalResponseByDateRange
+      dispatch(fetchWithdrawalResponseByDateRange({ startDate: start, endDate: end, skip: 0, limit: 10 }));
     }
   };
 
@@ -208,9 +222,11 @@ const WithdrawalPage = () => {
 
   // Get status color
   const getStatusColor = (status) => {
+    console.log('getStatusColor called with status:', status);
     const lowercaseStatus = (status || '').toLowerCase();
-    if (lowercaseStatus === 'success') return theme.palette.success.main;
-    if (lowercaseStatus === 'failed') return theme.palette.error.main;
+
+    if (lowercaseStatus === 'success' || lowercaseStatus === 'true') return theme.palette.success.main;
+    if (lowercaseStatus === 'failed' || lowercaseStatus === 'false') return theme.palette.error.main;
     return theme.palette.warning.main;
   };
 
@@ -450,8 +466,13 @@ const WithdrawalPage = () => {
           iconPosition={isMobile ? "top" : "start"} 
         />
         <Tab 
-          label="Withdrawal Statuses" 
+          label="Withdrawal Callbacks" 
           icon={<CurrencyExchangeIcon />} 
+          iconPosition={isMobile ? "top" : "start"} 
+        />
+        <Tab 
+          label="Withdrawal Responses" 
+          icon={<ThumbsUpDownIcon />} 
           iconPosition={isMobile ? "top" : "start"} 
         />
       </Tabs>
@@ -683,6 +704,124 @@ const WithdrawalPage = () => {
                       <Box sx={{ py: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                         <Typography variant="body1" color="text.secondary">
                           No withdrawal statuses found
+                        </Typography>
+                        <Button 
+                          variant="outlined" 
+                          color="primary" 
+                          startIcon={<RefreshIcon />}
+                          onClick={handleRefresh}
+                        >
+                          Refresh Data
+                        </Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
+
+      {!isLoading && tabValue === 2 && (
+        <Card
+          elevation={4}
+          sx={{
+            borderRadius: 2,
+            overflow: 'hidden',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              boxShadow: 6
+            }
+          }}
+        >
+          <TableContainer>
+            <Table sx={{ minWidth: isMobile ? 650 : 850 }} aria-label="withdrawal statuses table">
+              <TableHead>
+                <TableRow sx={{ backgroundColor: theme.palette.primary.light }}>
+                  <TableCell sx={{ fontWeight: 'bold', py: 2, color: theme.palette.primary.contrastText }}>trx ID</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Created At</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Amount</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>MSISDN</TableCell>
+                  {!isMobile && <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Message</TableCell>}
+                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Status Code</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {responses.data && responses.data.length > 0 ? (
+                  responses.data.map((status) => (
+                    <TableRow
+                      key={status.trxId}
+                      hover
+                      sx={{ 
+                        transition: 'background-color 0.2s',
+                        borderLeft: '4px solid transparent',
+                        '&:hover': {
+                          borderLeft: `4px solid ${theme.palette.primary.main}`,
+                          backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                        }
+                      }}
+                    >
+                      <TableCell component="th" scope="row" sx={{ py: 1.5 }}>
+                        <Tooltip title={status.refId}>
+                          <Typography noWrap sx={{ maxWidth: isMobile ? 80 : 'none' }}>
+                            {status.trxId}
+                          </Typography>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                          {new Date(status.createdAt).toLocaleString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={`ETB ${status.requestedAmount}`}
+                          size="small"
+                          sx={{ 
+                            fontWeight: 'bold', 
+                            bgcolor: 'primary.light',
+                            color: 'primary.contrastText' 
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>{status.requestingUser}</TableCell>
+                      {!isMobile && (
+                        <TableCell>
+                          <Tooltip title={status.message || 'N/A'}>
+                            <Typography noWrap sx={{ maxWidth: 150 }}>
+                              {status.message || 'N/A'}
+                            </Typography>
+                          </Tooltip>
+                        </TableCell>
+                      )}
+                      <TableCell>
+                        <Chip
+                          label={status.success}
+                          size="small"
+                          sx={{ 
+                            fontWeight: 'bold', 
+                            bgcolor: getStatusColor(status?.success.toString()),
+                            color: 'white' 
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title={status.status_code || 'N/A'}>
+                          <Typography noWrap sx={{ maxWidth: isMobile ? 80 : 'none' }}>
+                            {status.status_code || 'N/A'}
+                          </Typography>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={isMobile ? 6 : 7} align="center">
+                      <Box sx={{ py: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <Typography variant="body1" color="text.secondary">
+                          No withdrawal responses found
                         </Typography>
                         <Button 
                           variant="outlined" 

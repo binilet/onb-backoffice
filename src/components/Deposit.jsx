@@ -465,11 +465,11 @@ const DepositPage = () => {
               <TableHead>
                 <TableRow sx={{ backgroundColor: theme.palette.primary.light }}>
                   <TableCell sx={{ fontWeight: 'bold', py: 2, color: theme.palette.primary.contrastText }}>Ref ID</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Created At</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Date</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Amount</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Phone</TableCell>
-                  {!isMobile && <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Reason</TableCell>}
-                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Txn ID</TableCell>
+                  {!isMobile && <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>Status</TableCell>}
+                  <TableCell sx={{ fontWeight: 'bold', color: theme.palette.primary.contrastText }}>name</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -489,9 +489,9 @@ const DepositPage = () => {
                       }}
                     >
                       <TableCell component="th" scope="row" sx={{ py: 1.5 }}>
-                        <Tooltip title={deposit.refId}>
+                        <Tooltip title={deposit.uuid}>
                           <Typography noWrap sx={{ maxWidth: isMobile ? 80 : 'none' }}>
-                            {deposit.refId}
+                            {deposit.uuid}
                           </Typography>
                         </Tooltip>
                       </TableCell>
@@ -502,7 +502,7 @@ const DepositPage = () => {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={`ETB ${deposit.amount}`}
+                          label={`ETB ${deposit.total_amount}`}
                           size="small"
                           sx={{ 
                             fontWeight: 'bold', 
@@ -511,12 +511,12 @@ const DepositPage = () => {
                           }}
                         />
                       </TableCell>
-                      <TableCell>{deposit.phone}</TableCell>
+                      <TableCell>{deposit.phone_number}</TableCell>
                       {!isMobile && (
                         <TableCell>
-                          <Tooltip title={deposit.reason || 'N/A'}>
+                          <Tooltip title={deposit.status || 'N/A'}>
                             <Typography noWrap sx={{ maxWidth: 150 }}>
-                              {deposit.reason || 'N/A'}
+                              {deposit.status || 'N/A'}
                             </Typography>
                           </Tooltip>
                         </TableCell>
@@ -524,7 +524,7 @@ const DepositPage = () => {
                       <TableCell>
                         <Tooltip title={deposit.txnId || 'N/A'}>
                           <Typography noWrap sx={{ maxWidth: isMobile ? 80 : 'none' }}>
-                            {deposit.txnId || 'N/A'}
+                            {deposit.first_name || 'N/A'}
                           </Typography>
                         </Tooltip>
                       </TableCell>
@@ -597,20 +597,20 @@ const DepositPage = () => {
                       }}
                     >
                       <TableCell component="th" scope="row" sx={{ py: 1.5 }}>
-                        <Tooltip title={status.refId}>
+                        <Tooltip title={status.session_uuid}>
                           <Typography noWrap sx={{ maxWidth: isMobile ? 80 : 'none' }}>
-                            {status.refId}
+                            {status.session_uuid}
                           </Typography>
                         </Tooltip>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                          {new Date(status.created_at).toLocaleString()}
+                          {new Date(status.createdAt).toLocaleString()}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={`ETB ${status.amount}`}
+                          label={`ETB ${status.total_amount}`}
                           size="small"
                           sx={{ 
                             fontWeight: 'bold', 
@@ -619,23 +619,23 @@ const DepositPage = () => {
                           }}
                         />
                       </TableCell>
-                      <TableCell>{status.msisdn}</TableCell>
-                      {!isMobile && (
+                      {/* <TableCell>{status.msisdn}</TableCell> */}
+                       
                         <TableCell>
                           <Tooltip title={status.reason || 'N/A'}>
                             <Typography noWrap sx={{ maxWidth: 150 }}>
-                              {status.reason || 'N/A'}
+                              {status.paymnet_reason || 'N/A'}
                             </Typography>
                           </Tooltip>
                         </TableCell>
-                      )}
+                      
                       <TableCell>
                         <Chip
-                          label={status.Status}
+                          label={status.payment_status}
                           size="small"
                           sx={{ 
                             fontWeight: 'bold', 
-                            bgcolor: getStatusColor(status.status),
+                            bgcolor: getStatusColor(status.payment_status),
                             color: 'white' 
                           }}
                         />

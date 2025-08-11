@@ -22,10 +22,13 @@ import Box from '@mui/material/Box';
 // Import Icons (ensure these imports are correct)
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import  {LocalPolice}  from '@mui/icons-material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import SavingsIcon from '@mui/icons-material/Savings';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
+import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import LogoutIcon from '@mui/icons-material/Logout';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -110,6 +113,16 @@ const MainLayout = ({
              to="/users"
              active={location.pathname === "/users"}
            />
+           
+           {(role === "system" || role === "agent") && (
+             <SidebarItem
+               icon={<LocalPolice />}
+               text="Admins"
+               to="/admins"
+               active={location.pathname === "/admins"}
+             />
+           )}
+
            {role === "system" && (
              <SidebarItem
                icon={<GroupWorkIcon />}
@@ -148,7 +161,7 @@ const MainLayout = ({
                  to="/credits"
                  active={location.pathname === "/credits"}
                />
-               <SidebarItem
+               {/* <SidebarItem
                  icon={<SavingsIcon />}
                  text="Deposits"
                  to="/deposits"
@@ -159,6 +172,18 @@ const MainLayout = ({
                  text="Withdrawals"
                  to="/withdrawals"
                  active={location.pathname === "/withdrawals"}
+               /> */}
+               <SidebarItem
+                 icon={<AssuredWorkloadIcon />}
+                 text="Manual Deposits"
+                 to="/manual-deposits"
+                 active={location.pathname === "/manual-deposits"}
+               />
+               <SidebarItem
+                 icon={<LocalAtmIcon />}
+                 text="Manual Withdraws"
+                 to="/manual-withdraws"
+                 active={location.pathname === "/manual-withdraws"}
                />
              </>
            )}

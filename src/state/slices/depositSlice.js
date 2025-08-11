@@ -17,6 +17,16 @@ axiosInstance.interceptors.request.use(
     }
 )
 
+axios.interceptors.response.use(
+    (response) => { 
+      if (response.status === 401) {
+        sessionStorage.removeItem('token');
+        window.location.href = '/login';
+        return Promise.reject({ message: 'Unauthorized' });
+      }
+      return response;
+    });
+
 export const fetchDepositRequestsByDateRange = createAsyncThunk(
   'santimDeposits/fetchDepositRequestsByDateRange',
   async ({ startDate, endDate, skip = 0, limit = 10 }, { rejectWithValue }) => {

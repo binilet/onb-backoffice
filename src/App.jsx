@@ -11,10 +11,10 @@ import Login from './components/auth/Login';             // Adjust path
 import PrivateRoute from './components/auth/PrivateRoute';   // Adjust path
 import DashboardComponent from './components/dashboard'; // Adjust path
 import Users from './components/Users';             // Adjust path
-import Agents from './components/Agents';           // Adjust path
+import Agents from './components/Agents'; 
+import Admins from './components/admins';          // Adjust path
 import Transactions from './components/Transactions'; // Adjust path
 import NotFoundPage from './components/NotFoundPage'; 
-
 
 import { useSelector,useDispatch } from 'react-redux'; 
 import { fetchUserInfo,logout } from './state/slices/authSlice';
@@ -22,6 +22,9 @@ import GameGrid from './components/Games';
 import DepositPage from './components/Deposit';
 import WithdrawalPage from './components/Withdawls';
 import CreditBalancePage from './components/CreditBalancePage';
+import ManualDepositsManager from './components/ManualPay';
+import ManualWithdrawManager from './components/manualWithdraw';
+
 
 
 // Define theme (or import it)
@@ -93,6 +96,14 @@ const App = () => {
               }
             />
             <Route
+              path="/admins"
+              element={
+                <PrivateRoute>
+                  <Admins />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/agents"
               element={
                 <PrivateRoute allowedRoles={['system']}>
@@ -116,7 +127,7 @@ const App = () => {
                 </PrivateRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/deposits"
               element={
                 <PrivateRoute>
@@ -131,7 +142,7 @@ const App = () => {
                   <WithdrawalPage />
                 </PrivateRoute>
               }
-            />
+            /> */}
             <Route
               path="/credits"
               element={
@@ -140,9 +151,26 @@ const App = () => {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/manual-deposits"
+              element={
+                <PrivateRoute>
+                  <ManualDepositsManager />
+                </PrivateRoute>
+              }
+            />
              {/* Optional: 404 page specific to the logged-in layout */}
-             
+             <Route
+              path="/manual-withdraws"
+              element={
+                <PrivateRoute>
+                  <ManualWithdrawManager />
+                </PrivateRoute>
+              }
+            />
           </Route>
+          
+          
 
           
           {/* Fallback 404 for any route not matched above (e.g., /foo) */}

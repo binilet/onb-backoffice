@@ -16,6 +16,16 @@ axiosInstance.interceptors.request.use(
     }
 )
 
+axios.interceptors.response.use(
+    (response) => { 
+      if (response.status === 401) {
+        sessionStorage.removeItem('token');
+        window.location.href = '/login';
+        return Promise.reject({ message: 'Unauthorized' });
+      }
+      return response;
+    });
+
 // Thunk to fetch games by date range
 export const fetchGamesByDateRange = createAsyncThunk(
   'games/fetchGamesByDateRange',

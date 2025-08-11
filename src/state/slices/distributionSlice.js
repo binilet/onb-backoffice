@@ -5,6 +5,16 @@ const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_REACT_APP_API_URL,
 });
 
+axios.interceptors.response.use(
+    (response) => { 
+      if (response.status === 401) {
+        sessionStorage.removeItem('token');
+        window.location.href = '/login';
+        return Promise.reject({ message: 'Unauthorized' });
+      }
+      return response;
+    });
+
 axiosInstance.interceptors.request.use(
     (config)=>{
         const token = sessionStorage.getItem('token');
