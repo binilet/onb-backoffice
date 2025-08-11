@@ -45,6 +45,23 @@ export const fetchCreditBalancesByDateRange = createAsyncThunk(
   }
 );
 
+
+export const fetchCreditBalancesByPhoneNumber = createAsyncThunk(
+  'creditBalances/fetchCreditBalancesByPhoneNumber',
+  async ({ phone }, { rejectWithValue }) => {
+    try {
+      const params = { phone };
+      const response = await axiosInstance.get('/credit_balances/by_phone_number/', {
+        params,
+      });
+      return response.data;
+    } catch (err) {
+      console.error('Fetch credit balances error:', err.response?.data);
+      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch credit balances');
+    }
+  }
+);
+
 const creditBalanceSlice = createSlice({
   name: 'creditBalances',
   initialState: {
@@ -53,12 +70,22 @@ const creditBalanceSlice = createSlice({
       loading: false,
       error: null,
     },
+    balanceByPhone:{
+      data: null,
+      loading: false,
+      error: null,
+    }
   },
   reducers: {
     clearBalances: (state) => {
       state.balances.data = [];
       state.balances.error = null;
       state.balances.loading = false;
+    },
+    clearBalanceByPhone: (state) => {
+      state.balanceByPhone.data = null;
+      state.balanceByPhone.error = null;
+      state.balanceByPhone.loading = false;
     },
   },
   extraReducers: (builder) => {
@@ -75,9 +102,21 @@ const creditBalanceSlice = createSlice({
         state.balances.loading = false;
         state.balances.error = action.payload || 'Failed to fetch credit balances';
         state.balances.data = [];
-      });
+      })
+      .addCase(fetchCreditBalancesByPhoneNumber.pending, (state) => {
+        state.balanceByPhone.loading = true;
+        state.balanceByPhone.error = null;
+      }).addCase(fetchCreditBalancesByPhoneNumber.fulfilled, (state, action) => {
+        state.balanceByPhone.loading = false;
+        state.balanceByPhone.data = action.payload;
+      })
+      .addCase(fetchCreditBalancesByPhoneNumber.rejected, (state, action) =>  {
+        state.balanceByPhone.loading = false;
+        state.balanceByPhone.error = action.payload || 'Failed to fetch credit balances by phone number';
+        state.balanceByPhone.data = null;
+      })
   },
 });
 
-export const { clearBalances } = creditBalanceSlice.actions;
+export const { clearBalances,clearBalanceByPhone} = creditBalanceSlice.actions;
 export default creditBalanceSlice.reducer;
