@@ -21,24 +21,37 @@ import {
   Chip,
   alpha
 } from '@mui/material';
+
+
 import {
   Person as PersonIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   MonetizationOn as MonetizationOnIcon,
   MoneyOff as MoneyOffIcon,
+  NewReleasesSharp as NewIcon,
   TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import {
   Edit as EditIcon,
   Search as SearchIcon,
+  HistoryEdu as HistoryIcon
 } from '@mui/icons-material';
 
-const UsersTable = ({ users = [], handleEdit }) => {
+import TransactionHistoryModal from './TransactionHistoryModal';
+
+const UsersTable = ({ users = [], handleEdit,handleTransactionhistory }) => {
   const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
+  const [open, setOpen] = useState(false);
+
+  const handleHistoryModal = async (user) => {
+    await handleTransactionhistory(user)
+    setOpen(true);
+    
+  }
 
   const filteredUsers = users.filter(
     (user) =>
@@ -66,16 +79,25 @@ const UsersTable = ({ users = [], handleEdit }) => {
   const inactiveUsers = totalUsers - activeUsers;
   const totalHealthyCredit = users.reduce((acc, user) => acc + (user.current_balance > 0 ? user.current_balance : 0), 0);
   const totalUnhealthyCredit = users.reduce((acc, user) => acc + (user.current_balance <= 0 ? user.current_balance : 0), 0);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const newUsersCount = users.filter(user => {
+    //console.log(user.createdAt);
+    const createdDate = new Date(user.createdAt);
+    return createdDate >= today;
+  }).length;
 
   return (
     <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
       {/* Summary Cards */}
-     <SummaryCards
+      <SummaryCards
         totalUsers={totalUsers}
         activeUsers={activeUsers}
         inactiveUsers={inactiveUsers}
         totalHealthyCredit={totalHealthyCredit}
         totalUnhealthyCredit={totalUnhealthyCredit}
+        newUsers={newUsersCount}
       />
 
       {/* Search Bar */}
@@ -89,7 +111,6 @@ const UsersTable = ({ users = [], handleEdit }) => {
           setSearchQuery(e.target.value)
           setPage(0);
         }}
-        
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -120,7 +141,8 @@ const UsersTable = ({ users = [], handleEdit }) => {
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Admin ID</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Credit Balance</TableCell>
               <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Actions</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Edit</TableCell>
+              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>History</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -164,6 +186,15 @@ const UsersTable = ({ users = [], handleEdit }) => {
                     <EditIcon fontSize="small" />
                   </IconButton>
                 </TableCell>
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleHistoryModal(user)}
+                    size="small"
+                    sx={{ color: 'primary.main' }}
+                  >
+                    <HistoryIcon fontSize="small" />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -184,6 +215,8 @@ const UsersTable = ({ users = [], handleEdit }) => {
           mt: 2,
         }}
       />
+      <TransactionHistoryModal open={open} onClose={() => setOpen(false)} />
+
     </Box>
   );
 };
@@ -195,7 +228,8 @@ function SummaryCards({
   activeUsers,
   inactiveUsers,
   totalHealthyCredit,
-  totalUnhealthyCredit
+  totalUnhealthyCredit,
+  newUsers
 }) {
   const theme = useTheme();
   
@@ -244,6 +278,16 @@ function SummaryCards({
       icon: <MoneyOffIcon />,
       bgGradient: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)} 0%, ${alpha(theme.palette.warning.main, 0.2)} 100%)`,
       change: `${(totalUnhealthyCredit + totalHealthyCredit) !== 0 ? `$${(totalUnhealthyCredit / (totalUnhealthyCredit + totalHealthyCredit) * 100).toFixed(2)}%` : '0%'}`,
+      changeType: "negative"
+    }
+    ,
+    {
+      label: "New Users Today",
+      value: `$${newUsers?.toLocaleString() || '0'}`,
+      color: "success",
+      icon: <NewIcon />,
+      bgGradient: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)} 0%, ${alpha(theme.palette.warning.main, 0.2)} 100%)`,
+      change: `${(totalUsers) !== 0 ? `$${(newUsers / (totalUsers) * 100).toFixed(2)}%` : '0%'}`,
       changeType: "negative"
     }
   ];
@@ -348,6 +392,8 @@ function SummaryCards({
     </Grid>
   );
 }
+
+
 
 
 export default UsersTable;

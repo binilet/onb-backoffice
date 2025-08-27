@@ -62,6 +62,22 @@ export const fetchCreditBalancesByPhoneNumber = createAsyncThunk(
   }
 );
 
+export const fetchCreditHistoriesByPhoneNumber = createAsyncThunk(
+  'creditBalances/fetchCreditHistoriesByPhoneNumber',
+  async ({ phone }, { rejectWithValue }) => {
+    try {
+      const params = { phone };
+      const response = await axiosInstance.get('/credit_balances/history_by_phone_number/', {
+        params,
+      });
+      return response.data;
+    } catch (err) {
+      console.error('Fetch credit balances error:', err.response?.data);
+      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch credit balances');
+    }
+  }
+);
+
 const creditBalanceSlice = createSlice({
   name: 'creditBalances',
   initialState: {
@@ -71,6 +87,11 @@ const creditBalanceSlice = createSlice({
       error: null,
     },
     balanceByPhone:{
+      data: null,
+      loading: false,
+      error: null,
+    },
+    historyByPhone:{
       data: null,
       loading: false,
       error: null,
@@ -114,6 +135,20 @@ const creditBalanceSlice = createSlice({
         state.balanceByPhone.loading = false;
         state.balanceByPhone.error = action.payload || 'Failed to fetch credit balances by phone number';
         state.balanceByPhone.data = null;
+      })
+      .addCase(fetchCreditHistoriesByPhoneNumber.pending, (state) => {
+        state.historyByPhone.loading = true;
+        state.historyByPhone.error = null;
+      
+      }).addCase(fetchCreditHistoriesByPhoneNumber.fulfilled, (state, action) => {
+        state.historyByPhone.loading = false;
+        state.historyByPhone.data = action.payload;
+      
+      })
+      .addCase(fetchCreditHistoriesByPhoneNumber.rejected, (state, action) =>  {
+        state.historyByPhone.loading = false;
+        state.historyByPhone.error = action.payload || 'Failed to fetch credit histories by phone number';
+        state.historyByPhone.data = null;
       })
   },
 });

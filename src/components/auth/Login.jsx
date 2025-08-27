@@ -31,7 +31,10 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   
   const handleLogin = async () => {
-    const result = await dispatch(loginUser({ phone, password }));
+    if (!phone || !password) {
+      return alert('Please enter both phone number and password.');
+    }
+    const result = await dispatch(loginUser({ phone, password:password.trim() }));
     if (loginUser.fulfilled.match(result)) {
       await dispatch(fetchUserInfo());
       navigate('/');
