@@ -62,9 +62,9 @@ const Users = () => {
 
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, textAlign: 'center' }}>
+      {/* <Typography variant="h4" gutterBottom sx={{ mb: 3, textAlign: 'center' }}>
         Users Management
-      </Typography>
+      </Typography> */}
     <UsersTable users={_users} handleEdit={handleEdit} handleTransactionhistory={handleTransactionhistory} />
 
       <UserFormModal openModal={openModal}

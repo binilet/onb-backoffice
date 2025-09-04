@@ -24,6 +24,7 @@ import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import  {LocalPolice}  from '@mui/icons-material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import RsvpIcon from '@mui/icons-material/Rsvp';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import SavingsIcon from '@mui/icons-material/Savings';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
@@ -136,6 +137,13 @@ const MainLayout = ({
              text="Games"
              to="/games"
              active={location.pathname === "/games"}
+           />
+
+           <SidebarItem
+             icon={<RsvpIcon />}
+             text="Invite"
+             to="/hagere-invite"
+             active={location.pathname === "/hagere-invite"}
            />
 
            {role === "system" && (

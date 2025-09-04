@@ -73,6 +73,7 @@ const GameGrid = () => {
     totalBets: games?.reduce((sum, game) => sum + (game.bet_amount*game.number_of_players), 0) || 0,
     completedGames: games?.filter(game => game.game_completed).length || 0,
     totalPlayers: games?.reduce((sum, game) => sum + game.number_of_players, 0) || 0,
+    totalCuts:games?.reduce((sum, game) => sum + (game.cut_amount), 0) || 0,
   };
 
   const handleGameDistribution = (game,redistribute) => {
@@ -133,7 +134,7 @@ const GameGrid = () => {
       </Box>
 
       {/* Summary Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -157,6 +158,20 @@ const GameGrid = () => {
               <Box>
                 <Typography color="textSecondary" variant="body2">Total Bets</Typography>
                 <Typography variant="h4" sx={{ mt: 0.5 }}>${gameSummary.totalBets.toFixed(2)}</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'success.lighter' }}>
+                <MoneyIcon sx={{ color: 'success.main' }} />
+              </Box>
+              <Box>
+                <Typography color="textSecondary" variant="body2">Total Cut</Typography>
+                <Typography variant="h4" sx={{ mt: 0.5 }}>${gameSummary.totalCuts.toFixed(2)}</Typography>
               </Box>
             </CardContent>
           </Card>

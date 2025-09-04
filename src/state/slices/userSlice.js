@@ -5,6 +5,14 @@ const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_REACT_APP_API_URL,
 });
 
+const externalApi = axios.create({
+  baseURL: import.meta.env.VITE_EXTERNAL_API_URL,
+  headers: {
+    "x-api-key": import.meta.env.VITE_EXTERNAL_API_KEY,
+    "Content-Type": "application/json",
+  },
+});
+
 axiosInstance.interceptors.request.use(
     (config)=>{
         const token = sessionStorage.getItem('token');
@@ -36,7 +44,7 @@ export const get_users_by_role_user = createAsyncThunk(
       });
       return response.data;
     } catch (err) {
-      //console.log(err);
+      console.log(err);
       return thunkAPI.rejectWithValue(
         err.response?.data?.detail || "users not found!"
       );
@@ -53,7 +61,7 @@ export const get_users_by_role_admin = createAsyncThunk(
       });
       return response.data;
     } catch (err) {
-      //console.log(err);
+      console.log(err);
       return thunkAPI.rejectWithValue(
         err.response?.data?.detail || "users not found!"
       );
@@ -137,6 +145,24 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+
+export const sendHagereInvite = createAsyncThunk(
+  'sendHagereInvite',
+  async ( data , thunkAPI) => {
+    try {
+      console.log(import.meta.env.VITE_EXTERNAL_API_URL)
+      const result = await externalApi.post("/company/sendInviteFromDashboard", { phone:data.phone,sender:data.sender });
+      return result.data; 
+    } catch (error) {
+      console.log('sendHagereInvite error:', error?.response?.data);
+      console.log(error);
+      return thunkAPI.rejectWithValue(
+        error?.response?.data || { message: 'Failed to send invite' }
+      );
+    }
+  }
+);
+
 const usersSlice = createSlice({
     name:'users',
     initialState:{
@@ -148,7 +174,10 @@ const usersSlice = createSlice({
         update_status:null,
         referralUrl:null,
         referralUrlLoading:false,
-        referralUrlError:null
+        referralUrlError:null,
+
+        isSmsSending:false,
+        smsMessage:''
     },
     reducers:{
         logout(state){
@@ -264,7 +293,22 @@ const usersSlice = createSlice({
           .addCase(generate_referral_link.rejected, (state, action) => {
             state.referralUrlLoading = false;
             state.referralUrlError = action.payload;
-          });
+          }).
+        
+          addCase(sendHagereInvite.fulfilled,(state,action)=>{
+            console.log(action.payload);
+            state.isSmsSending = false;
+            state.smsMessage = action.payload?.message;
+        }).
+        addCase(sendHagereInvite.pending,(state,action)=>{
+            state.isSmsSending = true;
+            state.smsMessage = '';
+        }).
+        addCase(sendHagereInvite.rejected,(state,action)=>{
+            console.log(action.payload);
+            state.isSmsSending = false;
+            state.smsMessage = action.payload.data || 'Failed to send invite';
+        })
     }
 });
 

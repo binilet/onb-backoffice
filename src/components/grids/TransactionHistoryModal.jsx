@@ -41,9 +41,9 @@ const TransactionHistoryModal = ({ open, onClose }) => {
 
     historyByPhone.data.forEach((tx) => {
       if (tx.isdebit) {
-        totalDebit += tx.amount;
+        totalDebit += tx.net_amount;
       } else {
-        totalCredit += tx.amount;
+        totalCredit += tx.net_amount;
       }
     });
 
@@ -172,6 +172,8 @@ const TransactionHistoryModal = ({ open, onClose }) => {
                     <TableCell sx={{ fontWeight: 600, py: 2 }}>Date & Time</TableCell>
                     <TableCell sx={{ fontWeight: 600, py: 2 }}>Transaction Type</TableCell>
                     <TableCell sx={{ fontWeight: 600, py: 2 }}>Description</TableCell>
+                    <TableCell sx={{ fontWeight: 600, py: 2 }}>Bet Amount</TableCell>
+                    <TableCell sx={{ fontWeight: 600, py: 2 }}>Total Players</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600, py: 2 }}>Amount</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 600, py: 2 }}>Status</TableCell>
                   </TableRow>
@@ -217,7 +219,29 @@ const TransactionHistoryModal = ({ open, onClose }) => {
                             color: tx.isdebit ? 'success.main' : 'error.main'
                           }}
                         >
-                          {tx.isdebit ? '+' : '-'}{formatCurrency(tx.amount)}
+                          {formatCurrency(tx.bet_amount??0)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right" sx={{ py: 2 }}>
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            fontWeight: 600,
+                            color: tx.isdebit ? 'success.main' : 'error.main'
+                          }}
+                        >
+                          {tx.total_players??0}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right" sx={{ py: 2 }}>
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            fontWeight: 600,
+                            color: tx.isdebit ? 'success.main' : 'error.main'
+                          }}
+                        >
+                          {tx.isdebit ? '+' : '-'}{formatCurrency(tx.net_amount)}
                         </Typography>
                       </TableCell>
                       <TableCell align="center" sx={{ py: 2 }}>

@@ -25,6 +25,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PercentIcon from '@mui/icons-material/Percent';
 import NoteIcon from '@mui/icons-material/Note';
+import { CallMade } from '@mui/icons-material';
 import PersonIcon from '@mui/icons-material/Person';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 
@@ -331,6 +332,19 @@ const GameDetail = ({ game, open, onClose }) => {
                   </Typography>
                   <Typography variant="body1" fontWeight="medium" sx={{ wordBreak: 'break-word' }}>
                     {game.note ?? 'No note'}
+                  </Typography>
+                </Box>
+              </DetailSection>
+              <DetailSection>
+                <IconWrapper color="info.main">
+                  <CallMade fontSize="small" />
+                </IconWrapper>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Number Of Calls
+                  </Typography>
+                  <Typography variant="body1" fontWeight="medium" sx={{ wordBreak: 'break-word' }}>
+                    {game.number_of_calls ?? 'no of calls unavailable'}
                   </Typography>
                 </Box>
               </DetailSection>
