@@ -18,6 +18,7 @@ import {
   IconButton,
   CircularProgress,
   Tooltip,
+  alpha
 } from '@mui/material';
 import {
   SportsEsports as GameIcon,
@@ -134,77 +135,222 @@ const GameGrid = () => {
       </Box>
 
       {/* Summary Cards */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
-            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'primary.lighter' }}>
-                <GameIcon sx={{ color: 'primary.main' }} />
-              </Box>
-              <Box>
-                <Typography color="textSecondary" variant="body2">Total Games</Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>{gameSummary.totalGames}</Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+<Grid container spacing={2} sx={{ mb: 2 }}>
+  <Grid item xs={12} sm={6} md={2.4}>
+    <Card 
+      elevation={0} 
+      sx={{ 
+        borderRadius: 2, 
+        border: 1, 
+        borderColor: 'divider',
+        height: '100%',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme => `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`,
+          borderColor: theme => alpha(theme.palette.primary.main, 0.2),
+        },
+      }}
+    >
+      <CardContent sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box 
+            sx={{ 
+              width: 36,
+              height: 36,
+              borderRadius: 1.5,
+              bgcolor: 'primary.lighter',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              '& svg': { fontSize: 18 }
+            }}
+          >
+            <GameIcon sx={{ color: 'primary.main' }} />
+          </Box>
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, fontSize: '1.25rem' }}>
+          {gameSummary.totalGames}
+        </Typography>
+        <Typography color="textSecondary" variant="body2" sx={{ fontSize: '0.875rem' }}>
+          Total Games
+        </Typography>
+      </CardContent>
+    </Card>
+  </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
-            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'success.lighter' }}>
-                <MoneyIcon sx={{ color: 'success.main' }} />
-              </Box>
-              <Box>
-                <Typography color="textSecondary" variant="body2">Total Bets</Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>${gameSummary.totalBets.toFixed(2)}</Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+  <Grid item xs={12} sm={6} md={2.4}>
+    <Card 
+      elevation={0} 
+      sx={{ 
+        borderRadius: 2, 
+        border: 1, 
+        borderColor: 'divider',
+        height: '100%',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme => `0 4px 12px ${alpha(theme.palette.success.main, 0.1)}`,
+          borderColor: theme => alpha(theme.palette.success.main, 0.2),
+        },
+      }}
+    >
+      <CardContent sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box 
+            sx={{ 
+              width: 36,
+              height: 36,
+              borderRadius: 1.5,
+              bgcolor: 'success.lighter',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              '& svg': { fontSize: 18 }
+            }}
+          >
+            <MoneyIcon sx={{ color: 'success.main' }} />
+          </Box>
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, fontSize: '1.25rem' }}>
+          ${gameSummary.totalBets.toFixed(2)}
+        </Typography>
+        <Typography color="textSecondary" variant="body2" sx={{ fontSize: '0.875rem' }}>
+          Total Bets
+        </Typography>
+      </CardContent>
+    </Card>
+  </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
-            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'success.lighter' }}>
-                <MoneyIcon sx={{ color: 'success.main' }} />
-              </Box>
-              <Box>
-                <Typography color="textSecondary" variant="body2">Total Cut</Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>${gameSummary.totalCuts.toFixed(2)}</Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+  <Grid item xs={12} sm={6} md={2.4}>
+    <Card 
+      elevation={0} 
+      sx={{ 
+        borderRadius: 2, 
+        border: 1, 
+        borderColor: 'divider',
+        height: '100%',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme => `0 4px 12px ${alpha(theme.palette.success.main, 0.1)}`,
+          borderColor: theme => alpha(theme.palette.success.main, 0.2),
+        },
+      }}
+    >
+      <CardContent sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box 
+            sx={{ 
+              width: 36,
+              height: 36,
+              borderRadius: 1.5,
+              bgcolor: 'success.lighter',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              '& svg': { fontSize: 18 }
+            }}
+          >
+            <MoneyIcon sx={{ color: 'success.main' }} />
+          </Box>
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, fontSize: '1.25rem' }}>
+          ${gameSummary.totalCuts.toFixed(2)}
+        </Typography>
+        <Typography color="textSecondary" variant="body2" sx={{ fontSize: '0.875rem' }}>
+          Total Cut
+        </Typography>
+      </CardContent>
+    </Card>
+  </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
-            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'warning.lighter' }}>
-                <PlayersIcon sx={{ color: 'warning.main' }} />
-              </Box>
-              <Box>
-                <Typography color="textSecondary" variant="body2">Total Players</Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>{gameSummary.totalPlayers}</Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+  <Grid item xs={12} sm={6} md={2.4}>
+    <Card 
+      elevation={0} 
+      sx={{ 
+        borderRadius: 2, 
+        border: 1, 
+        borderColor: 'divider',
+        height: '100%',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme => `0 4px 12px ${alpha(theme.palette.warning.main, 0.1)}`,
+          borderColor: theme => alpha(theme.palette.warning.main, 0.2),
+        },
+      }}
+    >
+      <CardContent sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box 
+            sx={{ 
+              width: 36,
+              height: 36,
+              borderRadius: 1.5,
+              bgcolor: 'warning.lighter',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              '& svg': { fontSize: 18 }
+            }}
+          >
+            <PlayersIcon sx={{ color: 'warning.main' }} />
+          </Box>
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, fontSize: '1.25rem' }}>
+          {gameSummary.totalPlayers}
+        </Typography>
+        <Typography color="textSecondary" variant="body2" sx={{ fontSize: '0.875rem' }}>
+          Total Players
+        </Typography>
+      </CardContent>
+    </Card>
+  </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
-            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'info.lighter' }}>
-                <GameIcon sx={{ color: 'info.main' }} />
-              </Box>
-              <Box>
-                <Typography color="textSecondary" variant="body2">Completed Games</Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>{gameSummary.completedGames}</Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+  <Grid item xs={12} sm={6} md={2.4}>
+    <Card 
+      elevation={0} 
+      sx={{ 
+        borderRadius: 2, 
+        border: 1, 
+        borderColor: 'divider',
+        height: '100%',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme => `0 4px 12px ${alpha(theme.palette.info.main, 0.1)}`,
+          borderColor: theme => alpha(theme.palette.info.main, 0.2),
+        },
+      }}
+    >
+      <CardContent sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box 
+            sx={{ 
+              width: 36,
+              height: 36,
+              borderRadius: 1.5,
+              bgcolor: 'info.lighter',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              '& svg': { fontSize: 18 }
+            }}
+          >
+            <GameIcon sx={{ color: 'info.main' }} />
+          </Box>
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, fontSize: '1.25rem' }}>
+          {gameSummary.completedGames}
+        </Typography>
+        <Typography color="textSecondary" variant="body2" sx={{ fontSize: '0.875rem' }}>
+          Completed Games
+        </Typography>
+      </CardContent>
+    </Card>
+  </Grid>
+</Grid>
 
       {/* Date Filter */}
       <Card elevation={0} sx={{ mb: 4, border: 1, borderColor: 'divider', borderRadius: 2 }}>

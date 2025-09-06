@@ -259,8 +259,6 @@ const MainLayout = ({
      </Box>
    );
   
-
-
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -365,7 +363,7 @@ const MainLayout = ({
           // Test which margin logic works best with your specific drawer animation.
           // The key is that the AppBar width/margin AND main content width/margin should adjust together.
           // Let's try adjusting based on AppBar's behaviour:
-          marginLeft: 0, // Keep margin 0
+          //marginLeft: 0, // Keep margin 0
           width: { sm: `calc(100% - ${drawerOpen ? drawerWidth : 0}px)` }, // Adjust width like AppBar
            transition: theme.transitions.create(['margin', 'width'], { // Add width to transition
             easing: theme.transitions.easing.sharp,
@@ -379,5 +377,4 @@ const MainLayout = ({
     </Box>
   );
 };
-
 export default MainLayout;

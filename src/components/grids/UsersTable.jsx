@@ -53,45 +53,43 @@ const UsersTable = ({ users = [], handleEdit, handleTransactionhistory }) => {
   const [rowsPerPage, setRowsPerPage] = useState(50);
   const [open, setOpen] = useState(false);
 
+  const [filteredUsers, setFilteredUsers] = useState(users);
+
+  const handleFilteredUsers = (filtered) =>{
+    setFilteredUsers(filtered);
+  }
+
   const handleHistoryModal = async (user) => {
     await handleTransactionhistory(user);
     setOpen(true);
   };
 
-  const filteredUsers = users.filter(
+  /*const filteredUsers = users.filter(
     (user) =>
       user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.phone?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  );*/
   const paginatedUsers = filteredUsers.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 500));
-    setPage(0);
-  };
-
-  const totalUsers = users.length;
-  const activeUsers = users.filter((user) => user.isActive).length;
+  const totalUsers = filteredUsers.length;
+  const activeUsers = filteredUsers.filter((user) => user.isActive).length;
   const inactiveUsers = totalUsers - activeUsers;
-  const totalHealthyCredit = users.reduce(
+  const totalHealthyCredit = filteredUsers.reduce(
     (acc, user) => acc + (user.current_balance > 0 ? user.current_balance : 0),
     0
   );
-  const totalUnhealthyCredit = users.reduce(
+  const totalUnhealthyCredit = filteredUsers.reduce(
     (acc, user) => acc + (user.current_balance <= 0 ? user.current_balance : 0),
     0
   );
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const newUsersCount = users.filter((user) => {
+  const newUsersCount = filteredUsers.filter((user) => {
     //console.log(user.createdAt);
     const createdDate = new Date(user.createdAt);
     return createdDate >= today;
@@ -113,12 +111,13 @@ const UsersTable = ({ users = [], handleEdit, handleTransactionhistory }) => {
         users={users}
         handleEdit={handleEdit}
         handleHistoryModal={handleHistoryModal}
+        onFilteredUsersChange={handleFilteredUsers}
       />
+
       <TransactionHistoryModal open={open} onClose={() => setOpen(false)} />
     </Box>
   );
 };
-
 function SummaryCards({
   totalUsers,
   activeUsers,
@@ -128,22 +127,14 @@ function SummaryCards({
   newUsers,
 }) {
   const theme = useTheme();
-
+  
   const stats = [
     {
       label: "Total Users",
       value: totalUsers,
       color: "primary",
       icon: <PersonIcon />,
-      bgGradient: `linear-gradient(135deg, ${alpha(
-        theme.palette.primary.main,
-        0.1
-      )} 0%, ${alpha(theme.palette.primary.main, 0.2)} 100%)`,
-      change: `${
-        totalUsers !== 0
-          ? `$${((totalUsers / totalUsers) * 100).toFixed(2)}%`
-          : "0%"
-      }`,
+      change: totalUsers !== 0 ? `${((totalUsers / totalUsers) * 100).toFixed(2)}%` : "0%",
       changeType: "positive",
     },
     {
@@ -151,15 +142,7 @@ function SummaryCards({
       value: activeUsers,
       color: "success",
       icon: <CheckCircleIcon />,
-      bgGradient: `linear-gradient(135deg, ${alpha(
-        theme.palette.success.main,
-        0.1
-      )} 0%, ${alpha(theme.palette.success.main, 0.2)} 100%)`,
-      change: `${
-        totalUsers !== 0
-          ? `$${((activeUsers / totalUsers) * 100).toFixed(2)}%`
-          : "0%"
-      }`,
+      change: totalUsers !== 0 ? `${((activeUsers / totalUsers) * 100).toFixed(2)}%` : "0%",
       changeType: "positive",
     },
     {
@@ -167,189 +150,132 @@ function SummaryCards({
       value: inactiveUsers,
       color: "error",
       icon: <CancelIcon />,
-      bgGradient: `linear-gradient(135deg, ${alpha(
-        theme.palette.error.main,
-        0.1
-      )} 0%, ${alpha(theme.palette.error.main, 0.2)} 100%)`,
-      change: `${
-        totalUsers !== 0
-          ? `$${((inactiveUsers / totalUsers) * 100).toFixed(2)}%`
-          : "0%"
-      }`,
-
+      change: totalUsers !== 0 ? `${((inactiveUsers / totalUsers) * 100).toFixed(2)}%` : "0%",
       changeType: "negative",
     },
     {
-      label: "Total Healthy Credit",
+      label: "Healthy Credit",
       value: `$${totalHealthyCredit?.toLocaleString() || "0"}`,
       color: "success",
       icon: <MonetizationOnIcon />,
-      bgGradient: `linear-gradient(135deg, ${alpha(
-        theme.palette.success.main,
-        0.1
-      )} 0%, ${alpha(theme.palette.success.main, 0.2)} 100%)`,
-      change: `${
-        totalUnhealthyCredit + totalHealthyCredit !== 0
-          ? `$${(
-              (totalHealthyCredit /
-                (totalUnhealthyCredit + totalHealthyCredit)) *
-              100
-            ).toFixed(2)}%`
-          : "0%"
-      }`,
+      change: totalUnhealthyCredit + totalHealthyCredit !== 0
+        ? `${((totalHealthyCredit / (totalUnhealthyCredit + totalHealthyCredit)) * 100).toFixed(2)}%`
+        : "0%",
       changeType: "positive",
     },
     {
-      label: "Total Unhealthy Credit",
+      label: "Unhealthy Credit",
       value: `$${totalUnhealthyCredit?.toLocaleString() || "0"}`,
       color: "warning",
       icon: <MoneyOffIcon />,
-      bgGradient: `linear-gradient(135deg, ${alpha(
-        theme.palette.warning.main,
-        0.1
-      )} 0%, ${alpha(theme.palette.warning.main, 0.2)} 100%)`,
-      change: `${
-        totalUnhealthyCredit + totalHealthyCredit !== 0
-          ? `$${(
-              (totalUnhealthyCredit /
-                (totalUnhealthyCredit + totalHealthyCredit)) *
-              100
-            ).toFixed(2)}%`
-          : "0%"
-      }`,
+      change: totalUnhealthyCredit + totalHealthyCredit !== 0
+        ? `${((totalUnhealthyCredit / (totalUnhealthyCredit + totalHealthyCredit)) * 100).toFixed(2)}%`
+        : "0%",
       changeType: "negative",
     },
     {
-      label: "New Users Today",
+      label: "New Users",
       value: `${newUsers?.toLocaleString() || "0"}`,
       color: "primary",
       icon: <NewIcon />,
-      bgGradient: `linear-gradient(135deg, ${alpha(
-        theme.palette.primary.main,
-        0.1
-      )} 0%, ${alpha(theme.palette.primary.main, 0.2)} 100%)`,
-      change: `${
-        totalUsers !== 0
-          ? `$${((newUsers / totalUsers) * 100).toFixed(2)}%`
-          : "0%"
-      }`,
+      change: totalUsers !== 0 ? `${((newUsers / totalUsers) * 100).toFixed(2)}%` : "0%",
       changeType: "positive",
     },
   ];
 
   return (
-    <Grid container spacing={1} sx={{ mb: 4 }}>
+    <Grid container spacing={2} sx={{ mb: 3 }}>
       {stats.map((stat, index) => (
-        <Grid item xs={12} sm={6} lg={4} xl={2.4} key={index}>
+        <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
           <Card
             elevation={0}
             sx={{
-              borderRadius: 3,
-              border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-              background: stat.bgGradient,
-              position: "relative",
-              overflow: "hidden",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                transform: "translateY(-4px)",
-                boxShadow: `0 12px 24px ${alpha(
-                  theme.palette[stat.color].main,
-                  0.15
-                )}`,
-                border: `1px solid ${alpha(
-                  theme.palette[stat.color].main,
-                  0.3
-                )}`,
-              },
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 4,
-                background: `linear-gradient(90deg, ${
-                  theme.palette[stat.color].main
-                }, ${theme.palette[stat.color].light})`,
+              height: '100%',
+              borderRadius: 2,
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              backgroundColor: theme.palette.background.paper,
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: `0 4px 12px ${alpha(theme.palette[stat.color].main, 0.1)}`,
+                borderColor: alpha(theme.palette[stat.color].main, 0.2),
               },
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: 2 }}>
+              {/* Header with icon and change indicator */}
               <Box
                 sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 1.5,
                 }}
               >
-                <Avatar
+                <Box
                   sx={{
-                    bgcolor: alpha(theme.palette[stat.color].main, 0.1),
+                    width: 36,
+                    height: 36,
+                    borderRadius: 1.5,
+                    backgroundColor: alpha(theme.palette[stat.color].main, 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     color: theme.palette[stat.color].main,
-                    width: 56 / 2,
-                    height: 56 / 2,
-                    border: `2px solid ${alpha(
-                      theme.palette[stat.color].main,
-                      0.2
-                    )}`,
-                    "& svg": {
-                      fontSize: 28,
+                    '& svg': {
+                      fontSize: 18,
                     },
                   }}
                 >
                   {stat.icon}
-                </Avatar>
-
+                </Box>
+                
                 <Chip
                   size="small"
-                  icon={<TrendingUpIcon sx={{ fontSize: 16 }} />}
                   label={stat.change}
                   sx={{
-                    bgcolor:
-                      stat.changeType === "positive"
-                        ? alpha(theme.palette.success.main, 0.1)
-                        : alpha(theme.palette.error.main, 0.1),
-                    color:
-                      stat.changeType === "positive"
-                        ? theme.palette.success.main
-                        : theme.palette.error.main,
-                    border: `1px solid ${alpha(
-                      stat.changeType === "positive"
-                        ? theme.palette.success.main
-                        : theme.palette.error.main,
-                      0.2
-                    )}`,
+                    height: 20,
+                    fontSize: '0.75rem',
                     fontWeight: 600,
-                    "& .MuiChip-icon": {
-                      color: "inherit",
-                      transform:
-                        stat.changeType === "negative"
-                          ? "rotate(180deg)"
-                          : "none",
+                    backgroundColor: alpha(
+                      stat.changeType === 'positive' 
+                        ? theme.palette.success.main 
+                        : theme.palette.error.main, 
+                      0.1
+                    ),
+                    color: stat.changeType === 'positive' 
+                      ? theme.palette.success.main 
+                      : theme.palette.error.main,
+                    border: 'none',
+                    '& .MuiChip-label': {
+                      px: 1,
                     },
                   }}
                 />
               </Box>
 
+              {/* Value */}
               <Typography
-                variant="h3"
+                variant="h5"
                 sx={{
                   fontWeight: 700,
                   color: theme.palette.text.primary,
-                  mb: 1,
-                  fontSize: { xs: "1.75rem", sm: "2rem" },
+                  mb: 0.5,
+                  fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                  lineHeight: 1.2,
                 }}
               >
                 {stat.value}
               </Typography>
 
+              {/* Label */}
               <Typography
-                variant="body1"
+                variant="body2"
                 sx={{
                   color: theme.palette.text.secondary,
                   fontWeight: 500,
-                  letterSpacing: 0.5,
+                  fontSize: '0.875rem',
+                  lineHeight: 1.2,
                 }}
               >
                 {stat.label}
@@ -361,10 +287,7 @@ function SummaryCards({
     </Grid>
   );
 }
-
-export default UsersTable;
-
-const UserList = ({ users, handleEdit, handleHistoryModal }) => {
+const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange }) => {
   //const [users] = useState(mockUsers);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -373,19 +296,7 @@ const UserList = ({ users, handleEdit, handleHistoryModal }) => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  // Filter users based on search query (works across all data, not just current page)
-  const filteredUsers = useMemo(() => {
-    return users?.filter(
-      (user) =>
-        user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.agentId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.adminId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.invitedBy?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [users, searchQuery]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   // Get new users (created today)
   const newUsers = useMemo(() => {
@@ -426,15 +337,7 @@ const UserList = ({ users, handleEdit, handleHistoryModal }) => {
     setPage(0); // Reset page when searching
   };
 
-  // const handleEdit = (user) => {
-  //   console.log('Edit user:', user);
-  //   // Add your edit logic here
-  // };
 
-  /*const handleHistoryModal = (user) => {
-    console.log('View history for user:', user);
-    // Add your history modal logic here
-  };*/
 
   const getRoleColor = (role) => {
     switch (role?.toLowerCase()) {
@@ -507,6 +410,12 @@ const UserList = ({ users, handleEdit, handleHistoryModal }) => {
     document.body.removeChild(link);
   };
 
+   
+  const handleFilteredUsersChange = (filtered) => {
+    setFilteredUsers(filtered);
+    onFilteredUsersChange(filtered);
+  };
+
   return (
     <Box sx={{ p: 3, bgcolor: "grey.50", minHeight: "100vh" }}>
       <Card
@@ -515,48 +424,11 @@ const UserList = ({ users, handleEdit, handleHistoryModal }) => {
       >
         <CardContent sx={{ p: 3 }}>
           {/* Search Bar */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0 }}>
-          <TextField
-            fullWidth
-            variant="outlined"
-            size="medium"
-            placeholder="Search by username, phone, role, agent ID, or admin ID..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              maxWidth: 500,
-              mb: 3,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-              },
-            }}
+           <SearchBarComponent
+            users={users}
+            onFilteredUsersChange={handleFilteredUsersChange}
+            exportToCSV={exportToCSV}
           />
-
-          <Button
-    variant="contained"
-    startIcon={<DownloadIcon />}
-    onClick={exportToCSV}
-    sx={{
-      ml: 2,
-      bgcolor: 'success.main',
-      '&:hover': {
-        bgcolor: 'success.dark',
-      },
-      borderRadius: 2,
-      textTransform: 'none',
-      fontWeight: 600,
-    }}
-  >
-    Export to CSV
-  </Button>
-  </Box>
 
           {/* Tabs */}
           <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
@@ -828,3 +700,182 @@ const UserList = ({ users, handleEdit, handleHistoryModal }) => {
     </Box>
   );
 };
+const SearchBarComponent = ({ users, onFilteredUsersChange, exportToCSV }) => {
+
+  const [generalSearch, setGeneralSearch] = useState("");
+  const [agentIdSearch, setAgentIdSearch] = useState("");
+  const [adminIdSearch, setAdminIdSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleGeneralSearchChange = (event) => {
+    setGeneralSearch(event.target.value);
+    setPage(0); // Reset page when searching
+  };
+
+  const handleAgentIdSearchChange = (event) => {
+    setAgentIdSearch(event.target.value);
+    setPage(0); // Reset page when searching
+  };
+
+  const handleAdminIdSearchChange = (event) => {
+    setAdminIdSearch(event.target.value);
+    setPage(0); // Reset page when searching
+  };
+
+  // Filter users based on all search queries
+  const filteredUsers = useMemo(() => {
+    return users?.filter((user) => {
+      // General search (username, phone, role, invitedBy)
+      const matchesGeneral = !generalSearch || 
+        user.username?.toLowerCase().includes(generalSearch.toLowerCase()) ||
+        user.phone?.toLowerCase().includes(generalSearch.toLowerCase()) ||
+        user.role?.toLowerCase().includes(generalSearch.toLowerCase()) ||
+        user.invitedBy?.toLowerCase().includes(generalSearch.toLowerCase());
+
+      // Agent ID search
+      const matchesAgentId = !agentIdSearch || 
+        user.agentId?.toLowerCase().includes(agentIdSearch.toLowerCase());
+
+      // Admin ID search
+      const matchesAdminId = !adminIdSearch || 
+        user.adminId?.toLowerCase().includes(adminIdSearch.toLowerCase());
+
+      return matchesGeneral && matchesAgentId && matchesAdminId;
+    });
+  }, [users, generalSearch, agentIdSearch, adminIdSearch]);
+
+  // Call the callback when filtered users change
+  React.useEffect(() => {
+    if (onFilteredUsersChange) {
+      onFilteredUsersChange(filteredUsers);
+    }
+  }, [filteredUsers, onFilteredUsersChange]);
+
+  return (
+    <Box sx={{ mb: 3 }}>
+      <Grid container spacing={2} alignItems="center">
+        {/* General Search */}
+        <Grid item xs={12} sm={6} md={3}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            size="medium"
+            placeholder="Search by username, phone, role, invited by..."
+            value={generalSearch}
+            onChange={handleGeneralSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
+          />
+        </Grid>
+
+        {/* Agent ID Search */}
+        <Grid item xs={12} sm={6} md={3}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            size="medium"
+            placeholder="Search by agent ID"
+            value={agentIdSearch}
+            onChange={handleAgentIdSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
+          />
+        </Grid>
+
+        {/* Admin ID Search */}
+        <Grid item xs={12} sm={6} md={3}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            size="medium"
+            placeholder="Search by admin ID"
+            value={adminIdSearch}
+            onChange={handleAdminIdSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
+          />
+        </Grid>
+
+        {/* Export Button */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Button
+            fullWidth
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            onClick={exportToCSV}
+            sx={{
+              bgcolor: 'success.main',
+              '&:hover': {
+                bgcolor: 'success.dark',
+              },
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              height: '56px', // Match TextField height
+            }}
+          >
+            Export to CSV
+          </Button>
+        </Grid>
+      </Grid>
+
+      {/* Search Results Summary */}
+      {(generalSearch || agentIdSearch || adminIdSearch) && (
+        <Box sx={{ mt: 2, p: 1, bgcolor: 'grey.100', borderRadius: 1 }}>
+          <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+            Found {filteredUsers?.length || 0} user(s)
+            {generalSearch && ` matching "${generalSearch}"`}
+            {agentIdSearch && ` with agent ID "${agentIdSearch}"`}
+            {adminIdSearch && ` with admin ID "${adminIdSearch}"`}
+            {(generalSearch || agentIdSearch || adminIdSearch) && (
+              <Button
+                size="small"
+                onClick={() => {
+                  setGeneralSearch("");
+                  setAgentIdSearch("");
+                  setAdminIdSearch("");
+                }}
+                sx={{ ml: 1, textTransform: 'none', fontSize: '0.75rem' }}
+              >
+                Clear all
+              </Button>
+            )}
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+};
+export default UsersTable;

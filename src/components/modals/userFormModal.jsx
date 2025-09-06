@@ -314,7 +314,7 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
                   {_referal_loading ? (
                     <CircularProgress size={18} color="inherit" />
                   ) : (
-                    "Generate Link"
+                    "Generate Invite Link"
                   )}
                 </Button>
                 {_referal_error && (
