@@ -8,6 +8,8 @@ import creditBalanceReducer from './slices/creditBalanceSlice';
 import winningDistributionReducer from "./slices/distributionSlice";
 import manualDepositReducer from './slices/manualDepositSlice';
 import manualWithdrawReducer from './slices/manualWithdrawSlice';
+import patternReducer from './slices/patternSlice';
+import autoGameReducer from './slices/autoGame';
 
 const store = configureStore({
   reducer:{
@@ -19,7 +21,9 @@ const store = configureStore({
     creditBalances:creditBalanceReducer,
     winningDistributions:winningDistributionReducer,
     manualDeposits: manualDepositReducer,
-    manualRequests:manualWithdrawReducer
+    manualRequests:manualWithdrawReducer,
+    jackpotPattern:patternReducer,
+    autoGame:autoGameReducer,
   }
 });
 export default store;

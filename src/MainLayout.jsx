@@ -30,6 +30,7 @@ import SavingsIcon from '@mui/icons-material/Savings';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import LogoutIcon from '@mui/icons-material/Logout';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -192,6 +193,13 @@ const MainLayout = ({
                  text="Manual Withdraws"
                  to="/manual-withdraws"
                  active={location.pathname === "/manual-withdraws"}
+               />
+
+               <SidebarItem
+                 icon={<SettingsSuggestIcon />}
+                 text="Auto Play"
+                 to="/auto-settings"
+                 active={location.pathname === "/auto-settings"}
                />
              </>
            )}

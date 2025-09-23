@@ -25,6 +25,7 @@ import CreditBalancePage from './components/CreditBalancePage';
 import ManualDepositsManager from './components/ManualPay';
 import ManualWithdrawManager from './components/manualWithdraw';
 import HagereOnlineInvite from './components/HagereInvite';
+import AuotoSettingComponent from './components/AutoSettingComponent';
 
 
 
@@ -175,6 +176,14 @@ const App = () => {
               element={
                 <PrivateRoute>
                   <HagereOnlineInvite />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/auto-settings"
+              element={
+                <PrivateRoute>
+                  <AuotoSettingComponent />
                 </PrivateRoute>
               }
             />
