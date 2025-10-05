@@ -259,10 +259,7 @@ const AutoSettingComponent = () => {
       startTimeLocal: new Date(startDateTime).toISOString(),
       pattern: patternId?.toString(),
       isVoid: !!isVoid,
-      boardIds: [],
-      callList: [],
-      playerBoards: [],
-      gameWinners: [],
+      gameStatus:'created'
     };
 
     //console.log(newGame);
@@ -715,11 +712,11 @@ const AutoSettingComponent = () => {
               }}
               sx={{ width: 200 }}
             />
-            <Select value={isPaidCriteria??""} onChange={handleIsPaidChange} sx={{ width: 200 }} displayEmpty defaultValue={""}>
+            {/* <Select value={isPaidCriteria??""} onChange={handleIsPaidChange} sx={{ width: 200 }} displayEmpty defaultValue={""}>
               <MenuItem value="">All</MenuItem>
               <MenuItem value={true}>Paid</MenuItem>
               <MenuItem value={false}>Unpaid</MenuItem>
-            </Select>
+            </Select> */}
             <Button
               variant="contained"
               onClick={async () => {
@@ -795,10 +792,10 @@ const AutoSettingComponent = () => {
                         
                         Edit
                       </MuiMenuItem>
-                      <MuiMenuItem onClick={handleWinningDistribution}>
+                      {/* <MuiMenuItem onClick={handleWinningDistribution}>
                         
                         Distribute
-                      </MuiMenuItem>
+                      </MuiMenuItem> */}
                       <MuiMenuItem onClick={handleShowDetail}>
                         
                         Detail

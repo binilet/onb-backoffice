@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useCallback,memo} from 'react';
+import React, { useState, useEffect, useCallback, memo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -21,8 +21,8 @@ import {
   CardContent,
   Stack,
   TextField,
-  Button
-} from '@mui/material';
+  Button,
+} from "@mui/material";
 import {
   Close as CloseIcon,
   EmojiEvents as TrophyIcon,
@@ -35,30 +35,29 @@ import {
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
   LocationCity as BranchIcon,
-  Money as AmountIcon 
-} from '@mui/icons-material';
+  Money as AmountIcon,
+  Dialpad as DialpadIcon,
+  Functions as FunctionsIcon
+} from "@mui/icons-material";
 
 const SearchBox = memo(({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+
   const handleSetSearchTerm = (e) => {
     setSearchTerm(e.target.value);
   };
 
   return (
-    <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
+    <Box sx={{ mb: 2, display: "flex", gap: 2 }}>
       <TextField
         fullWidth
         variant="outlined"
         placeholder="Search by Board ID, Owner Phone, or Player Phone"
         value={searchTerm}
         onChange={handleSetSearchTerm}
-        sx={{ backgroundColor: 'background.paper' }}
+        sx={{ backgroundColor: "background.paper" }}
       />
-      <Button
-        variant="contained"
-        onClick={() => onSearch(searchTerm)}
-      >
+      <Button variant="contained" onClick={() => onSearch(searchTerm)}>
         Search
       </Button>
     </Box>
@@ -66,19 +65,21 @@ const SearchBox = memo(({ onSearch }) => {
 });
 
 const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
-  console.log('rendering ...');
   const [activeTab, setActiveTab] = useState(0);
-  const [filteredBoards, setFilteredBoards] = useState([...gameData.playerBoards]);
+  const [filteredBoards, setFilteredBoards] = useState([
+    ...gameData.playerBoards,
+  ]);
 
   /*useEffect(() => {
     setFilteredBoards([...gameData.playerBoards]);
   }, [gameData]);*/
 
   const handleSearch = (term) => {
-    const filtered = gameData.playerBoards.filter(board =>
-      String(board.boardId).toLowerCase().includes(term.toLowerCase()) ||
-      String(board.ownerPhone).toLowerCase().includes(term.toLowerCase()) ||
-      String(board.playerPhone).toLowerCase().includes(term.toLowerCase())
+    const filtered = gameData.playerBoards.filter(
+      (board) =>
+        String(board.boardId).toLowerCase().includes(term.toLowerCase()) ||
+        String(board.ownerPhone).toLowerCase().includes(term.toLowerCase()) ||
+        String(board.playerPhone).toLowerCase().includes(term.toLowerCase())
     );
     setFilteredBoards(filtered);
   };
@@ -88,17 +89,18 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
   }, []);
 
   const getStatusColor = () => {
-    if (gameData.isDone) return 'success';
-    if (gameData.isRunning) return 'info';
-    if (gameData.isScheduled) return 'warning';
-    return 'default';
+    if (gameData.isDone) return "success";
+    if (gameData.isRunning) return "info";
+    if (gameData.isScheduled) return "warning";
+    return "default";
   };
 
   const getStatusText = () => {
-    if (gameData.isDone) return 'Completed';
-    if (gameData.isRunning) return 'Running';
-    if (gameData.isScheduled) return 'Scheduled';
-    return 'Unknown';
+    // if (gameData.isDone) return "Completed";
+    // if (gameData.isRunning) return "Running";
+    // if (gameData.isScheduled) return "Scheduled";
+    // return "Unknown";
+    return gameData.gameStatus || "Unknown";
   };
 
   const formatDate = (dateString) => {
@@ -106,49 +108,52 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
   };
 
   const TabPanel = ({ children, value, index }) => (
-    <div hidden={value !== index} style={{ padding: '20px 0' }}>
+    <div hidden={value !== index} style={{ padding: "20px 0" }}>
       {value === index && children}
     </div>
   );
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth fullScreen>
-      <DialogTitle sx={{ 
-        background: 'linear-gradient(45deg, #1976d2, #9c27b0)',
-        color: 'white',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+      <DialogTitle
+        sx={{
+          background: "linear-gradient(45deg, #1976d2, #9c27b0)",
+          color: "white",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Box>
-          <Typography variant="h6" color={'#fff'}>
+          <Typography variant="h6" color={"#fff"}>
             Game Details
           </Typography>
-          <Typography variant="subtitle2" color={'#fff'}>
+          <Typography variant="subtitle2" color={"#fff"}>
             {gameData.gameId}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Chip
-            label={getStatusText()}
-            color={getStatusColor()}
-            size="small"
-          />
-          <IconButton onClick={onClose} sx={{ color: 'white' }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          <Chip label={getStatusText()} color={getStatusColor()} size="small" />
+          <IconButton onClick={onClose} sx={{ color: "white" }}>
             <CloseIcon />
           </IconButton>
         </Box>
       </DialogTitle>
 
       <DialogContent>
-        <Tabs value={activeTab} onChange={handleTabChange} centered sx={{ mb: 2 }}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          centered
+          sx={{ mb: 2 }}
+        >
           <Tab label="Game Info" icon={<CasinoIcon />} />
           <Tab label="Players" icon={<GroupIcon />} />
           <Tab label="Boards" icon={<BoardIcon />} />
           <Tab label="Winners" icon={<TrophyIcon />} />
         </Tabs>
 
-{/* game info */}
+        {/* game info */}
         <TabPanel value={activeTab} index={0}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
@@ -159,7 +164,7 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
                       <ListItemIcon>
                         <CasinoIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText 
+                      <ListItemText
                         primary="Game Name"
                         secondary={gameData.gameName}
                       />
@@ -168,22 +173,42 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
                       <ListItemIcon>
                         <MoneyIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText 
+                      <ListItemText
                         primary="Bet Amount"
                         secondary={`$${gameData.betAmount}`}
                       />
                     </ListItem>
-                   
-                    
+
                     <ListItem>
                       <ListItemIcon>
                         <ScheduleIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText 
+                      <ListItemText
                         primary="Start Time"
                         secondary={formatDate(gameData.startTimeLocal)}
                       />
                     </ListItem>
+
+                    <ListItem>
+                      <ListItemIcon>
+                        <FunctionsIcon color="primary" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Call Count"
+                        secondary={gameData.callList?.length || "—"}
+                      />
+                    </ListItem>
+
+                    <ListItem>
+                      <ListItemIcon>
+                        <DialpadIcon color="primary" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Call List"
+                        secondary={gameData.callList?.join(", ") || "—"}
+                      />
+                    </ListItem>
+
                   </List>
                 </CardContent>
               </Card>
@@ -197,27 +222,27 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
                   </Typography>
                   <Grid container spacing={4}>
                     <Grid item xs={6}>
-                      <Paper elevation={1} sx={{ p: 2, textAlign: 'center' }}>
+                      <Paper elevation={1} sx={{ p: 2, textAlign: "center" }}>
                         <Typography variant="body2" color="textSecondary">
                           Total Winners
                         </Typography>
                         <Typography variant="h4">
-                          {gameData.winners?.length || 0}
+                          {gameData.gameWinners?.length || 0}
                         </Typography>
                       </Paper>
                     </Grid>
                     <Grid item xs={6}>
-                      <Paper elevation={1} sx={{ p: 2, textAlign: 'center' }}>
+                      <Paper elevation={1} sx={{ p: 2, textAlign: "center" }}>
                         <Typography variant="body2" color="textSecondary">
                           Total Players
                         </Typography>
                         <Typography variant="h4">
-                          {gameData.playerBoards?.length || 0}
+                          {gameData.boardIds?.length || 0}
                         </Typography>
                       </Paper>
                     </Grid>
                     <Grid item xs={6}>
-                      <Paper elevation={1} sx={{ p: 2, textAlign: 'center' }}>
+                      <Paper elevation={1} sx={{ p: 2, textAlign: "center" }}>
                         <Typography variant="body2" color="textSecondary">
                           Total Winning
                         </Typography>
@@ -232,24 +257,32 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
             </Grid>
           </Grid>
         </TabPanel>
-{/* players */}
+        {/* players */}
         <TabPanel value={activeTab} index={1}>
           <Grid container spacing={2}>
-            {gameData.players?.map((player, index) => (
+            {gameData.playerBoards?.map((player, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card elevation={2}>
                   <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar sx={{ bgcolor: 'primary.main' }}>
+                    <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+                      <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>
                         <GroupIcon />
                       </Avatar>
                       <Box>
-                        <Typography variant="subtitle1">
+                        <Typography variant="subtitle1" fontWeight="bold">
                           Player {index + 1}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {player}
+                        <Typography variant="body2" color="text.secondary">
+                          📱 {player.playerPhone}
                         </Typography>
+                        <Box mt={1}>
+                          <Typography variant="body2" fontWeight="medium">
+                            Boards:
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {player?.boardIds?.join(", ") || "—"}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
                   </CardContent>
@@ -258,102 +291,122 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
             ))}
           </Grid>
         </TabPanel>
-{/* boards */}
-<TabPanel value={activeTab} index={2}>
-<SearchBox onSearch={handleSearch} />
-  <Grid container spacing={2}>
-    {(filteredBoards || gameData.playerBoards).map((board, index) => (
-      <Grid item xs={12} sm={6} md={4} key={board.boardId || index}>
-        <Card elevation={2}>
-          <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="subtitle1" color="primary">
-                Board #{board.boardId}
-              </Typography>
-              <Chip
-                size="small"
-                icon={<PhoneIcon />}
-                label={board.playerPhone}
-              />
-            </Box>
-            <Typography variant="body2" color="textSecondary">
-              Owner: {board.ownerPhone}
-            </Typography>
-          </CardContent>
-        </Card>
-      </Grid>
-    ))}
-  </Grid>
-</TabPanel>
-{/* winners */}
+        {/* boards */}
+        <TabPanel value={activeTab} index={2}>
+          <SearchBox onSearch={handleSearch} />
+          <Grid container spacing={2}>
+            {(filteredBoards || gameData?.playerBoards).map((board, index) => (
+              <Grid item xs={12} sm={6} md={4} key={board.boardId || index}>
+                <Card elevation={2}>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="subtitle1" color="primary">
+                        Board # {board?.boardIds?.join(", ") || "—"}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        icon={<PhoneIcon />}
+                        label={board.playerPhone}
+                      />
+                    </Box>
+                    <Typography variant="body2" color="textSecondary">
+                      Owner: {board.ownerPhone}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </TabPanel>
+        {/* winners */}
         <TabPanel value={activeTab} index={3}>
-          {gameData.hasJackpot && 
-          <JackpotDisplay gameData={gameData}/>
-          }
+          {gameData.hasJackpot && <JackpotDisplay gameData={gameData} />}
 
           <Typography variant="h6" sx={{ mb: 2 }}>
             Regular Winners
           </Typography>
 
           <Grid container spacing={2}>
-            {gameData.winners?.map((winner, index) => (
+            {gameData.gameWinners?.map((winner, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card elevation={3}>
                   <CardContent>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'flex-start',
-                      gap: 2,
-                      bgcolor: 'primary.main',
-                      color: 'white',
-                      p: 2,
-                      borderRadius: 1,
-                      mb: 2
-                    }}>
-                      <TrophyIcon sx={{ color: '#FFD700', fontSize: 40 }} />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 2,
+                        bgcolor: "primary.main",
+                        color: "white",
+                        p: 2,
+                        borderRadius: 1,
+                        mb: 2,
+                      }}
+                    >
+                      <TrophyIcon sx={{ color: "#FFD700", fontSize: 40 }} />
                       <Box>
                         <Typography variant="h6">
                           Winner #{index + 1}
                         </Typography>
                       </Box>
                     </Box>
-                    
+
                     <List dense>
                       <ListItem>
                         <ListItemIcon>
                           <PhoneIcon color="primary" />
                         </ListItemIcon>
-                        <ListItemText 
+                        <ListItemText
                           primary="Phone Number"
                           secondary={winner.playerPhone}
                         />
                       </ListItem>
-                      
+
                       <ListItem>
                         <ListItemIcon>
                           <MoneyIcon color="primary" />
                         </ListItemIcon>
-                        <ListItemText 
+                        <ListItemText
                           primary="Winning Amount"
-                          secondary={`$${winner.amount.toLocaleString()}`}
+                          secondary={`$${winner.winningAmount.toLocaleString()}`}
                         />
                       </ListItem>
-                      
+
                       <ListItem>
                         <ListItemIcon>
                           <BoardIcon color="primary" />
                         </ListItemIcon>
-                        <ListItemText 
+                        <ListItemText
                           primary="Winning Board"
                           secondary={`Board #${winner.boardId}`}
                         />
                       </ListItem>
                     </List>
 
-                    {gameData.playerBoards.find(board => board.boardId === winner.boardId) && (
-                      <Box sx={{ mt: 1, p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
+                    {gameData.playerBoards.find(
+                      (board) => board.boardId === winner.boardId
+                    ) && (
+                      <Box
+                        sx={{
+                          mt: 1,
+                          p: 1,
+                          bgcolor: "action.hover",
+                          borderRadius: 1,
+                        }}
+                      >
                         <Typography variant="caption" color="textSecondary">
-                          Board Owner: {gameData.playerBoards.find(board => board.boardId === winner.boardId).ownerPhone}
+                          Board Owner:{" "}
+                          {
+                            gameData.playerBoards.find(
+                              (board) => board.boardId === winner.boardId
+                            ).ownerPhone
+                          }
                         </Typography>
                       </Box>
                     )}
@@ -361,10 +414,12 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
                 </Card>
               </Grid>
             ))}
-            
-            {(!gameData.winners || gameData.winners.length === 0) && (
+
+            {(!gameData.gameWinners || gameData.gameWinners.length === 0) && (
               <Grid item xs={12}>
-                <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'action.hover' }}>
+                <Paper
+                  sx={{ p: 3, textAlign: "center", bgcolor: "action.hover" }}
+                >
                   <Typography variant="subtitle1" color="textSecondary">
                     No winners yet
                   </Typography>
@@ -378,12 +433,12 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
   );
 };
 
-
 const JackpotDisplay = ({ gameData }) => {
   // Early return if no jackpot
   if (!gameData.hasJackpot) return null;
 
-  const hasWinners = gameData.jackpotWinnerInfo && gameData.jackpotWinnerInfo.length > 0;
+  const hasWinners =
+    gameData.jackpotWinnerInfo && gameData.jackpotWinnerInfo.length > 0;
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -391,30 +446,37 @@ const JackpotDisplay = ({ gameData }) => {
         elevation={3}
         sx={{
           p: 3,
-          background: 'linear-gradient(135deg, #00fff0 0%, #0066ff 100%)',
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden'
+          background: "linear-gradient(135deg, #00fff0 0%, #0066ff 100%)",
+          color: "white",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
         {/* Header Section */}
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box
+          sx={{
+            mb: 3,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <TrophyIcon size={32} />
-            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
               Jackpot Game
             </Typography>
           </Box>
           <Chip
             icon={<AmountIcon size={16} />}
-            label={`$${gameData.jackpotWinning?.toLocaleString() || '0'}`}
+            label={`$${gameData.jackpotWinning?.toLocaleString() || "0"}`}
             sx={{
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-              color: 'white',
-              '& .MuiChip-icon': { color: 'white' },
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              height: 36
+              bgcolor: "rgba(255, 255, 255, 0.2)",
+              color: "white",
+              "& .MuiChip-icon": { color: "white" },
+              fontWeight: "bold",
+              fontSize: "1.1rem",
+              height: 36,
             }}
           />
         </Box>
@@ -428,65 +490,113 @@ const JackpotDisplay = ({ gameData }) => {
                   <Paper
                     sx={{
                       p: 2,
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: 2
+                      bgcolor: "rgba(255, 255, 255, 0.1)",
+                      backdropFilter: "blur(10px)",
+                      borderRadius: 2,
                     }}
                   >
-                    <Typography variant="h6" sx={{ mb: 2, color: '#FFD700' }}>
+                    <Typography variant="h6" sx={{ mb: 2, color: "#FFD700" }}>
                       Jackpot {index + 1} Winner
                     </Typography>
-                    
+
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <Stack spacing={2}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                            }}
+                          >
                             <BoardIcon size={20} />
                             <Box>
-                              <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                              <Typography
+                                variant="caption"
+                                sx={{ opacity: 0.8 }}
+                              >
                                 Board ID
                               </Typography>
-                              <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: "medium" }}
+                              >
                                 {winner.board}
                               </Typography>
                             </Box>
                           </Box>
-                          
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                            }}
+                          >
                             <PhoneIcon size={20} />
                             <Box>
-                              <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                              <Typography
+                                variant="caption"
+                                sx={{ opacity: 0.8 }}
+                              >
                                 Phone
                               </Typography>
-                              <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: "medium" }}
+                              >
                                 {winner.phone}
                               </Typography>
                             </Box>
                           </Box>
                         </Stack>
                       </Grid>
-                      
+
                       <Grid item xs={12} sm={6}>
                         <Stack spacing={2}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                            }}
+                          >
                             <BranchIcon size={20} />
                             <Box>
-                              <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                              <Typography
+                                variant="caption"
+                                sx={{ opacity: 0.8 }}
+                              >
                                 Branch
                               </Typography>
-                              <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: "medium" }}
+                              >
                                 {winner.branch}
                               </Typography>
                             </Box>
                           </Box>
-                          
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                            }}
+                          >
                             <AmountIcon size={20} />
                             <Box>
-                              <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                              <Typography
+                                variant="caption"
+                                sx={{ opacity: 0.8 }}
+                              >
                                 Amount Won
                               </Typography>
-                              <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: "medium" }}
+                              >
                                 ${winner.amount?.toLocaleString()}
                               </Typography>
                             </Box>
@@ -499,7 +609,7 @@ const JackpotDisplay = ({ gameData }) => {
               ))}
             </Grid>
           ) : (
-            <Box sx={{ textAlign: 'center', py: 3 }}>
+            <Box sx={{ textAlign: "center", py: 3 }}>
               <Typography variant="h6" sx={{ opacity: 0.8 }}>
                 No Jackpot Winner Yet
               </Typography>
