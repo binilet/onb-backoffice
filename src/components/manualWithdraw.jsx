@@ -47,6 +47,7 @@ import {
 import {
   fetchManualWithdrawRequests,
   updateTransactionApproval,
+  updateTransactionVoid,
   setFilters,
   clearFilters,
   clearError
@@ -64,12 +65,12 @@ const ManualWithdrawManager = () => {
     endDate: '',
     phone: ''
   });
-  
+
   const [currentTab, setCurrentTab] = useState(0);
   const [approvalModal, setApprovalModal] = useState({ open: false, transaction: null });
   const [voidModal, setVoidModal] = useState({ open: false, transaction: null });
-  const [telebirrReferencedata,setTelebirrReferenceData] = useState('');
-  const [telebirrReferenceError,setTelebirrReferenceError] = useState('');
+  const [telebirrReferencedata, setTelebirrReferenceData] = useState('');
+  const [telebirrReferenceError, setTelebirrReferenceError] = useState('');
   const [balanceError, setBalanceError] = useState('');
 
   useEffect(() => {
@@ -84,7 +85,7 @@ const ManualWithdrawManager = () => {
   };
 
   const handleApplyFilters = () => {
-   
+
     dispatch(setFilters(localFilters));
     dispatch(fetchManualWithdrawRequests(localFilters));
   };
@@ -115,18 +116,17 @@ const ManualWithdrawManager = () => {
   const handleVoidClick = (transaction) => {
     setVoidModal({ open: true, transaction });
   };
-  
+
 
   const handleApprovalConfirm = () => {
     setTelebirrReferenceError('');
     setBalanceError('');
-    if(!telebirrReferencedata)
-    {
-        setTelebirrReferenceError("Please set telebirr reference number");
-        return;
+    if (!telebirrReferencedata) {
+      setTelebirrReferenceError("Please set telebirr reference number");
+      return;
     }
 
-    if(balanceByPhone.data?.current_balance < approvalModal.transaction.amount){
+    if (balanceByPhone.data?.current_balance < approvalModal.transaction.amount) {
       setBalanceError("Insufficient balance");
       return;
     }
@@ -134,7 +134,7 @@ const ManualWithdrawManager = () => {
     const transaction = approvalModal.transaction;
     const updates = {
       id: transaction._id,
-      telebirrReferencedata 
+      telebirrReferencedata
     };
     dispatch(updateTransactionApproval(updates));
     setApprovalModal({ open: false, transaction: null });
@@ -144,12 +144,9 @@ const ManualWithdrawManager = () => {
     // You can add void logic here similar to approval
     const transaction = voidModal.transaction;
     const updates = {
-      id: transaction._id,
-      void: true,
-      approved: false
+      id: transaction._id
     };
-    // For now, we'll use the same update function - you might need a separate void action
-    dispatch(updateTransactionApproval({ ...updates, approved: false }));
+    dispatch(updateTransactionVoid(updates));
     setVoidModal({ open: false, transaction: null });
   };
 
@@ -173,8 +170,8 @@ const ManualWithdrawManager = () => {
   };
 
   const SummaryCard = ({ title, value, subtitle, color = 'primary', icon: Icon }) => (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         height: '100%',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: 'white',
@@ -224,7 +221,7 @@ const ManualWithdrawManager = () => {
   };
 
   // Filter data based on current tab
-  const filteredData = currentTab === 0 
+  const filteredData = currentTab === 0
     ? data.filter(t => !t.approved && !t.void)
     : data.filter(t => t.approved);
 
@@ -236,7 +233,7 @@ const ManualWithdrawManager = () => {
         size="small"
         startIcon={<CheckIcon />}
         onClick={() => handleApprovalClick(transaction)}
-        sx={{ 
+        sx={{
           minWidth: 'auto',
           borderRadius: 2,
           textTransform: 'none',
@@ -245,13 +242,13 @@ const ManualWithdrawManager = () => {
       >
         Approve
       </Button>
-      {/* <Button
+      <Button
         variant="contained"
         color="error"
         size="small"
         startIcon={<BlockIcon />}
         onClick={() => handleVoidClick(transaction)}
-        sx={{ 
+        sx={{
           minWidth: 'auto',
           borderRadius: 2,
           textTransform: 'none',
@@ -259,7 +256,7 @@ const ManualWithdrawManager = () => {
         }}
       >
         Void
-      </Button> */}
+      </Button>
     </Stack>
   );
 
@@ -351,13 +348,12 @@ const ManualWithdrawManager = () => {
         <Grid item xs={12} sm={6} lg={2}>
           <SummaryCard
             title="Success Rate"
-            value={`${
-              summary.totalRequested
-                ? Math.round(
-                    (summary.totalApproved / summary.totalRequested) * 100
-                  )
-                : 0
-            }%`}
+            value={`${summary.totalRequested
+              ? Math.round(
+                (summary.totalApproved / summary.totalRequested) * 100
+              )
+              : 0
+              }%`}
             subtitle="Approval rate"
             color="secondary"
             icon={CheckIcon}
@@ -964,7 +960,7 @@ const ManualWithdrawManager = () => {
               fontWeight: 600,
               px: 3,
             }}
-            //enabled={balanceByPhone.data?.current_balance >= approvalModal.transaction.amount}
+          //enabled={balanceByPhone.data?.current_balance >= approvalModal.transaction.amount}
           >
             Approve Request
           </Button>

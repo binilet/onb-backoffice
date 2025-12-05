@@ -36,11 +36,11 @@ export const fetchManualWithdrawRequests = createAsyncThunk(
       if (filters.startDate) queryParams.append('startDate', filters.startDate);
       if (filters.endDate) queryParams.append('endDate', filters.endDate);
       if (filters.phone) queryParams.append('phone', filters.phone);
-        const params = {startDate:filters.startDate,endDate:filters.endDate,phone:filters.phone}
+      const params = { startDate: filters.startDate, endDate: filters.endDate, phone: filters.phone }
 
       const response = await axiosInstance.get('/manual-withdraws/requests', { params });
 
-      
+
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -51,10 +51,22 @@ export const fetchManualWithdrawRequests = createAsyncThunk(
 // Async thunk for updating transaction approval
 export const updateTransactionApproval = createAsyncThunk(
   'manualWithdrawl/approveWitdrawl',
-  async ({ id,telebirrReferencedata }, { rejectWithValue }) => {
+  async ({ id, telebirrReferencedata }, { rejectWithValue }) => {
     try {
-        const response = await axiosInstance.patch(`/manual-withdraws/requests/${id}/approve?telebirrReference=${telebirrReferencedata}`);
-        return { id,telebirrReferencedata , ...response.data };
+      const response = await axiosInstance.patch(`/manual-withdraws/requests/${id}/approve?telebirrReference=${telebirrReferencedata}`);
+      return { id, telebirrReferencedata, ...response.data };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateTransactionVoid = createAsyncThunk(
+  'manualWithdrawl/voidWitdrawl',
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(`/manual-withdraws/void_requests/${id}/void?`);
+      return { id, ...response.data }
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -138,7 +150,24 @@ const manualWithdrawSlice = createSlice({
       .addCase(updateTransactionApproval.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(updateTransactionVoid.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateTransactionVoid.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.data.findIndex(transaction => transaction._id === action.payload.id);
+        if (index !== -1) {
+          state.data[index].void = true;
+          state.summary = calculateSummary(state.data);
+        }
+      })
+      .addCase(updateTransactionVoid.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
   }
 });
 
@@ -147,22 +176,27 @@ const calculateSummary = (transactions) => {
   return transactions.reduce((summary, transaction) => {
     summary.totalRequested += 1;
     summary.totalAmount += transaction.amount;
-    
+
     if (transaction.approved) {
       summary.totalApproved += 1;
       summary.approvedAmount += transaction.amount;
+    } else if (transaction.void) {
+      summary.totalVoid += 1;
+      summary.voidAmount += transaction.amount;
     } else {
       summary.totalPending += 1;
       summary.pendingAmount += transaction.amount;
     }
-    
+
     return summary;
   }, {
     totalRequested: 0,
     totalApproved: 0,
+    totalVoid: 0,
     totalPending: 0,
     totalAmount: 0,
     approvedAmount: 0,
+    voidAmount: 0,
     pendingAmount: 0
   });
 };

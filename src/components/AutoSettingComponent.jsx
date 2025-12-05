@@ -50,18 +50,21 @@ import {
   List,
   Undo as UndoIcon,
 } from '@mui/icons-material';
+import NaturePeopleIcon from '@mui/icons-material/NaturePeople';
 import { useTheme } from '@mui/material/styles';
 
 import JackpotPatternComponent from './jackpotPattern';
 import ErrorModal from './ErrorModal';
 
 import { useSelector, useDispatch } from 'react-redux';
+import OwnerStatsModal from './OwnerStatsModal';
 
 import {
   fetchGames,
-  createOrUpdateGame,  createGame,
+  createOrUpdateGame, createGame,
   updateGame,
   resetSaved,
+  getOwnerStats
 } from '../state/slices/autoGame';
 
 import { fetchPatterns } from '../state/slices/patternSlice';
@@ -91,8 +94,8 @@ const selectJackpotGame = (state) => state.autoGame;
 //memoize jackpot
 const selectFilteredJackpotGame = createSelector(
   [selectJackpotGame],
-  (jackpotGame)=>{
-    const {latestGameTime, ...rest} = jackpotGame;
+  (jackpotGame) => {
+    const { latestGameTime, ...rest } = jackpotGame;
     return rest;
   }
 );
@@ -104,9 +107,9 @@ const AutoSettingComponent = () => {
 
   const dispatch = useDispatch();
 
- 
 
-  const { __todayGames, __saved, __loading, __error, __users_credit } = useSelector(
+
+  const { __todayGames, __saved, __loading, __error, __users_credit, __ownerStats, __ownerStatsLoading } = useSelector(
     selectFilteredJackpotGame,
     shallowEqual // 👈 Add shallow equality check
   );
@@ -115,6 +118,7 @@ const AutoSettingComponent = () => {
   const [errorModal, setErrorModal] = useState({ open: false, message: '' });
   const [value, setValue] = useState(0);
   const patterns = useSelector((state) => state.jackpotPattern.list);
+  const ownerStats = useSelector((state) => state.autoGame.__ownerStats);
 
   const theme = useTheme();
   // New state for JackpotGame
@@ -125,6 +129,7 @@ const AutoSettingComponent = () => {
   const [startTime, setStartTime] = useState(null);
   const [startDateTime, setStartDateTime] = useState(null);
   const [patternId, setSelectedPatternId] = useState(null);
+  const [dynamicPatternId, setDynamicPatternId] = useState(null);
   const [hasJackpot, setHasJackpot] = useState(false);
   const [jackpotWinning, setJackpotWinning] = useState([]);
   const [jackpotWinner, setJackpotWinner] = useState('');
@@ -142,8 +147,8 @@ const AutoSettingComponent = () => {
   const [collapseOpen, setCollapseOpen] = useState(false);
   const _logged_in_user = useSelector((state) => state.auth.user);
   const [selectedBranches, setSelectedBranches] = useState([]);
-  
-  const [houseBonusBranches,setHouseBonusBranches] = useState([]);
+
+  const [houseBonusBranches, setHouseBonusBranches] = useState([]);
 
 
   const formatCurrency = (amount) => `$${amount ? amount.toFixed(2) : 0}`;
@@ -161,7 +166,7 @@ const AutoSettingComponent = () => {
     //dispatch(jackpotDashboardData({start:null,end:null}));
     //dispatch(getSummerizedDashboardData());
     //dispatch(get_distinct_branch_names());
-    
+
   }, []);
 
   //fetch users credit
@@ -180,7 +185,7 @@ const AutoSettingComponent = () => {
     dispatch(fetchPatterns());
   }, [dispatch]);
 
-  
+
   useEffect(() => {
     if (__saved) {
       resetGameFields();
@@ -194,16 +199,16 @@ const AutoSettingComponent = () => {
       return response;
     }
     fetchData();
-    
+
   }, []);
-  
+
   useEffect(() => {
     if (transferDetail && transferDetail.role === 'Employee') {
       setOpenCashierCreditModal(true);
     } else if (transferDetail) {
       setOpenConfirmation(true);
     }
-    
+
   }, [transferDetail]);
 
 
@@ -232,7 +237,7 @@ const AutoSettingComponent = () => {
   };
 
 
- 
+
   const handleErrorModalClose = () => {
     setErrorModal({ open: false, message: '' });
   };
@@ -250,6 +255,11 @@ const AutoSettingComponent = () => {
       return;
     }
 
+    if (!patternId && !dynamicPatternId) {
+      setErrorModal({ open: true, message: 'Please select a static or dynamic pattern!' });
+      return;
+    }
+
     const newGame = {
       gameId,
       gameName,
@@ -259,7 +269,8 @@ const AutoSettingComponent = () => {
       startTimeLocal: new Date(startDateTime).toISOString(),
       pattern: patternId?.toString(),
       isVoid: !!isVoid,
-      gameStatus:'created'
+      gameStatus: 'created',
+      dynamicPattern: dynamicPatternId?.toString(),
     };
 
     //console.log(newGame);
@@ -277,11 +288,12 @@ const AutoSettingComponent = () => {
     setStartTime('');
     setStartDateTime('');
 
-   
+
     setIsVoid(false);
     setIsRunning(false);
     setNote('');
     setSelectedPatternId(null);
+    setDynamicPatternId(null);
     setSelectedGame(null);
     setEditingGame(false);
     setSelectedBranches([]);
@@ -330,11 +342,18 @@ const AutoSettingComponent = () => {
     setStartDateTime(formattedDateTime);
 
     if (selectedGame.pattern) {
-      console.log(selectedGame.pattern.id);
-      setSelectedPatternId(selectedGame.pattern.id);
+      //console.log(selectedGame.pattern);
+      setSelectedPatternId(selectedGame.pattern);
     } else {
       setSelectedPatternId('');
     }
+
+    if (selectedGame.dynamicPattern) {
+      setDynamicPatternId(selectedGame.dynamicPattern);
+    } else {
+      setDynamicPatternId('');
+    }
+
     setHasJackpot(selectedGame.hasJackpot);
     setJackpotWinning(selectedGame.jackpotWinning || []);
     setJackpotWinner(selectedGame.jackpotWinner || '');
@@ -354,7 +373,7 @@ const AutoSettingComponent = () => {
   };
 
   const [showDisribution, setShowDistribution] = useState(false);
-  const [showAdminDistribution,setShowAdminDistribution] = useState(false);
+  const [showAdminDistribution, setShowAdminDistribution] = useState(false);
 
   const handleWinningDistribution = () => {
     //alert(selectedGame);
@@ -379,24 +398,33 @@ const AutoSettingComponent = () => {
     setSelectedGame(null);
   };
 
-  const [showTransactionHistory, setShowTransactionHistory] = useState(false);
+  const [ownerStatsModalOpen, setOwnerStatsModalOpen] = useState(false);
 
-
-
-
-
-
+  const handleShowOwnerStats = async () => {
+    if (selectedGame) {
+      await dispatch(getOwnerStats({ gameId: selectedGame.gameId }));
+      setOwnerStatsModalOpen(true);
+      handleMenuClose();
+    }
+  };
   return (
     <Box sx={{ width: '100%' }}>
       <ErrorModal open={errorModal.open} onClose={handleErrorModalClose} message={errorModal.message} />
       <Tabs value={value} onChange={handleChange} aria-label="Jackpot tabs">
 
-            <Tab key="game" label="Game" />, 
-            <Tab key="pattern" label="Pattern" />,
-            
+        <Tab key="game" label="Game" />,
+        <Tab key="pattern" label="Pattern" />,
+
       </Tabs>
-      
-      {showGameDetail && <GameDetailsDialog  open={showGameDetail} onClose={closeDetail} gameData={selectedGame} />}
+
+      {showGameDetail && <GameDetailsDialog open={showGameDetail} onClose={closeDetail} gameData={selectedGame} />}
+
+      <OwnerStatsModal
+        open={ownerStatsModalOpen}
+        onClose={() => setOwnerStatsModalOpen(false)}
+        stats={__ownerStats}
+        loading={__ownerStatsLoading}
+      />
 
       {/* game tab*/}
       <TabPanel value={value} index={0}>
@@ -405,7 +433,7 @@ const AutoSettingComponent = () => {
         )}
 
         {showAdminDistribution && <AdminBonusDialog open={showAdminDistribution} onClose={handleAdminBonusDistributionClose} onSave={handleAdminBonusSave} game={selectedGame} />}
-        
+
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h6">Games {__todayGames?.length > 0 ? `(${__todayGames.length} games)` : ``}</Typography>
           <IconButton onClick={() => setCollapseOpen(!collapseOpen)}>
@@ -546,13 +574,13 @@ const AutoSettingComponent = () => {
               <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <FormControl sx={{ flex: 1 }}>
-                    <InputLabel>Pattern</InputLabel>
+                    <InputLabel>Static Pattern</InputLabel>
                     <Select
                       value={patternId || ''}
                       onChange={(e) => setSelectedPatternId(e.target.value)}
                       displayEmpty
                       label="Pattern"
-                      required
+                      // required
                       defaultValue={""}
                     >
                       <MenuItem value="">
@@ -566,22 +594,34 @@ const AutoSettingComponent = () => {
                     </Select>
                   </FormControl>
 
-                  {/* <FormControl sx={{ flex: 1 }}>
-                    <InputLabel>Jackpot Branches</InputLabel>
+                  <FormControl sx={{ flex: 1 }}>
+                    <InputLabel>Dynamic Pattern</InputLabel>
                     <Select
-                      multiple
-                      value={selectedBranches || []}
-                      onChange={(e) => setSelectedBranches(e.target.value)}
-                      renderValue={(selected) => selected.join(', ')}
+                      value={dynamicPatternId || ''}
+                      onChange={(e) => setDynamicPatternId(e.target.value)}
+                      displayEmpty
+                      label="Dynamic Pattern"
+                      // required
                       defaultValue={""}
                     >
-                      {branchNames?.map((branch, index) => (
-                        <MenuItem key={index} value={branch}>
-                          {branch}
-                        </MenuItem>
-                      ))}
+                      <MenuItem value="">
+                        <em></em>
+                      </MenuItem>
+                      <MenuItem key={'any_line'} value={'any_line'}>
+                        Any Line
+                      </MenuItem>
+                      <MenuItem key={'any_two_line'} value={'any_two_line'}>
+                        Any Two Line
+                      </MenuItem>
+                      <MenuItem key={'any_three_line'} value={'any_three_line'}>
+                        Any Three Line
+                      </MenuItem>
+                      <MenuItem key={'any_half'} value={'any_half'}>
+                        Any Half
+                      </MenuItem>
                     </Select>
-                  </FormControl> */}
+                  </FormControl>
+
                 </Box>
               </Grid>
 
@@ -734,7 +774,7 @@ const AutoSettingComponent = () => {
                   });
                   return;
                 }
-                 dispatch(fetchGames({ start: startDate, end: endDate }));
+                dispatch(fetchGames({ start: startDate, end: endDate }));
               }}
             >
               Find
@@ -752,9 +792,9 @@ const AutoSettingComponent = () => {
                 <TableCell>Winning</TableCell>
                 <TableCell>Start Time</TableCell>
                 <TableCell>Date</TableCell>
-                
+
                 <TableCell>Player#</TableCell>
-                
+
                 <TableCell>Status</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
@@ -770,11 +810,11 @@ const AutoSettingComponent = () => {
                   <TableCell>
                     {game.startTimeLocal}
                   </TableCell>
-                  
+
                   {/* <TableCell>{adjustToGMT3(game.startDateTime)}</TableCell> */}
                   <TableCell>{game.playerBoards?.length}</TableCell>
-                  
-                  
+
+
                   <TableCell>
                     {game.isVoid ? 'Void' : game.gameStatus}
                   </TableCell>
@@ -789,7 +829,7 @@ const AutoSettingComponent = () => {
                       onClose={handleMenuClose}
                     >
                       <MuiMenuItem onClick={handleGameEdit}>
-                        
+                        <EditIcon fontSize="small" sx={{ mr: 1 }} />
                         Edit
                       </MuiMenuItem>
                       {/* <MuiMenuItem onClick={handleWinningDistribution}>
@@ -797,8 +837,13 @@ const AutoSettingComponent = () => {
                         Distribute
                       </MuiMenuItem> */}
                       <MuiMenuItem onClick={handleShowDetail}>
-                        
+                        <SearchIcon fontSize="small" sx={{ mr: 1 }} />
                         Detail
+                      </MuiMenuItem>
+
+                      <MuiMenuItem onClick={handleShowOwnerStats}>
+                        <NaturePeopleIcon fontSize="small" sx={{ mr: 1 }} />
+                        Owner Stats
                       </MuiMenuItem>
                     </Menu>
                   </TableCell>

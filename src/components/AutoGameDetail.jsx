@@ -171,6 +171,15 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
                     </ListItem>
                     <ListItem>
                       <ListItemIcon>
+                        <CheckCircleIcon color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Game Note"
+                        secondary={gameData.gameNote}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon>
                         <MoneyIcon color="primary" />
                       </ListItemIcon>
                       <ListItemText
@@ -217,7 +226,7 @@ const AutoGameDetailsDialog = ({ open, onClose, gameData }) => {
             <Grid item xs={12} md={6}>
               <Card elevation={3}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom sx={{color:'secondary.main'}}>
                     Game Status
                   </Typography>
                   <Grid container spacing={4}>
