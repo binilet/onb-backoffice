@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser,fetchUserInfo } from '../../state/slices/authSlice';
+import { loginUser, fetchUserInfo } from '../../state/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -29,15 +29,25 @@ export default function Login() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const handleLogin = async () => {
     if (!phone || !password) {
       return alert('Please enter both phone number and password.');
     }
-    const result = await dispatch(loginUser({ phone, password:password.trim() }));
+    const result = await dispatch(loginUser({ phone, password: password.trim() }));
     if (loginUser.fulfilled.match(result)) {
-      await dispatch(fetchUserInfo());
-      navigate('/');
+      const userAction = await dispatch(fetchUserInfo());
+      if (fetchUserInfo.fulfilled.match(userAction)) {
+        const user = userAction.payload;
+        if (user.role === 'employee') {
+          navigate('/hagere-invite');
+        } else {
+          navigate('/');
+        }
+      } else {
+        // Handle case where fetchUserInfo fails even if login succeeded (unlikely but possible)
+        navigate('/');
+      }
     }
   };
 
@@ -59,7 +69,7 @@ export default function Login() {
         alignItems="center"
         minHeight="100vh"
         px={2}
-         width="100%"
+        width="100%"
       >
         <Paper
           elevation={6}
@@ -77,7 +87,7 @@ export default function Login() {
             <Typography
               variant="h4"
               fontWeight={700}
-              sx={{ 
+              sx={{
                 color: '#1565c0',
                 mb: 1,
                 letterSpacing: '-0.5px'
@@ -89,9 +99,9 @@ export default function Login() {
               Sign in to your account to continue
             </Typography>
           </Box>
-          
+
           <Divider sx={{ mb: 4, borderColor: alpha('#2979ff', 0.1) }} />
-          
+
           <TextField
             label="Phone Number"
             fullWidth
@@ -122,7 +132,7 @@ export default function Login() {
               },
             }}
           />
-          
+
           <TextField
             label="Password"
             type={showPassword ? 'text' : 'password'}
@@ -165,12 +175,12 @@ export default function Login() {
               },
             }}
           />
-          
+
           {error && (
-            <Typography 
-              color="error" 
-              variant="body2" 
-              mt={1} 
+            <Typography
+              color="error"
+              variant="body2"
+              mt={1}
               mb={2}
               textAlign="center"
               bgcolor={alpha('#f44336', 0.1)}
@@ -180,7 +190,7 @@ export default function Login() {
               {error}
             </Typography>
           )}
-          
+
           <Button
             variant="contained"
             fullWidth
@@ -208,7 +218,7 @@ export default function Login() {
               'Sign In'
             )}
           </Button>
-          
+
           {/* <Box textAlign="center" mt={3}>
             <Typography variant="body2" color="text.secondary">
               Don't have an account?{' '}

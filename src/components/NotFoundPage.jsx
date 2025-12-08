@@ -1,6 +1,7 @@
 // src/components/NotFoundPage.js (or your preferred location)
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -8,10 +9,14 @@ import Container from '@mui/material/Container';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'; // Using a Material UI icon
 
 const NotFoundPage = () => {
+  const current_user = useSelector((state) => state.auth._current_user || {});
+  const role = current_user.role;
+  const homeLink = role === 'employee' ? '/hagere-invite' : '/';
+
   return (
     <Container component="main" maxWidth="sm" display="flex"
-    justifyContent="center"
-    alignItems="center">
+      justifyContent="center"
+      alignItems="center">
       <Box
         sx={{
           minHeight: '90vh', // Use minHeight to ensure it takes at least the viewport height
@@ -50,7 +55,7 @@ const NotFoundPage = () => {
 
         <Button
           component={RouterLink} // Use RouterLink for client-side navigation
-          to="/" // Link to the dashboard/home page
+          to={homeLink} // Link to the dashboard/home page
           variant="contained"
           size="large"
         >

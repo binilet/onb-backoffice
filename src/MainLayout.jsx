@@ -11,10 +11,10 @@ import Notifications from '@mui/icons-material/Notifications'; // Assuming you u
 import AccountCircle from '@mui/icons-material/AccountCircle'; // Assuming you use this
 import { useTheme } from '@mui/material/styles'; // Import useTheme to access theme
 import { useLocation } from 'react-router-dom'; // For location tracking
-import { useSelector,useDispatch } from 'react-redux'; // For Redux state management
+import { useSelector, useDispatch } from 'react-redux'; // For Redux state management
 import SidebarItem from './components/sidebar'; // Adjust path (assuming this component exists)
 
-import {  Avatar, Stack } from '@mui/material';
+import { Avatar, Stack } from '@mui/material';
 
 import Box from '@mui/material/Box';
 
@@ -22,7 +22,7 @@ import Box from '@mui/material/Box';
 // Import Icons (ensure these imports are correct)
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import  {LocalPolice}  from '@mui/icons-material';
+import { LocalPolice } from '@mui/icons-material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import RsvpIcon from '@mui/icons-material/Rsvp';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
@@ -44,133 +44,142 @@ const MainLayout = ({
   isMobile,
   drawerOpen,
   handleDrawerToggle,
-   
+
 }) => {
   const theme = useTheme(); // Get theme object for transitions and breakpoints
   const location = useLocation(); // For tracking current route
   const dispatch = useDispatch(); // For dispatching actions
-  
+
   const user = useSelector((state) => state.auth._current_user || {});
   const username = user.username || 'Guest';
 
   const role = user.role || 'No Role Assigned';
   const avatarLetter = username?.charAt(0)?.toUpperCase() || 'U';
   const sidebarGradient = `linear-gradient(180deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`;
-  
+
 
   const handleLogout = () => {
     dispatch(logout()); // update this based on your setup
   };
 
-   const drawer = (
-     <Box
-       sx={{
-         width: drawerWidth,
-         height: "100vh",
-         display: "flex",
-         flexDirection: "column",
-         justifyContent: "space-between",
-         bgcolor: "background.paper",
-         boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.05)",
-         borderRadius: "0 0px 16px 0",
-         overflow: "hidden",
-       }}
-     >
-       {/* Top Logo Area */}
-       <Box>
-         <Box
-           sx={{
-             p: 2,
-             background: sidebarGradient,
-             mb: 2,
-           }}
-         >
-           <Typography
-             variant="h6"
-             fontWeight={700}
-             sx={{
-               color: "white",
-               letterSpacing: "0.5px",
-               display: "flex",
-               alignItems: "center",
-               gap: 1,
-             }}
-           >
-             <BusinessIcon /> Hagere-Online
-           </Typography>
-         </Box>
+  const drawer = (
+    <Box
+      sx={{
+        width: drawerWidth,
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        bgcolor: "background.paper",
+        boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.05)",
+        borderRadius: "0 0px 16px 0",
+        overflow: "hidden",
+      }}
+    >
+      {/* Top Logo Area */}
+      <Box>
+        <Box
+          sx={{
+            p: 2,
+            background: sidebarGradient,
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            sx={{
+              color: "white",
+              letterSpacing: "0.5px",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <BusinessIcon /> Hagere-Online
+          </Typography>
+        </Box>
 
-         {/* Navigation Menu */}
-         <Box sx={{ px: 2 }}>
-           {/* You can use a custom component for menu items */}
-           <SidebarItem
-             icon={<QueryStatsIcon />}
-             text="Dashboard"
-             to="/"
-             active={location.pathname === "/"}
-           />
-           <SidebarItem
-             icon={<PeopleAltIcon />}
-             text="Users"
-             to="/users"
-             active={location.pathname === "/users"}
-           />
-           
-           {(role === "system" || role === "agent") && (
-             <SidebarItem
-               icon={<LocalPolice />}
-               text="Admins"
-               to="/admins"
-               active={location.pathname === "/admins"}
-             />
-           )}
+        {/* Navigation Menu */}
+        <Box sx={{ px: 2 }}>
+          {/* You can use a custom component for menu items */}
 
-           {role === "system" && (
-             <SidebarItem
-               icon={<GroupWorkIcon />}
-               text="Agents"
-               to="/agents"
-               active={location.pathname === "/agents"}
-             />
-           )}
-           <SidebarItem
-             icon={<RocketLaunchIcon />}
-             text="Games"
-             to="/games"
-             active={location.pathname === "/games"}
-           />
+          {role !== "employee" && (
+            <>
+              <SidebarItem
+                icon={<QueryStatsIcon />}
+                text="Dashboard"
+                to="/"
+                active={location.pathname === "/"}
+              />
+              <SidebarItem
+                icon={<PeopleAltIcon />}
+                text="Users"
+                to="/users"
+                active={location.pathname === "/users"}
+              />
+            </>
+          )}
 
-           <SidebarItem
-             icon={<RsvpIcon />}
-             text="Invite"
-             to="/hagere-invite"
-             active={location.pathname === "/hagere-invite"}
-           />
+          {(role === "system" || role === "agent") && (
+            <SidebarItem
+              icon={<LocalPolice />}
+              text="Admins"
+              to="/admins"
+              active={location.pathname === "/admins"}
+            />
+          )}
 
-           {role === "system" && (
-             <>
-               <Typography
-                 variant="caption"
-                 color="text.secondary"
-                 sx={{
-                   px: 1.5,
-                   py: 1,
-                   mt: 2,
-                   display: "block",
-                   fontWeight: 600,
-                   textTransform: "uppercase",
-                 }}
-               >
-                 Finance
-               </Typography>
+          {role === "system" && (
+            <SidebarItem
+              icon={<GroupWorkIcon />}
+              text="Agents"
+              to="/agents"
+              active={location.pathname === "/agents"}
+            />
+          )}
+          {role !== "employee" && (
+            <SidebarItem
+              icon={<RocketLaunchIcon />}
+              text="Games"
+              to="/games"
+              active={location.pathname === "/games"}
+            />
+          )}
+          <SidebarItem
+            icon={<RsvpIcon />}
+            text="Invite"
+            to="/hagere-invite"
+            active={location.pathname === "/hagere-invite"}
+          />
 
-               <SidebarItem
-                 icon={<MonetizationOnIcon />}
-                 text="Credits"
-                 to="/credits"
-                 active={location.pathname === "/credits"}
-               />
-               {/* <SidebarItem
+          {(role === "system" || role === "employee") && (
+            <>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  px: 1.5,
+                  py: 1,
+                  mt: 2,
+                  display: "block",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                }}
+              >
+                Finance
+              </Typography>
+
+              {(role !== "employee") && (
+                <SidebarItem
+                  icon={<MonetizationOnIcon />}
+                  text="Credits"
+                  to="/credits"
+                  active={location.pathname === "/credits"}
+                />
+              )}
+
+              {/* <SidebarItem
                  icon={<SavingsIcon />}
                  text="Deposits"
                  to="/deposits"
@@ -182,91 +191,91 @@ const MainLayout = ({
                  to="/withdrawals"
                  active={location.pathname === "/withdrawals"}
                /> */}
-               <SidebarItem
-                 icon={<AssuredWorkloadIcon />}
-                 text="Manual Deposits"
-                 to="/manual-deposits"
-                 active={location.pathname === "/manual-deposits"}
-               />
-               <SidebarItem
-                 icon={<LocalAtmIcon />}
-                 text="Manual Withdraws"
-                 to="/manual-withdraws"
-                 active={location.pathname === "/manual-withdraws"}
-               />
+              <SidebarItem
+                icon={<AssuredWorkloadIcon />}
+                text="Manual Deposits"
+                to="/manual-deposits"
+                active={location.pathname === "/manual-deposits"}
+              />
+              <SidebarItem
+                icon={<LocalAtmIcon />}
+                text="Manual Withdraws"
+                to="/manual-withdraws"
+                active={location.pathname === "/manual-withdraws"}
+              />
 
-               <SidebarItem
-                 icon={<SettingsSuggestIcon />}
-                 text="Auto Play"
-                 to="/auto-settings"
-                 active={location.pathname === "/auto-settings"}
-               />
-             </>
-           )}
-         </Box>
-       </Box>
+              <SidebarItem
+                icon={<SettingsSuggestIcon />}
+                text="Auto Play"
+                to="/auto-settings"
+                active={location.pathname === "/auto-settings"}
+              />
+            </>
+          )}
+        </Box>
+      </Box>
 
-       {/* Bottom Profile Area */}
-       <Box
-         sx={{
-           p: 2.5,
-           mx: 2,
-           mb: 2,
-           bgcolor: theme.palette.background.default,
-           borderRadius: 2,
-           boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.05)",
-         }}
-       >
-         <Stack direction="row" spacing={2} alignItems="center">
-           <Avatar
-             sx={{
-               bgcolor: theme.palette.secondary.main,
-               boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.15)",
-               width: 42,
-               height: 42,
-               fontSize: "1.2rem",
-               fontWeight: 600,
-             }}
-           >
-             {avatarLetter}
-           </Avatar>
-           <Box flexGrow={1}>
-             <Typography variant="subtitle1" fontWeight={600} noWrap>
-               {username}
-             </Typography>
-             <Typography
-               variant="caption"
-               color="text.secondary"
-               sx={{
-                 display: "flex",
-                 alignItems: "center",
-                 gap: 0.5,
-               }}
-             >
-               <CircleIcon
-                 sx={{ fontSize: "8px", color: theme.palette.success.main }}
-               />
-               {role}
-             </Typography>
-           </Box>
-           <Tooltip title="Logout">
-             <IconButton
-               onClick={handleLogout}
-               sx={{
-                 color: theme.palette.error.main,
-                 "&:hover": {
-                   bgcolor: alpha(theme.palette.error.main, 0.1),
-                 },
-               }}
-             >
-               <LogoutIcon />
-             </IconButton>
-           </Tooltip>
-         </Stack>
-       </Box>
-     </Box>
-   );
-  
+      {/* Bottom Profile Area */}
+      <Box
+        sx={{
+          p: 2.5,
+          mx: 2,
+          mb: 2,
+          bgcolor: theme.palette.background.default,
+          borderRadius: 2,
+          boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.05)",
+        }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Avatar
+            sx={{
+              bgcolor: theme.palette.secondary.main,
+              boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.15)",
+              width: 42,
+              height: 42,
+              fontSize: "1.2rem",
+              fontWeight: 600,
+            }}
+          >
+            {avatarLetter}
+          </Avatar>
+          <Box flexGrow={1}>
+            <Typography variant="subtitle1" fontWeight={600} noWrap>
+              {username}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+              }}
+            >
+              <CircleIcon
+                sx={{ fontSize: "8px", color: theme.palette.success.main }}
+              />
+              {role}
+            </Typography>
+          </Box>
+          <Tooltip title="Logout">
+            <IconButton
+              onClick={handleLogout}
+              sx={{
+                color: theme.palette.error.main,
+                "&:hover": {
+                  bgcolor: alpha(theme.palette.error.main, 0.1),
+                },
+              }}
+            >
+              <LogoutIcon />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Box>
+    </Box>
+  );
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -299,7 +308,7 @@ const MainLayout = ({
             component="div"
             sx={{ flexGrow: 1 }}
           >
-            
+
           </Typography>
           <IconButton color="inherit">
             <Notifications />
@@ -345,9 +354,9 @@ const MainLayout = ({
                 // Use transform to slide in/out based on drawerOpen state
                 transform: drawerOpen ? 'translateX(0)' : `translateX(-${drawerWidth}px)`,
                 transition: theme.transitions.create('transform', {
-                   easing: theme.transitions.easing.sharp,
-                   duration: drawerOpen ? theme.transitions.duration.enteringScreen : theme.transitions.duration.leavingScreen,
-                 }),
+                  easing: theme.transitions.easing.sharp,
+                  duration: drawerOpen ? theme.transitions.duration.enteringScreen : theme.transitions.duration.leavingScreen,
+                }),
               },
             }}
             open={drawerOpen} // This controls the transform via CSS conditional styles usually, but explicitly setting it helps too
@@ -363,9 +372,9 @@ const MainLayout = ({
           p: 3,
           // Adjust margin based on drawer state only on non-mobile
           transition: theme.transitions.create('margin', {
-             easing: theme.transitions.easing.sharp,
-             duration: drawerOpen ? theme.transitions.duration.enteringScreen : theme.transitions.duration.leavingScreen,
-           }),
+            easing: theme.transitions.easing.sharp,
+            duration: drawerOpen ? theme.transitions.duration.enteringScreen : theme.transitions.duration.leavingScreen,
+          }),
           marginLeft: { sm: drawerOpen ? 0 : `-${drawerWidth}px` }, // This pulls content left when drawer closes
           // OR alternative: marginLeft: { sm: 0 } and let the AppBar width handle the space
           // Test which margin logic works best with your specific drawer animation.
@@ -373,7 +382,7 @@ const MainLayout = ({
           // Let's try adjusting based on AppBar's behaviour:
           //marginLeft: 0, // Keep margin 0
           width: { sm: `calc(100% - ${drawerOpen ? drawerWidth : 0}px)` }, // Adjust width like AppBar
-           transition: theme.transitions.create(['margin', 'width'], { // Add width to transition
+          transition: theme.transitions.create(['margin', 'width'], { // Add width to transition
             easing: theme.transitions.easing.sharp,
             duration: drawerOpen ? theme.transitions.duration.enteringScreen : theme.transitions.duration.leavingScreen,
           }),

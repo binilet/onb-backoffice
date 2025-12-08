@@ -1,245 +1,220 @@
-import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormControl, InputLabel, Select, MenuItem, Switch, InputAdornment, IconButton } from '@mui/material';
-  import PersonIcon from '@mui/icons-material/Person';
-  import PhoneIcon from '@mui/icons-material/Phone';
-  import ContentCutIcon from '@mui/icons-material/ContentCut';
-  import NoteIcon from '@mui/icons-material/Note';
-  import React, { useEffect } from 'react';
-  import { useDispatch, useSelector } from 'react-redux';
-  import { generate_referral_link, updateUser } from '../../state/slices/userSlice';
-  import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { Modal, CircularProgress, Box, Grid, Typography, TextField, Button, FormControl, InputLabel, Select, MenuItem, Switch, InputAdornment, IconButton } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import PhoneIcon from '@mui/icons-material/Phone';
+import ContentCutIcon from '@mui/icons-material/ContentCut';
+import NoteIcon from '@mui/icons-material/Note';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { generate_referral_link, updateUser } from '../../state/slices/userSlice';
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
-  const UserFormModal = ({ openModal, handleCloseModal,editingUser, isMobile}) => {
-    
-    const dispatch = useDispatch();
-    const [id, setId] = React.useState(editingUser? editingUser._id : '');
-    const [agent_id, setAgentId] = React.useState(editingUser? editingUser.agentId : '');
-    const [admin_id, setAdminId] = React.useState(editingUser? editingUser.adminId : '');
-    const [cutPercent, setCutPercent] = React.useState(editingUser? editingUser.agentPercent : '');
-    const [verified, setVerified] = React.useState(editingUser? editingUser.verified : false);
-    const [isActive, setIsActive] = React.useState(editingUser? editingUser.isActive : false);
-    const [role, setRole] = React.useState(editingUser? editingUser.role : 'user');
-    const [username, setUsername] = React.useState(editingUser? editingUser.username : '');
-    const [phone, setPhone] = React.useState(
-      editingUser ? editingUser.username : ""
-    );
-    const [ban_until, setBanUntil] = React.useState(
-      editingUser ? editingUser.ban_until : ""
-    );
+const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) => {
 
-    useEffect(()=>{
-      if(editingUser){
-        setId(editingUser._id);
-        setCutPercent(editingUser.agentPercent);
-        setVerified(editingUser.verified);
-        setIsActive(editingUser.isActive);
-        setRole(editingUser.role);
-        setUsername(editingUser.username);
-        setPhone(editingUser.phone);
-        setBanUntil(editingUser.banUntil);
-        setAgentId(editingUser.agentId);
-        setAdminId(editingUser.adminId);
-      }else{
-        setId('');
-        setCutPercent('');
-        setVerified(false);
-        setIsActive(false);
-        setRole('');
-        setUsername('');
-        setPhone('');
-        setBanUntil('');
-        setAgentId('');
-        setAdminId('');
-      } 
-      setStatus(null);
-    },[editingUser]);
+  const dispatch = useDispatch();
+  const [id, setId] = React.useState(editingUser ? editingUser._id : '');
+  const [agent_id, setAgentId] = React.useState(editingUser ? editingUser.agentId : '');
+  const [admin_id, setAdminId] = React.useState(editingUser ? editingUser.adminId : '');
+  const [cutPercent, setCutPercent] = React.useState(editingUser ? editingUser.agentPercent : '');
+  const [verified, setVerified] = React.useState(editingUser ? editingUser.verified : false);
+  const [isActive, setIsActive] = React.useState(editingUser ? editingUser.isActive : false);
+  const [role, setRole] = React.useState(editingUser ? editingUser.role : 'user');
+  const [username, setUsername] = React.useState(editingUser ? editingUser.username : '');
+  const [phone, setPhone] = React.useState(
+    editingUser ? editingUser.username : ""
+  );
+  const [ban_until, setBanUntil] = React.useState(
+    editingUser ? editingUser.ban_until : ""
+  );
 
-    const _update_status = useSelector((state) => state.users.update_status);
-    const _error = useSelector((state) => state.users.error);
+  useEffect(() => {
+    if (editingUser) {
+      setId(editingUser._id);
+      setCutPercent(editingUser.agentPercent);
+      setVerified(editingUser.verified);
+      setIsActive(editingUser.isActive);
+      setRole(editingUser.role);
+      setUsername(editingUser.username);
+      setPhone(editingUser.phone);
+      setBanUntil(editingUser.banUntil);
+      setAgentId(editingUser.agentId);
+      setAdminId(editingUser.adminId);
+    } else {
+      setId('');
+      setCutPercent('');
+      setVerified(false);
+      setIsActive(false);
+      setRole('');
+      setUsername('');
+      setPhone('');
+      setBanUntil('');
+      setAgentId('');
+      setAdminId('');
+    }
+    setStatus(null);
+  }, [editingUser]);
 
-    const _referal_link = useSelector((state)=> state.users.referralUrl);
-    const _referal_loading = useSelector((state)=> state.users.referralUrlLoading);
-    const _referal_error = useSelector((state)=> state.users.referralUrlError);
-    const current_user = useSelector((state) => state.auth._current_user || {});
-    const [showFields, setShowFields] = React.useState(false);
+  const _update_status = useSelector((state) => state.users.update_status);
+  const _error = useSelector((state) => state.users.error);
 
-    React.useEffect(() => {
-      if(current_user && current_user.role){
-        if(current_user.role === 'system' || current_user.role === 'agent'){
-          setShowFields(true);
-        }else{
-          setShowFields(false);
-        }
+  const _referal_link = useSelector((state) => state.users.referralUrl);
+  const _referal_loading = useSelector((state) => state.users.referralUrlLoading);
+  const _referal_error = useSelector((state) => state.users.referralUrlError);
+  const current_user = useSelector((state) => state.auth._current_user || {});
+  const [showFields, setShowFields] = React.useState(false);
+
+  React.useEffect(() => {
+    if (current_user && current_user.role) {
+      if (current_user.role === 'system' || current_user.role === 'agent') {
+        setShowFields(true);
+      } else {
+        setShowFields(false);
       }
-    }, [current_user]);
+    }
+  }, [current_user]);
 
-    const [status, setStatus] = React.useState(null);
-    const [copied, setCopied] = React.useState(false);
+  const [status, setStatus] = React.useState(null);
+  const [copied, setCopied] = React.useState(false);
 
-    const handleSubmit = async () => {
-      if(!id){
-        setStatus("Id not set. please refresh the page and try again.");
-        return;
-      }
-      if(!role){
-        setStatus("Please select a role");
-        return;
-      }
-
-      let adminPercent = 0;
-      let agentPercent = 0;
-
-      if(role === 'admin'){
-        adminPercent = cutPercent;
-      }else if(role === 'agent'){
-        agentPercent = cutPercent;
-      }
-
-      const userData = {
-        agentPercent,
-        verified,
-        isActive,
-        role,
-        username,
-        phone,
-        ban_until,
-        agentId:agent_id,
-        adminId:admin_id,
-        adminPercent,
-      };
-  
-      if (editingUser) {
-        // Update existing user
-        await dispatch(updateUser({userId:editingUser._id, updates:userData}));
-      }
-      //handleCloseModal();
+  const handleSubmit = async () => {
+    if (!id) {
+      setStatus("Id not set. please refresh the page and try again.");
+      return;
+    }
+    if (!role) {
+      setStatus("Please select a role");
+      return;
     }
 
-    const handleGenerate = async () => {
-      try {
-        if(phone && phone.length > 0){
-          dispatch(generate_referral_link(phone));
-        }
-      } catch (err) {
-        console.log(err);
-      } 
+    let adminPercent = 0;
+    let agentPercent = 0;
+
+    if (role === 'admin') {
+      adminPercent = cutPercent;
+    } else if (role === 'agent') {
+      agentPercent = cutPercent;
+    }
+
+    const userData = {
+      agentPercent,
+      verified,
+      isActive,
+      role,
+      username,
+      phone,
+      ban_until,
+      agentId: agent_id,
+      adminId: admin_id,
+      adminPercent,
     };
 
-    const handleCopy = () => {
-      if (_referal_link) {
-        navigator.clipboard.writeText(_referal_link);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+    if (editingUser) {
+      // Update existing user
+      await dispatch(updateUser({ userId: editingUser._id, updates: userData }));
+    }
+    //handleCloseModal();
+  }
+
+  const handleGenerate = async () => {
+    try {
+      if (phone && phone.length > 0) {
+        dispatch(generate_referral_link(phone));
       }
-    };
-  
-    return (
-      <Modal open={openModal} onClose={handleCloseModal}>
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleCopy = () => {
+    if (_referal_link) {
+      navigator.clipboard.writeText(_referal_link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
+  return (
+    <Modal open={openModal} onClose={handleCloseModal}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: isMobile ? "95%" : 800,
+          bgcolor: "background.paper",
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 3,
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
+        <Typography variant="h5" sx={{ mb: 3 }}>
+          {editingUser ? `Edit User (${editingUser?._id})` : "Add New User"}
+        </Typography>
+
         <Box
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: isMobile ? "95%" : 800,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 3,
-            maxHeight: "90vh",
-            overflowY: "auto",
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: 2,
           }}
         >
-          <Typography variant="h5" sx={{ mb: 3 }}>
-            {editingUser ? `Edit User (${editingUser?._id})` : "Add New User"}
-          </Typography>
-
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-              gap: 2,
+          <TextField
+            name="username"
+            label="User Name"
+            fullWidth
+            value={username}
+            onChange={() => setUsername(event.target.value)}
+            readOnly
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonIcon />
+                </InputAdornment>
+              ),
             }}
-          >
-            <TextField
-              name="username"
-              label="User Name"
-              fullWidth
-              value={username}
-              onChange={() => setUsername(event.target.value)}
-              readOnly
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonIcon />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+          />
 
+          <TextField
+            name="phone"
+            label="Phone"
+            fullWidth
+            value={phone}
+            onChange={(event) => {
+              const input = event.target.value;
+              // Allow only digits and max 10 characters
+              if (/^\d{0,10}$/.test(input)) {
+                setPhone(input);
+              }
+            }}
+            readOnly
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PhoneIcon />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+          />
+
+          {showFields && (
             <TextField
-              name="phone"
-              label="Phone"
+              name="agent phone"
+              label="Agent Phone"
               fullWidth
-              value={phone}
+              value={agent_id}
+              //onChange={() => setAgentId(event.target.value)}
               onChange={(event) => {
-                const input = event.target.value;
-                // Allow only digits and max 10 characters
-                if (/^\d{0,10}$/.test(input)) {
-                  setPhone(input);
-                }
-              }}
-              readOnly
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneIcon />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-            />
-
-            {showFields && (
-              <TextField
-                name="agent phone"
-                label="Agent Phone"
-                fullWidth
-                value={agent_id}
-                //onChange={() => setAgentId(event.target.value)}
-                onChange={(event) => {
                 const input = event.target.value;
                 // Allow only digits and max 10 characters
                 if (/^\d{0,10}$/.test(input)) {
                   setAgentId(input);
                 }
               }}
-                disabled={current_user.role === "agent"}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PhoneIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-              />
-            )}
-
-            <TextField
-              name="adminPhone"
-              label="Admin Phone"
-              fullWidth
-              value={admin_id}
-              onChange={(event) => {
-                const input = event.target.value;
-                // Allow only digits and max 10 characters
-                if (/^\d{0,10}$/.test(input)) {
-                  setAdminId(input);
-                }
-              }}
-              inputProps={{ maxLength: 10 }}
-              disabled={current_user.role === "admin"}
+              disabled={current_user.role === "agent"}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -249,175 +224,205 @@ import { Modal,CircularProgress, Box,Grid, Typography, TextField, Button, FormCo
               }}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
             />
+          )}
 
-            {showFields && (
-              <TextField
-                name="cut"
-                label="Cut"
-                type="number"
-                fullWidth
-                value={cutPercent}
-                onChange={() => setCutPercent(event.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <ContentCutIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-              />
-            )}
-
-            <FormControl fullWidth>
-              <InputLabel id="role-label">Role</InputLabel>
-              <Select
-                labelId="role-label"
-                id="role"
-                name="role"
-                value={role}
-                onChange={(event) => setRole(event.target.value)}
-                label="Role"
-                sx={{ borderRadius: 2 }}
-              >
-                {current_user.role === "system" && (
-                  <MenuItem value="agent">agent</MenuItem>
-                )}
-                {showFields && <MenuItem value="admin">admin</MenuItem>}
-                <MenuItem value="user">user</MenuItem>
-                {/* <MenuItem value="admin">Admin</MenuItem> */}
-              </Select>
-            </FormControl>
-
-            <TextField
-              name="banUntil"
-              label="Ban Until"
-              type="date"
-              fullWidth
-              value={
-                ban_until ? new Date(ban_until).toISOString().split("T")[0] : ""
+          <TextField
+            name="adminPhone"
+            label="Admin Phone"
+            fullWidth
+            value={admin_id}
+            onChange={(event) => {
+              const input = event.target.value;
+              // Allow only digits and max 10 characters
+              if (/^\d{0,10}$/.test(input)) {
+                setAdminId(input);
               }
-              onChange={(event) => setBanUntil(event.target.value)}
-              InputLabelProps={{ shrink: true }}
+            }}
+            inputProps={{ maxLength: 10 }}
+            disabled={current_user.role === "admin"}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PhoneIcon />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+          />
+
+          {showFields && (
+            <TextField
+              name="cut"
+              label="Cut"
+              type="number"
+              fullWidth
+              value={cutPercent}
+              onChange={() => setCutPercent(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <ContentCutIcon />
+                  </InputAdornment>
+                ),
+              }}
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
             />
+          )}
 
-            <Box display="flex" flexDirection="column" gap={1} maxWidth={400}>
-              <Box display="flex" gap={1}>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleGenerate}
-                  disabled={_referal_loading}
-                  sx={{ borderRadius: 2, minWidth: 120 }}
-                >
-                  {_referal_loading ? (
-                    <CircularProgress size={18} color="inherit" />
-                  ) : (
-                    "Generate Invite Link"
-                  )}
-                </Button>
-                {_referal_error && (
-                  <Typography
-                    color="error"
-                    variant="caption"
-                    sx={{ alignSelf: "center" }}
-                  >
-                    {_referal_error}
-                  </Typography>
-                )}
-              </Box>
+          <FormControl fullWidth>
+            <InputLabel id="role-label">Role</InputLabel>
+            <Select
+              labelId="role-label"
+              id="role"
+              name="role"
+              value={role}
+              onChange={(event) => setRole(event.target.value)}
+              label="Role"
+              sx={{ borderRadius: 2 }}
+            >
+              {current_user.role === "system" && (
+                <MenuItem value="agent">agent</MenuItem>
 
-              {_referal_link && (
-                <TextField
-                  size="small"
-                  value={_referal_link}
-                  InputProps={{
-                    readOnly: true,
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={handleCopy}
-                          edge="end"
-                          size="small"
-                        >
-                          <ContentCopyIcon fontSize="small" />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      fontSize: "12px",
-                    },
-                  }}
-                />
+              )}
+              {current_user.role === "system" && (
+                <MenuItem value="employee">employee</MenuItem>
+
               )}
 
-              {copied && (
-                <Typography variant="caption" color="primary">
-                  Copied to clipboard!
+              {showFields && <MenuItem value="admin">admin</MenuItem>}
+              <MenuItem value="user">user</MenuItem>
+              {/* <MenuItem value="admin">Admin</MenuItem> */}
+            </Select>
+          </FormControl>
+
+          <TextField
+            name="banUntil"
+            label="Ban Until"
+            type="date"
+            fullWidth
+            value={
+              ban_until ? new Date(ban_until).toISOString().split("T")[0] : ""
+            }
+            onChange={(event) => setBanUntil(event.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+          />
+
+          <Box display="flex" flexDirection="column" gap={1} maxWidth={400}>
+            <Box display="flex" gap={1}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleGenerate}
+                disabled={_referal_loading}
+                sx={{ borderRadius: 2, minWidth: 120 }}
+              >
+                {_referal_loading ? (
+                  <CircularProgress size={18} color="inherit" />
+                ) : (
+                  "Generate Invite Link"
+                )}
+              </Button>
+              {_referal_error && (
+                <Typography
+                  color="error"
+                  variant="caption"
+                  sx={{ alignSelf: "center" }}
+                >
+                  {_referal_error}
                 </Typography>
               )}
             </Box>
-          </Box>
 
-          <Grid container spacing={2} sx={{ mt: 3 }}>
-            {current_user.role === "system" && <Grid item xs={6}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                Active
-              </Typography>
-              <Switch
-                checked={isActive}
-                onChange={() => setIsActive(event.target.checked)}
-                inputProps={{ "aria-label": "isActive" }}
-                name="isActive"
+            {_referal_link && (
+              <TextField
+                size="small"
+                value={_referal_link}
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={handleCopy}
+                        edge="end"
+                        size="small"
+                      >
+                        <ContentCopyIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                    fontSize: "12px",
+                  },
+                }}
               />
-            </Grid>
-            }
-            <Grid item xs={6}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                Verified
+            )}
+
+            {copied && (
+              <Typography variant="caption" color="primary">
+                Copied to clipboard!
               </Typography>
-              <Switch
-                checked={verified}
-                onChange={() => setVerified(event.target.checked)}
-                inputProps={{ "aria-label": "verified" }}
-                name="verified"
-              />
-            </Grid>
-            
+            )}
+          </Box>
+        </Box>
+
+        <Grid container spacing={2} sx={{ mt: 3 }}>
+          {current_user.role === "system" && <Grid item xs={6}>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              Active
+            </Typography>
+            <Switch
+              checked={isActive}
+              onChange={() => setIsActive(event.target.checked)}
+              inputProps={{ "aria-label": "isActive" }}
+              name="isActive"
+            />
+          </Grid>
+          }
+          <Grid item xs={6}>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              Verified
+            </Typography>
+            <Switch
+              checked={verified}
+              onChange={() => setVerified(event.target.checked)}
+              inputProps={{ "aria-label": "verified" }}
+              name="verified"
+            />
           </Grid>
 
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={handleSubmit}
-            sx={{ mt: 3 }}
-          >
-            {editingUser ? "Save Changes" : "Add Agent"}
-          </Button>
-          {_update_status && (
-            <Typography variant="body2" color="primary" sx={{ mt: 2 }}>
-              {_update_status}
-            </Typography>
-          )}
-          {_error && (
-            <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-              {_error}
-            </Typography>
-          )}
-          {status && (
-            <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-              {status}
-            </Typography>
-          )}
-        </Box>
-      </Modal>
-    );
-  };
-  
-  export default UserFormModal;
-  
+        </Grid>
+
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={handleSubmit}
+          sx={{ mt: 3 }}
+        >
+          {editingUser ? "Save Changes" : "Add Agent"}
+        </Button>
+        {_update_status && (
+          <Typography variant="body2" color="primary" sx={{ mt: 2 }}>
+            {_update_status}
+          </Typography>
+        )}
+        {_error && (
+          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+            {_error}
+          </Typography>
+        )}
+        {status && (
+          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+            {status}
+          </Typography>
+        )}
+      </Box>
+    </Modal>
+  );
+};
+
+export default UserFormModal;
