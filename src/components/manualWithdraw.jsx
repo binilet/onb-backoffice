@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -18,8 +18,6 @@ import {
   TableRow,
   CircularProgress,
   Alert,
-  IconButton,
-  Tooltip,
   Tabs,
   Tab,
   Dialog,
@@ -31,7 +29,6 @@ import {
   Container
 } from '@mui/material';
 import {
-  Refresh as RefreshIcon,
   CheckCircle as CheckCircleIcon,
   Pending as PendingIcon,
   Clear as ClearIcon,
@@ -54,6 +51,7 @@ import {
 } from '../state/slices/manualWithdrawSlice';
 
 import { fetchCreditBalancesByPhoneNumber } from '../state/slices/creditBalanceSlice';
+import { numericFontFamily } from '../../theme';
 
 const ManualWithdrawManager = () => {
   const dispatch = useDispatch();
@@ -173,30 +171,21 @@ const ManualWithdrawManager = () => {
     <Card
       sx={{
         height: '100%',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        position: 'relative',
-        overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `linear-gradient(135deg, ${getCardGradient(color)})`,
-          opacity: 0.9
-        }
+        bgcolor: 'background.paper',
+        color: 'text.primary',
+        border: 1,
+        borderColor: 'divider',
+        boxShadow: 'none',
       }}
     >
-      <CardContent sx={{ position: 'relative', zIndex: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography color="inherit" variant="h6" sx={{ fontWeight: 500, opacity: 0.9 }}>
+      <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 2 }}>
+          <Typography color="text.secondary" variant="body2">
             {title}
           </Typography>
-          {Icon && <Icon sx={{ fontSize: 28, opacity: 0.8 }} />}
+          {Icon && <Icon fontSize="small" sx={{ color: 'text.secondary' }} />}
         </Box>
-        <Typography variant="h3" component="div" sx={{ fontWeight: 700, mb: 1 }}>
+        <Typography variant={color === 'primary' ? 'h2' : 'h3'} component="div" sx={{ fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums', color: color === 'primary' ? 'primary.main' : 'text.primary', overflowWrap: 'anywhere', mb: 1 }}>
           {value}
         </Typography>
         {subtitle && (
@@ -207,18 +196,6 @@ const ManualWithdrawManager = () => {
       </CardContent>
     </Card>
   );
-
-  const getCardGradient = (color) => {
-    const gradients = {
-      primary: '#667eea 0%, #764ba2 100%',
-      success: '#11998e 0%, #38ef7d 100%',
-      warning: '#ffecd2 0%, #fcb69f 100%',
-      info: '#a8edea 0%, #fed6e3 100%',
-      secondary: '#ff9a9e 0%, #fecfef 100%',
-      error: '#ff6b6b 0%, #ee5a24 100%'
-    };
-    return gradients[color] || gradients.primary;
-  };
 
   // Filter data based on current tab
   const filteredData = currentTab === 0
@@ -261,41 +238,10 @@ const ManualWithdrawManager = () => {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Modern Header */}
-      {/* <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 4,
-        p: 3,
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        borderRadius: 3,
-        color: 'white'
-      }}>
-        <Box>
-          <Typography variant="h3" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-            Manual Withdraw Manager
-          </Typography>
-          <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400 }}>
-            Manage withdrawal requests and approvals
-          </Typography>
-        </Box>
-        <Tooltip title="Refresh Data">
-          <IconButton 
-            onClick={handleRefresh} 
-            disabled={loading}
-            sx={{ 
-              color: 'white',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              '&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' }
-            }}
-          >
-            <RefreshIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>*/}
-
+    <Container maxWidth={false} sx={{ p: { xs: 3, md: 4 }, color: 'text.primary', minWidth: 0, '& input': { colorScheme: (theme) => theme.palette.mode } }}>
+      <Typography variant="h2" component="h1" sx={{ mb: 4, pb: 3, borderBottom: 1, borderColor: 'divider' }}>
+        Manual Withdraw Manager
+      </Typography>
       {/* Error Alert */}
       {error && (
         <Alert
@@ -376,18 +322,20 @@ const ManualWithdrawManager = () => {
 
       {/* Modern Filters */}
       <Paper
+        variant="outlined"
         sx={{
           p: 3,
           mb: 3,
-          borderRadius: 3,
-          background: "linear-gradient(145deg, #f0f2f5 0%, #ffffff 100%)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          borderRadius: 2,
+          bgcolor: 'background.paper',
+          border: 1,
+          borderColor: 'divider',
         }}
       >
         <Typography
           variant="h5"
           gutterBottom
-          sx={{ fontWeight: 600, color: "#2c3e50" }}
+          sx={{ fontWeight: 600, color: 'text.primary' }}
         >
           Filter Withdrawals
         </Typography>
@@ -477,28 +425,26 @@ const ManualWithdrawManager = () => {
 
       {/* Tabbed Interface */}
       <Paper
+        variant="outlined"
         sx={{
-          borderRadius: 3,
-          overflow: "hidden",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          borderRadius: 2,
+          overflow: 'hidden',
         }}
       >
         <Box
           sx={{
             borderBottom: 1,
-            borderColor: "divider",
-            background: "linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%)",
+            borderColor: 'divider',
           }}
         >
           <Tabs
             value={currentTab}
             onChange={handleTabChange}
             sx={{
-              "& .MuiTab-root": {
-                textTransform: "none",
+              '& .MuiTab-root': {
+                textTransform: 'none',
                 fontWeight: 600,
-                fontSize: "1rem",
-                minHeight: 64,
+                minHeight: 48,
               },
             }}
           >
@@ -542,7 +488,7 @@ const ManualWithdrawManager = () => {
         ) : (
           <TableContainer>
             <Table>
-              <TableHead sx={{ backgroundColor: "#f8f9fa" }}>
+              <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600 }}>Transaction ID</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Phone</TableCell>
@@ -566,17 +512,16 @@ const ManualWithdrawManager = () => {
                   <TableRow
                     key={transaction._id}
                     hover
-                    sx={{ "&:hover": { backgroundColor: "#f8f9fa" } }}
                   >
                     <TableCell>
                       <Typography
                         variant="body2"
-                        fontFamily="monospace"
                         sx={{
-                          backgroundColor: "#e3f2fd",
-                          padding: "4px 8px",
+                          fontFamily: numericFontFamily,
+                          bgcolor: 'action.hover',
+                          padding: '4px 8px',
                           borderRadius: 1,
-                          display: "inline-block",
+                          display: 'inline-block',
                         }}
                       >
                         {transaction.trxid || transaction._id.slice(-8)}
@@ -587,7 +532,7 @@ const ManualWithdrawManager = () => {
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}
                       >
                         <PhoneIcon
-                          sx={{ fontSize: 16, color: "text.secondary" }}
+                          sx={{ fontSize: 16, color: 'text.secondary' }}
                         />
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
                           {transaction.phone}
@@ -611,8 +556,9 @@ const ManualWithdrawManager = () => {
                         variant="h6"
                         sx={{
                           fontWeight: 700,
-                          color: "primary.main",
-                          fontFamily: "monospace",
+                          color: 'primary.main',
+                          fontFamily: numericFontFamily,
+                          fontVariantNumeric: 'tabular-nums',
                         }}
                       >
                         {formatCurrency(transaction.amount)}
@@ -642,12 +588,12 @@ const ManualWithdrawManager = () => {
                     <TableCell>
                       <Typography
                         variant="body2"
-                        fontFamily="monospace"
                         sx={{
-                          backgroundColor: "#f5f5f5",
-                          padding: "4px 8px",
+                          fontFamily: numericFontFamily,
+                          bgcolor: 'action.hover',
+                          padding: '4px 8px',
                           borderRadius: 1,
-                          display: "inline-block",
+                          display: 'inline-block',
                         }}
                       >
                         {/* {transaction.reference || 'N/A'} */}
@@ -719,39 +665,39 @@ const ManualWithdrawManager = () => {
         maxWidth="md"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: 3 },
+          sx: { borderRadius: 2 },
         }}
       >
         <DialogTitle
           sx={{
-            background: "linear-gradient(135deg, #4caf50 0%, #45a049 100%)",
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
+            px: 4,
+            py: 3,
+            borderBottom: 1,
+            borderColor: 'divider',
           }}
         >
-          <CheckCircleIcon />
+          <CheckCircleIcon sx={{ color: 'success.main' }} />
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            <Typography variant="h3" component="h2">
               Approve Withdrawal Request
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            <Typography variant="body2" color="text.secondary">
               Please review the details before approving
             </Typography>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ p: 4 }}>
+        <DialogContent sx={{ p: 3 }}>
           {approvalModal.transaction && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <Paper
-                  sx={{ p: 3, backgroundColor: "#f8f9fa", borderRadius: 2 }}
+                  variant="outlined"
+                  sx={{ p: 3, bgcolor: 'background.default', borderRadius: 2 }}
                 >
                   <Typography
                     variant="h6"
                     gutterBottom
-                    sx={{ fontWeight: 600, color: "#2c3e50" }}
+                    sx={{ fontWeight: 600, color: 'text.primary' }}
                   >
                     Transaction Details
                   </Typography>
@@ -763,8 +709,7 @@ const ManualWithdrawManager = () => {
                       </Typography>
                       <Typography
                         variant="body1"
-                        fontFamily="monospace"
-                        sx={{ fontWeight: 600 }}
+                        sx={{ fontWeight: 600, fontFamily: numericFontFamily }}
                       >
                         {approvalModal.transaction.trxid ||
                           approvalModal.transaction._id.slice(-8)}
@@ -777,7 +722,7 @@ const ManualWithdrawManager = () => {
                       <Typography
                         variant="h5"
                         color="primary.main"
-                        sx={{ fontWeight: 700 }}
+                        sx={{ fontWeight: 700, fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' }}
                       >
                         {formatCurrency(approvalModal.transaction.amount)}
                       </Typography>
@@ -795,12 +740,13 @@ const ManualWithdrawManager = () => {
               </Grid>
               <Grid item xs={12} md={6}>
                 <Paper
-                  sx={{ p: 3, backgroundColor: "#f8f9fa", borderRadius: 2 }}
+                  variant="outlined"
+                  sx={{ p: 3, bgcolor: 'background.default', borderRadius: 2 }}
                 >
                   <Typography
                     variant="h6"
                     gutterBottom
-                    sx={{ fontWeight: 600, color: "#2c3e50" }}
+                    sx={{ fontWeight: 600, color: 'text.primary' }}
                   >
                     User Information
                   </Typography>
@@ -845,12 +791,13 @@ const ManualWithdrawManager = () => {
 
               <Grid item xs={12} md={6}>
                 <Paper
-                  sx={{ p: 3, backgroundColor: "#f8f9fa", borderRadius: 2 }}
+                  variant="outlined"
+                  sx={{ p: 3, bgcolor: 'background.default', borderRadius: 2 }}
                 >
                   <Typography
                     variant="h6"
                     gutterBottom
-                    sx={{ fontWeight: 600, color: "#2c3e50" }}
+                    sx={{ fontWeight: 600, color: 'text.primary' }}
                   >
                     Telebirr Reference Id
                   </Typography>
@@ -879,16 +826,17 @@ const ManualWithdrawManager = () => {
               </Grid>
               <Grid item xs={12} md={6}>
                 <Paper
-                  sx={{ p: 3, backgroundColor: "#f8f9fa", borderRadius: 2 }}
+                  variant="outlined"
+                  sx={{ p: 3, bgcolor: 'background.default', borderRadius: 2 }}
                 >
                   <Typography
                     variant="h6"
                     gutterBottom
-                    sx={{ fontWeight: 600, color: "#2c3e50" }}
+                    sx={{ fontWeight: 600, color: 'text.primary' }}
                   >
                     Users Balance
                     {balanceError && (
-                      <Typography component="span" sx={{ color: "red", ml: 1 }}>
+                      <Typography component="span" sx={{ color: 'error.main', ml: 1 }}>
                         : ({balanceError})
                       </Typography>
                     )}
@@ -897,7 +845,7 @@ const ManualWithdrawManager = () => {
                   <Typography
                     variant="h5"
                     color="primary.main"
-                    sx={{ fontWeight: 700 }}
+                    sx={{ fontWeight: 700, fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' }}
                   >
                     {balanceByPhone.loading ? (
                       <CircularProgress size={24} />
@@ -918,17 +866,17 @@ const ManualWithdrawManager = () => {
               {approvalModal.transaction.note && (
                 <Grid item xs={12}>
                   <Paper
+                    variant="outlined"
                     sx={{
                       p: 3,
-                      backgroundColor: "#fff3cd",
+                      bgcolor: 'background.default',
                       borderRadius: 2,
-                      border: "1px solid #ffeaa7",
                     }}
                   >
                     <Typography
                       variant="h6"
                       gutterBottom
-                      sx={{ fontWeight: 600, color: "#856404" }}
+                      sx={{ fontWeight: 600, color: 'warning.dark' }}
                     >
                       Notes
                     </Typography>
@@ -973,29 +921,28 @@ const ManualWithdrawManager = () => {
         onClose={closeVoidModal}
         maxWidth="sm"
         PaperProps={{
-          sx: { borderRadius: 3 },
+          sx: { borderRadius: 2 },
         }}
       >
         <DialogTitle
           sx={{
-            background: "linear-gradient(135deg, #f44336 0%, #d32f2f 100%)",
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
+            px: 4,
+            py: 3,
+            borderBottom: 1,
+            borderColor: 'divider',
           }}
         >
-          <BlockIcon />
+          <BlockIcon sx={{ color: 'error.main' }} />
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            <Typography variant="h3" component="h2">
               Void Withdrawal Request
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            <Typography variant="body2" color="text.secondary">
               This action cannot be undone
             </Typography>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ p: 4 }}>
+        <DialogContent sx={{ p: 3 }}>
           <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
               Are you sure you want to void this withdrawal request?
@@ -1006,7 +953,10 @@ const ManualWithdrawManager = () => {
             </Typography>
           </Alert>
           {voidModal.transaction && (
-            <Paper sx={{ p: 3, backgroundColor: "#f8f9fa", borderRadius: 2 }}>
+            <Paper
+              variant="outlined"
+              sx={{ p: 3, bgcolor: 'background.default', borderRadius: 2 }}
+            >
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <Typography variant="caption" color="text.secondary">
@@ -1014,8 +964,7 @@ const ManualWithdrawManager = () => {
                   </Typography>
                   <Typography
                     variant="body1"
-                    fontFamily="monospace"
-                    sx={{ fontWeight: 600 }}
+                    sx={{ fontWeight: 600, fontFamily: numericFontFamily }}
                   >
                     {voidModal.transaction.trxid ||
                       voidModal.transaction._id.slice(-8)}
@@ -1028,7 +977,7 @@ const ManualWithdrawManager = () => {
                   <Typography
                     variant="h6"
                     color="error.main"
-                    sx={{ fontWeight: 700 }}
+                    sx={{ fontWeight: 700, fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' }}
                   >
                     {formatCurrency(voidModal.transaction.amount)}
                   </Typography>

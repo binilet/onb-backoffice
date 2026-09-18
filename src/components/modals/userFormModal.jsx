@@ -2,11 +2,11 @@ import { Modal, CircularProgress, Box, Grid, Typography, TextField, Button, Form
 import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
-import NoteIcon from '@mui/icons-material/Note';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { generate_referral_link, updateUser } from '../../state/slices/userSlice';
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { numericFontFamily } from '../../../theme';
 
 const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) => {
 
@@ -133,23 +133,32 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
   };
 
   return (
-    <Modal open={openModal} onClose={handleCloseModal}>
+    <Modal open={openModal} onClose={handleCloseModal} aria-labelledby="user-form-title">
       <Box
         sx={{
           position: "absolute",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: isMobile ? "95%" : 800,
-          bgcolor: "background.paper",
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 3,
-          maxHeight: "90vh",
-          overflowY: "auto",
+          width: (theme) => isMobile ? `calc(100% - ${theme.spacing(6)})` : { xs: `calc(100% - ${theme.spacing(6)})`, md: '75%' },
+          boxSizing: 'border-box',
+          maxWidth: (theme) => theme.breakpoints.values.md,
+          bgcolor: 'background.paper',
+          color: 'text.primary',
+          border: 1,
+          borderColor: 'divider',
+          boxShadow: 0,
+          p: { xs: 3, sm: 5 },
+          borderRadius: 2,
+          maxHeight: '90dvh',
+          overflowY: 'auto',
+          overflowWrap: 'anywhere',
+          '& input': { colorScheme: (theme) => theme.palette.mode },
+          '& input[type="number"], & input[name*="phone"], & input[name*="Phone"]': { fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' },
+          '& .MuiInputAdornment-root': { color: 'text.secondary' },
         }}
       >
-        <Typography variant="h5" sx={{ mb: 3 }}>
+        <Typography id="user-form-title" variant="h3" component="h2" sx={{ mb: 4, pb: 3, borderBottom: 1, borderColor: 'divider' }}>
           {editingUser ? `Edit User (${editingUser?._id})` : "Add New User"}
         </Typography>
 
@@ -174,7 +183,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
                 </InputAdornment>
               ),
             }}
-            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            sx={{ minWidth: 0 }}
           />
 
           <TextField
@@ -197,7 +206,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
                 </InputAdornment>
               ),
             }}
-            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            sx={{ minWidth: 0 }}
           />
 
           {showFields && (
@@ -222,7 +231,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
                   </InputAdornment>
                 ),
               }}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              sx={{ minWidth: 0 }}
             />
           )}
 
@@ -247,7 +256,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
                 </InputAdornment>
               ),
             }}
-            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            sx={{ minWidth: 0 }}
           />
 
           {showFields && (
@@ -265,7 +274,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
                   </InputAdornment>
                 ),
               }}
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              sx={{ minWidth: 0 }}
             />
           )}
 
@@ -305,7 +314,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
             }
             onChange={(event) => setBanUntil(event.target.value)}
             InputLabelProps={{ shrink: true }}
-            sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            sx={{ minWidth: 0 }}
           />
 
           <Box display="flex" flexDirection="column" gap={1} maxWidth={400}>
@@ -353,9 +362,9 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
                   ),
                 }}
                 sx={{
+                  minWidth: 0,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
-                    fontSize: "12px",
                   },
                 }}
               />

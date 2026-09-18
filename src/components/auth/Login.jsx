@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, fetchUserInfo } from '../../state/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,7 @@ import {
   InputAdornment,
   IconButton,
   Container,
-  alpha,
+  Alert,
 } from '@mui/material';
 import {
   Visibility,
@@ -45,7 +45,6 @@ export default function Login() {
           navigate('/');
         }
       } else {
-        // Handle case where fetchUserInfo fails even if login succeeded (unlikely but possible)
         navigate('/');
       }
     }
@@ -55,97 +54,83 @@ export default function Login() {
     setShowPassword(!showPassword);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleLogin();
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-        px={2}
-        width="100%"
-      >
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+        px: 4,
+      }}
+    >
+      <Container maxWidth="sm" sx={{ px: 0 }}>
+        <Box sx={{ mb: 8, textAlign: 'center' }}>
+          <Typography variant="h2" fontWeight={700} color="text.primary">
+            Hagere Online
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+            Admin console — sign in to continue
+          </Typography>
+        </Box>
+
         <Paper
-          elevation={6}
+          elevation={0}
           sx={{
             width: '100%',
-            p: 4,
-            borderRadius: 2,
-            background: 'linear-gradient(145deg, #ffffff 0%, #f7fbff 100%)',
-            border: '1px solid',
-            borderColor: alpha('#2979ff', 0.1),
-            boxShadow: `0 12px 28px ${alpha('#2979ff', 0.1)}`
+            p: 6,
+            border: 1,
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
           }}
         >
-          <Box mb={4} textAlign="center">
-            <Typography
-              variant="h4"
-              fontWeight={700}
-              sx={{
-                color: '#1565c0',
-                mb: 1,
-                letterSpacing: '-0.5px'
-              }}
-            >
-              Hagere Games
+          <Box sx={{ mb: 5 }}>
+            <Typography variant="h4" fontWeight={700} color="text.primary">
+              Sign in
             </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Sign in to your account to continue
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Use your registered phone number and password.
             </Typography>
           </Box>
 
-          <Divider sx={{ mb: 4, borderColor: alpha('#2979ff', 0.1) }} />
+          <Divider sx={{ mb: 4 }} />
 
           <TextField
-            label="Phone Number"
+            label="Phone number"
             fullWidth
-            margin="normal"
             variant="outlined"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <PhoneIcon sx={{ color: '#2979ff' }} />
+                  <PhoneIcon sx={{ color: 'text.secondary', fontSize: '1.125rem' }} />
                 </InputAdornment>
               ),
             }}
-            sx={{
-              mb: 2,
-              '& .MuiOutlinedInput-root': {
-                '&:hover fieldset': {
-                  borderColor: '#2979ff',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#2979ff',
-                },
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#2979ff',
-              },
-            }}
+            sx={{ mb: 3 }}
           />
 
           <TextField
             label="Password"
             type={showPassword ? 'text' : 'password'}
             fullWidth
-            margin="normal"
             variant="outlined"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <LockIcon sx={{ color: '#2979ff' }} />
+                  <LockIcon sx={{ color: 'text.secondary', fontSize: '1.125rem' }} />
                 </InputAdornment>
               ),
               endAdornment: (
@@ -154,93 +139,42 @@ export default function Login() {
                     onClick={handleTogglePasswordVisibility}
                     edge="end"
                     size="small"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
-            sx={{
-              mb: 2,
-              '& .MuiOutlinedInput-root': {
-                '&:hover fieldset': {
-                  borderColor: '#2979ff',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#2979ff',
-                },
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#2979ff',
-              },
-            }}
+            sx={{ mb: 2 }}
           />
 
           {error && (
-            <Typography
-              color="error"
-              variant="body2"
-              mt={1}
-              mb={2}
-              textAlign="center"
-              bgcolor={alpha('#f44336', 0.1)}
-              p={1}
-              borderRadius={1}
-            >
+            <Alert severity="error" variant="outlined" sx={{ mt: 2 }}>
               {error}
-            </Typography>
+            </Alert>
           )}
 
           <Button
             variant="contained"
             fullWidth
-            sx={{
-              mt: 3,
-              py: 1.5,
-              borderRadius: '10px',
-              textTransform: 'none',
-              fontSize: '1rem',
-              fontWeight: 600,
-              background: 'linear-gradient(90deg, #2979ff 0%, #1565c0 100%)',
-              boxShadow: `0 4px 12px ${alpha('#2979ff', 0.4)}`,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                boxShadow: `0 6px 16px ${alpha('#2979ff', 0.6)}`,
-                transform: 'translateY(-2px)',
-              }
-            }}
+            disableElevation
+            sx={{ mt: 4, py: 1.5, fontSize: '0.9375rem' }}
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              'Sign In'
-            )}
+            {loading ? <CircularProgress size={20} color="inherit" /> : 'Sign in'}
           </Button>
-
-          {/* <Box textAlign="center" mt={3}>
-            <Typography variant="body2" color="text.secondary">
-              Don't have an account?{' '}
-              <Typography
-                component="span"
-                variant="body2"
-                sx={{
-                  color: '#2979ff',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                  }
-                }}
-                onClick={() => navigate('/register')}
-              >
-                Sign up
-              </Typography>
-            </Typography>
-          </Box> */}
         </Paper>
-      </Box>
-    </Container>
+
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block', textAlign: 'center', mt: 4 }}
+        >
+          Hagere Online admin console · Authorized personnel only
+        </Typography>
+      </Container>
+    </Box>
   );
 }

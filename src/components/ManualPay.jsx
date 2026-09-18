@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -21,15 +21,10 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   IconButton,
   Tooltip,
   CircularProgress,
   Alert,
-  Divider,
   Stack
 } from '@mui/material';
 import {
@@ -46,7 +41,7 @@ import {
 
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchManualDeposits, approveManualDeposit } from '../state/slices/manualDepositSlice';
-import { use } from 'react';
+import { numericFontFamily } from '../../theme';
 
 const ManualDepositsManager = () => {
   const dispatch = useDispatch();
@@ -160,8 +155,16 @@ const ManualDepositsManager = () => {
   };
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+    <Box sx={{
+      p: { xs: 3, md: 4 }, minWidth: 0, color: 'text.primary',
+      '& .MuiCardContent-root': { p: 4, '&:last-child': { pb: 4 } },
+      '& input': { colorScheme: (theme) => theme.palette.mode },
+      '& .MuiTableCell-root': { whiteSpace: 'nowrap' },
+      '& .MuiTableCell-root:nth-of-type(9)': { whiteSpace: 'normal', overflowWrap: 'anywhere' },
+      '& .MuiTableBody-root .MuiTableCell-root:nth-of-type(-n+3)': { fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' },
+      '& .MuiTableRow-root:last-child .MuiTableCell-root': { borderBottom: 0 },
+    }}>
+      <Typography variant="h2" component="h1" sx={{ mb: 4, pb: 3, borderBottom: 1, borderColor: 'divider' }}>
         Manual Deposits Manager
       </Typography>
 
@@ -178,14 +181,14 @@ const ManualDepositsManager = () => {
       )}
 
       {/* Filters Card */}
-      <Card sx={{ mb: 3, boxShadow: 3 }}>
+      <Card sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <FilterList color="primary" />
             Filters
           </Typography>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={6} md={2.5}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -196,7 +199,7 @@ const ManualDepositsManager = () => {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={2.5}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -207,7 +210,7 @@ const ManualDepositsManager = () => {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={2.5}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -217,12 +220,13 @@ const ManualDepositsManager = () => {
                 placeholder="Search by phone..."
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid item xs={12} sm={6} md={3}>
               <Button
                 variant="contained"
                 startIcon={<Refresh />}
                 onClick={handleFind}
-                sx={{ height: '40px' }}
+                fullWidth
+                sx={{ py: 2 }}
               >
                 Find
               </Button>
@@ -234,12 +238,12 @@ const ManualDepositsManager = () => {
       {/* Summary Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} md={4}>
-          <Card sx={{ backgroundColor: '#e3f2fd', boxShadow: 2 }}>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Receipt color="primary" sx={{ fontSize: 40 }} />
+                <Receipt sx={{ color: 'text.secondary' }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="h3" sx={{ fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>
                     {summary.totalTransactions}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -251,12 +255,12 @@ const ManualDepositsManager = () => {
           </Card>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Card sx={{ backgroundColor: '#e8f5e8', boxShadow: 2 }}>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
-                <AccountBalance color="success" sx={{ fontSize: 40 }} />
+                <AccountBalance sx={{ color: 'primary.main' }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="h2" sx={{ fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums', color: 'primary.main', overflowWrap: 'anywhere' }}>
                     ETB {summary.totalAmount}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -268,12 +272,12 @@ const ManualDepositsManager = () => {
           </Card>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Card sx={{ backgroundColor: '#fff3e0', boxShadow: 2 }}>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
-                <DateRange color="warning" sx={{ fontSize: 40 }} />
+                <DateRange sx={{ color: 'text.secondary' }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="h3" sx={{ fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>
                     ETB {summary.averageAmount}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -287,11 +291,13 @@ const ManualDepositsManager = () => {
       </Grid>
 
       {/* Main Content Card */}
-      <Card sx={{ boxShadow: 3 }}>
-        <CardContent sx={{ p: 0 }}>
+      <Card sx={{ '& .MuiCardContent-root': { p: 0, '&:last-child': { pb: 0 } } }}>
+        <CardContent>
           <Tabs 
             value={tabValue} 
             onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
             sx={{ borderBottom: 1, borderColor: 'divider' }}
           >
             <Tab 
@@ -337,7 +343,7 @@ const ManualDepositsManager = () => {
                   <TableBody>
                     {filteredItems?.map((item) => (
                       <TableRow key={item._id} hover>
-                        <TableCell sx={{ fontFamily: 'monospace' }}>
+                        <TableCell sx={{ fontFamily: numericFontFamily }}>
                           {item.trxId}
                         </TableCell>
                         <TableCell>
@@ -347,7 +353,7 @@ const ManualDepositsManager = () => {
                           </Stack>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#2e7d32' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main', fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' }}>
                             ETB {item.amount}
                           </Typography>
                         </TableCell>
@@ -433,7 +439,7 @@ const ManualDepositsManager = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle sx={{ backgroundColor: '#f5f5f5' }}>
+        <DialogTitle sx={{ px: 4, py: 3, borderBottom: 1, borderColor: 'divider', typography: 'h3' }}>
           Transaction Details
         </DialogTitle>
         <DialogContent>
@@ -444,7 +450,7 @@ const ManualDepositsManager = () => {
                   <Typography variant="subtitle2" color="text.secondary">
                     Transaction ID
                   </Typography>
-                  <Typography variant="body1" sx={{ fontFamily: 'monospace', mb: 2 }}>
+                  <Typography variant="body1" sx={{ fontFamily: numericFontFamily, mb: 2 }}>
                     {selectedTransaction.trxId}
                   </Typography>
                 </Grid>
@@ -460,7 +466,7 @@ const ManualDepositsManager = () => {
                   <Typography variant="subtitle2" color="text.secondary">
                     Amount
                   </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#2e7d32', mb: 2 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'primary.main', fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums', mb: 2 }}>
                     ETB {selectedTransaction.amount}
                   </Typography>
                 </Grid>
@@ -476,8 +482,8 @@ const ManualDepositsManager = () => {
                   <Typography variant="subtitle2" color="text.secondary">
                     Receipt Message
                   </Typography>
-                  <Paper sx={{ p: 2, backgroundColor: '#f8f9fa', mt: 1 }}>
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line', fontFamily: 'monospace' }}>
+                  <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.default', mt: 1 }}>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line', fontFamily: numericFontFamily }}>
                       {selectedTransaction.receiptMessage}
                     </Typography>
                   </Paper>

@@ -1,93 +1,96 @@
-import React, { useState } from 'react';
-import { ListItem, ListItemIcon, ListItemText, Collapse } from '@mui/material';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-
-import { useTheme } from '@mui/material/styles';
 import { ButtonBase, Box, Stack, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { alpha } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 
-const SidebarItem = ({ icon, text, to, active }) => {
+export default function SidebarItem({ icon, text, to, active = false, disabled = false, onClick }) {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const isDisabled = disabled || !to;
+  const isActive = active && !isDisabled;
 
   return (
     <ButtonBase
-      component="div"
-      onClick={() => navigate(to)}
+      component={isDisabled ? 'button' : Link}
+      {...(isDisabled ? { type: 'button' } : { to, onClick })}
+      aria-current={isActive ? 'page' : undefined}
+      disabled={isDisabled}
       sx={{
         width: '100%',
         textAlign: 'left',
-        py: 0.5,
-        px: 2,
-        borderRadius: 1.5,
-        mb: 0.75,
+        py: 1.5,
+        px: 3,
+        borderRadius: 1,
+        mb: 1,
         position: 'relative',
-        transition: 'all 0.3s ease',
-        bgcolor: active ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
+        minWidth: 0,
+        minHeight: { xs: theme.layout.touchTargetSize, sm: theme.layout.navItemHeight },
+        color: isDisabled ? 'text.disabled' : isActive ? 'primary.main' : 'text.secondary',
+        bgcolor: isActive ? 'surface.selected' : 'transparent',
         '&:hover': {
-          bgcolor: active 
-            ? alpha(theme.palette.primary.main, 0.18) 
-            : alpha(theme.palette.action.hover, 0.08)
+          color: isActive ? 'primary.main' : 'text.primary',
+          bgcolor: isActive ? 'surface.selectedHover' : 'action.hover',
+        },
+        '&.Mui-focusVisible': {
+          outline: `${theme.layout.focusWidth}px solid ${theme.palette.primary.main}`,
+          outlineOffset: -theme.layout.focusWidth,
+        },
+        '&.Mui-disabled': {
+          color: 'text.disabled',
+          bgcolor: 'transparent',
         },
         overflow: 'hidden',
-        justifyContent: 'flex-start'
+        justifyContent: 'flex-start',
       }}
     >
-      {/* Active indicator - left border */}
-      {active && (
+      {isActive && (
         <Box
           sx={{
             position: 'absolute',
             left: 0,
             top: '50%',
             transform: 'translateY(-50%)',
-            width: 4,
-            height: '70%',
+            width: theme.layout.navIndicatorWidth,
+            height: theme.layout.navIconSize,
             bgcolor: 'primary.main',
-            borderRadius: '0 4px 4px 0',
+            borderRadius: theme.layout.navIndicatorRadius,
           }}
         />
       )}
-      
-      <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%' }}>
+
+      <Stack component="span" direction="row" spacing={3} alignItems="center" sx={{ width: '100%', minWidth: 0 }}>
         <Box
+          component="span"
           sx={{
-            color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+            color: isDisabled ? 'text.disabled' : isActive ? 'primary.main' : 'text.secondary',
             display: 'flex',
-            p: 0.75,
-            borderRadius: 1.5,
-            bgcolor: active ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
-            transition: 'all 0.3s ease',
+            flexShrink: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: theme.layout.navIconSize,
+            '& .MuiSvgIcon-root': { fontSize: theme.layout.navIconSize },
           }}
         >
           {icon}
         </Box>
         <Typography
+          component="span"
           variant="body2"
-          fontWeight={active ? 700 : 500}
-          color={active ? 'primary.main' : 'text.primary'}
-          sx={{ flexGrow: 1 }}
+          fontWeight={isActive ? 600 : 500}
+          color="inherit"
+          sx={{ flexGrow: 1, minWidth: 0, overflowWrap: 'anywhere' }}
         >
           {text}
         </Typography>
-        
-        {/* Optional: You can add a subtle indicator on the right side */}
-        {active && (
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              bgcolor: 'primary.main',
-              borderRadius: '50%',
-              ml: 'auto'
-            }}
-          />
-        )}
       </Stack>
     </ButtonBase>
   );
-};
+}
 
-export default SidebarItem;
+SidebarItem.propTypes = {
+  icon: PropTypes.node.isRequired,
+  text: PropTypes.string.isRequired,
+  to: PropTypes.string,
+  active: PropTypes.bool,
+  disabled: PropTypes.bool,
+  onClick: PropTypes.func,
+};

@@ -1,302 +1,205 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
-  Grid,
   Typography,
   TextField,
-  MenuItem,
   Button,
   Paper,
-  Divider,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { 
+import {
   selectWinningDistributionsByRange,
-  fetchDistributionByDateRange 
-} from '../../state/slices/distributionSlice';
+  fetchDistributionByDateRange,
+} from "../../state/slices/distributionSlice";
+import { numericFontFamily } from "../../../theme";
 
-const DistributionListPanel = ({ users = [] }) => {
+const DistributionListPanel = () => {
   const dispatch = useDispatch();
   const distributions = useSelector(selectWinningDistributionsByRange);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [selectedUser, setSelectedUser] = useState("");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const rowsPerPage = 10;
 
   useEffect(() => {
-    dispatch(fetchDistributionByDateRange({ start:null, end:null, phone: null }));
-  },[]);
+    dispatch(fetchDistributionByDateRange({ start: null, end: null, phone: null }));
+  }, [dispatch]);
 
   const handleFilter = () => {
-    dispatch(fetchDistributionByDateRange({ start:startDate, end:endDate, phone: selectedUser }));
+    dispatch(fetchDistributionByDateRange({ start: startDate, end: endDate, phone: null }));
+    setPage(0);
   };
 
-  const handleChangePage = (newPage) => {
-    setPage(newPage);
+  const handleReset = () => {
+    setStartDate("");
+    setEndDate("");
+    dispatch(fetchDistributionByDateRange({ start: null, end: null, phone: null }));
+    setPage(0);
   };
 
   const totalAmount = distributions.reduce((acc, d) => acc + d.amount, 0);
-  
-  // Create our own pagination logic
+
   const paginatedDistributions = distributions.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
-  
-  const totalPages = Math.ceil(distributions.length / rowsPerPage);
-  
-  return (
-    <Paper sx={{ 
-      p: 3,
-      borderRadius: 2,
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-      bgcolor: '#fcfcfc'
-    }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#1976d2' }}>
-        🎯 Distribution Dashboard
-      </Typography>
-      
-      <Paper sx={{ 
-        p: 2, 
-        mb: 3,
-        bgcolor: '#f5f8ff',
-        border: '1px solid #e0e9ff',
-        borderRadius: 1
-      }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={3}>
-            <TextField
-              fullWidth
-              label="Start Date"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              variant="outlined"
-              size="small"
-              sx={{ bgcolor: 'white' }}
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={3}>
-            <TextField
-              fullWidth
-              label="End Date"
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              variant="outlined"
-              size="small"
-              sx={{ bgcolor: 'white' }}
-            />
-          </Grid>
-          
-          {/* <Grid item xs={12} sm={3}>
-            <TextField
-              select
-              fullWidth
-              label="Select User"
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-              variant="outlined"
-              size="small"
-              sx={{ bgcolor: 'white' }}
-            >
-              <MenuItem value="">All Users</MenuItem>
-              {users.map((user) => (
-                <MenuItem key={user.phone} value={user.phone}>
-                  {user.username} ({user.phone})
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid> */}
-          
-          <Grid item xs={12} sm={3}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                onClick={handleFilter}
-                sx={{ 
-                  py: 1,
-                  boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
-                  '&:hover': { boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)' }
-                }}
-              >
-                Apply Filters
-              </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => {
-                  setStartDate("");
-                  setEndDate("");
-                  setSelectedUser("");
-                }}
-                sx={{ minWidth: '40px', px: 1 }}
-              >
-                ↺
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
 
-      <Box sx={{ 
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        mb: 2,
-        px: 1
-      }}>
-        <Typography>
-          Showing <strong>{distributions.length}</strong> results
+  const totalPages = Math.max(1, Math.ceil(distributions.length / rowsPerPage));
+
+  const formatMoney = (value) =>
+    new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0);
+
+  return (
+    <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, border: 1, borderColor: "divider" }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1}
+        alignItems={{ xs: "stretch", sm: "center" }}
+        sx={{ mb: 2 }}
+      >
+        <TextField
+          label="Start date"
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 150 }}
+        />
+        <TextField
+          label="End date"
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 150 }}
+        />
+        <Button variant="contained" disableElevation onClick={handleFilter}>
+          Apply
+        </Button>
+        <Button variant="outlined" color="inherit" onClick={handleReset}>
+          Reset
+        </Button>
+        <Box sx={{ flexGrow: 1 }} />
+        <Typography variant="body2" color="text.secondary">
+          {distributions.length} result(s)
         </Typography>
-        <Typography sx={{ 
-          fontWeight: 'bold', 
-          color: '#1976d2',
-          bgcolor: 'rgba(25, 118, 210, 0.1)',
-          px: 2,
-          py: 0.5,
-          borderRadius: 1,
-        }}>
-          Total Amount: ${totalAmount.toFixed(2)}
+        <Typography variant="subtitle2" sx={{ fontFamily: numericFontFamily }}>
+          Total {formatMoney(totalAmount)}
         </Typography>
-      </Box>
-      
-      <Divider sx={{ mb: 2 }} />
-      
-      <Box sx={{ 
-        mb: 2,
-        overflowX: 'auto',
-        '&::-webkit-scrollbar': {
-          height: '8px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          bgcolor: 'rgba(0,0,0,0.2)',
-          borderRadius: '4px',
-        }
-      }}>
-        <table style={{ 
-          width: '100%', 
-          borderCollapse: 'separate',
-          borderSpacing: '0',
-        }}>
-          <thead>
-            <tr style={{ 
-              backgroundColor: '#1976d2', 
-              color: 'white',
-            }}>
-              <th style={{ padding: '12px 16px', textAlign: 'left', borderTopLeftRadius: '8px' }}>Date</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left' }}>Phone</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left' }}>Role</th>
-              <th style={{ padding: '12px 16px', textAlign: 'right' }}>Amount</th>
-              <th style={{ padding: '12px 16px', textAlign: 'right' }}>Bet</th>
-              <th style={{ padding: '12px 16px', textAlign: 'center' }}>Your %</th>
-              <th style={{ padding: '12px 16px', textAlign: 'right' }}>Distributable</th>
-              <th style={{ padding: '12px 16px', textAlign: 'center', borderTopRightRadius: '8px' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
+      </Stack>
+
+      <TableContainer sx={{ overflowX: "auto" }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Date</TableCell>
+              <TableCell>Phone</TableCell>
+              <TableCell>Role</TableCell>
+              <TableCell align="right">Amount</TableCell>
+              <TableCell align="right">Bet</TableCell>
+              <TableCell align="right">Your %</TableCell>
+              <TableCell align="right">Distributable</TableCell>
+              <TableCell align="center">Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {paginatedDistributions.map((distribution, index) => (
-              <tr key={index} style={{ 
-                backgroundColor: index % 2 === 0 ? '#f8f9fa' : 'white',
-              }}>
-                <td style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0' }}>
-                  {new Date(distribution.date).toLocaleString()}
-                </td>
-                <td style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0' }}>
-                  {distribution.phone}
-                </td>
-                <td style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0' }}>
-                  {distribution.role}
-                </td>
-                <td style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', textAlign: 'right' }}>
-                  ${distribution.amount.toFixed(2)}
-                </td>
-                <td style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', textAlign: 'right' }}>
-                  ${distribution.betAmount.toFixed(2)}
-                </td>
-                <td style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', textAlign: 'center' }}>
-                  {distribution.yourPercent}%
-                </td>
-                <td style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', textAlign: 'right' }}>
-                  ${distribution.distributable.toFixed(2)}
-                </td>
-                <td style={{ padding: '12px 16px', borderBottom: '1px solid #e0e0e0', textAlign: 'center' }}>
-                  <span style={{ 
-                    padding: '4px 12px',
-                    borderRadius: '12px',
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    backgroundColor: distribution.approved ? '#e6f7ed' : '#fff4e5',
-                    color: distribution.approved ? '#0a8043' : '#b25900',
-                    border: `1px solid ${distribution.approved ? '#b7e6cd' : '#ffe2b6'}`
-                  }}>
-                    {distribution.approved ? 'Approved' : 'Pending'}
-                  </span>
-                </td>
-              </tr>
+              <TableRow key={index} hover sx={{ "&:last-child td": { border: 0 } }}>
+                <TableCell>
+                  <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>
+                    {new Date(distribution.date).toLocaleString()}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>
+                    {distribution.phone}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Chip label={distribution.role} size="small" variant="outlined" sx={{ height: 22, fontWeight: 600 }} />
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body2" sx={{ fontFamily: numericFontFamily, fontWeight: 600 }}>
+                    {formatMoney(distribution.amount)}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>
+                    {formatMoney(distribution.betAmount)}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>
+                    {distribution.yourPercent}%
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>
+                    {formatMoney(distribution.distributable)}
+                  </Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Chip
+                    label={distribution.approved ? "Approved" : "Pending"}
+                    color={distribution.approved ? "success" : "warning"}
+                    size="small"
+                    variant="outlined"
+                    sx={{ height: 22, fontWeight: 600 }}
+                  />
+                </TableCell>
+              </TableRow>
             ))}
             {distributions.length === 0 && (
-              <tr>
-                <td colSpan={8} style={{ padding: '32px 16px', textAlign: 'center', color: '#757575' }}>
-                  No distributions found. Try adjusting your filters.
-                </td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No distributions found. Try adjusting your filters.
+                  </Typography>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </Box>
-      
-      <Box sx={{ 
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        gap: 2
-      }}>
-        <Typography variant="body2">
-          Page {page + 1} of {Math.max(1, totalPages)}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={1} sx={{ mt: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          Page {page + 1} of {totalPages}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Button 
-            size="small"
-            variant="outlined"
-            disabled={page === 0}
-            onClick={() => handleChangePage(0)}
-          >
-            First
-          </Button>
-          <Button 
-            size="small"
-            variant="outlined"
-            disabled={page === 0}
-            onClick={() => handleChangePage(page - 1)}
-          >
-            Prev
-          </Button>
-          <Button 
-            size="small"
-            variant="outlined"
-            disabled={page >= totalPages - 1}
-            onClick={() => handleChangePage(page + 1)}
-          >
-            Next
-          </Button>
-          <Button 
-            size="small"
-            variant="outlined"
-            disabled={page >= totalPages - 1}
-            onClick={() => handleChangePage(totalPages - 1)}
-          >
-            Last
-          </Button>
-        </Box>
-      </Box>
+        <Button size="small" variant="outlined" color="inherit" disabled={page === 0} onClick={() => setPage(0)}>
+          First
+        </Button>
+        <Button size="small" variant="outlined" color="inherit" disabled={page === 0} onClick={() => setPage(page - 1)}>
+          Prev
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          color="inherit"
+          disabled={page >= totalPages - 1}
+          onClick={() => setPage(page + 1)}
+        >
+          Next
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          color="inherit"
+          disabled={page >= totalPages - 1}
+          onClick={() => setPage(totalPages - 1)}
+        >
+          Last
+        </Button>
+      </Stack>
     </Paper>
   );
 };

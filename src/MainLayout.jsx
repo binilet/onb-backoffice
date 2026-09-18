@@ -1,4 +1,4 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import { Outlet } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -6,13 +6,14 @@ import Drawer from '@mui/material/Drawer';
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu'; // Assuming you use this
-import Notifications from '@mui/icons-material/Notifications'; // Assuming you use this
-import AccountCircle from '@mui/icons-material/AccountCircle'; // Assuming you use this
-import { useTheme } from '@mui/material/styles'; // Import useTheme to access theme
-import { useLocation } from 'react-router-dom'; // For location tracking
-import { useSelector, useDispatch } from 'react-redux'; // For Redux state management
-import SidebarItem from './components/sidebar'; // Adjust path (assuming this component exists)
+import MenuIcon from '@mui/icons-material/Menu';
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
+import LightModeOutlined from '@mui/icons-material/LightModeOutlined';
+import { useTheme } from '@mui/material/styles';
+import { useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import SidebarItem from './components/sidebar';
+import { navigationFor, getPreviewUser } from './marketplace/navigation';
 
 import { Avatar, Stack } from '@mui/material';
 
@@ -26,8 +27,6 @@ import { LocalPolice } from '@mui/icons-material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import RsvpIcon from '@mui/icons-material/Rsvp';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import SavingsIcon from '@mui/icons-material/Savings';
-import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
@@ -36,7 +35,6 @@ import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import CircleIcon from '@mui/icons-material/Circle';
 import BusinessIcon from '@mui/icons-material/Business';
 import Tooltip from '@mui/material/Tooltip';
-import { alpha } from '@mui/material/styles'; // For alpha function
 import { logout } from './state/slices/authSlice';
 
 const MainLayout = ({
@@ -44,227 +42,235 @@ const MainLayout = ({
   isMobile,
   drawerOpen,
   handleDrawerToggle,
-
+  onToggleTheme,
 }) => {
-  const theme = useTheme(); // Get theme object for transitions and breakpoints
-  const location = useLocation(); // For tracking current route
-  const dispatch = useDispatch(); // For dispatching actions
+  const theme = useTheme();
+  const location = useLocation();
+  const dispatch = useDispatch();
 
-  const user = useSelector((state) => state.auth._current_user || {});
-  const username = user.username || 'Guest';
-
-  const role = user.role || 'No Role Assigned';
-  const avatarLetter = username?.charAt(0)?.toUpperCase() || 'U';
-  const sidebarGradient = `linear-gradient(180deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`;
-
-
+  const user = useSelector((state) => state.auth._current_user);
+  const username = user?.username || 'Guest';
+  const role = user?.role || 'No Role Assigned';
+  const hasLegacyAccess = ['system', 'agent', 'admin', 'employee'].includes(user?.role);
+  const avatarLetter = username.charAt(0).toUpperCase() || 'U';
+  const marketplaceUser = import.meta.env.DEV ? getPreviewUser(location.search) : null;
+  // const marketplaceItems = navigationFor(marketplaceUser?.role);
+  const marketplaceItems = navigationFor(role);
+  const isMarketplace = import.meta.env.DEV && location.pathname.startsWith('/marketplace/');
+  const isDark = theme.palette.mode === 'dark';
+  const themeLabel = isDark ? 'Use light theme' : 'Use dark theme';
+  const legacyItems = [
+    { text: 'Dashboard', to: '/', icon: QueryStatsIcon, roles: ['system', 'agent', 'admin'] },
+    { text: 'Users', to: '/users', icon: PeopleAltIcon, roles: ['system', 'agent', 'admin'] },
+    { text: 'Admins', to: '/admins', icon: LocalPolice, roles: ['system', 'agent'] },
+    { text: 'Agents', to: '/agents', icon: GroupWorkIcon, roles: ['system'] },
+    { text: 'Games', to: '/games', icon: RocketLaunchIcon, roles: ['system', 'agent', 'admin'] },
+    { text: 'Invite', to: '/hagere-invite', icon: RsvpIcon, roles: ['system', 'agent', 'admin', 'employee'] },
+  ];
+  const financeItems = [
+    { text: 'Credits', to: '/credits', icon: MonetizationOnIcon, roles: ['system'] },
+    { text: 'Manual Deposits', to: '/manual-deposits', icon: AssuredWorkloadIcon, roles: ['system', 'employee'] },
+    { text: 'Manual Withdraws', to: '/manual-withdraws', icon: LocalAtmIcon, roles: ['system', 'employee'] },
+    { text: 'Auto Play', to: '/auto-settings', icon: SettingsSuggestIcon, roles: ['system', 'employee'] },
+  ];
+  const handleNavigation = (event) => {
+    if (isMobile && drawerOpen && !event.defaultPrevented && event.button === 0 &&
+        !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      handleDrawerToggle();
+    }
+  };
+  const renderLegacyItem = (item) => (
+    (!hasLegacyAccess || item.roles.includes(role)) && (
+      <SidebarItem
+        key={item.to}
+        icon={<item.icon />}
+        text={item.text}
+        to={item.to}
+        active={location.pathname === item.to}
+        disabled={!hasLegacyAccess}
+        onClick={handleNavigation}
+      />
+    )
+  );
   const handleLogout = () => {
-    dispatch(logout()); // update this based on your setup
+    dispatch(logout());
   };
 
   const drawer = (
     <Box
       sx={{
-        width: drawerWidth,
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        bgcolor: "background.paper",
-        boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.05)",
-        borderRadius: "0 0px 16px 0",
-        overflow: "hidden",
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.paper',
+        color: 'text.primary',
+        overflow: 'hidden',
       }}
     >
-      {/* Top Logo Area */}
-      <Box>
-        <Box
-          sx={{
-            p: 2,
-            background: sidebarGradient,
-            mb: 2,
-          }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{
-              color: "white",
-              letterSpacing: "0.5px",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <BusinessIcon /> Hagere-Online
-          </Typography>
-        </Box>
-
-        {/* Navigation Menu */}
-        <Box sx={{ px: 2 }}>
-          {/* You can use a custom component for menu items */}
-
-          {role !== "employee" && (
-            <>
-              <SidebarItem
-                icon={<QueryStatsIcon />}
-                text="Dashboard"
-                to="/"
-                active={location.pathname === "/"}
-              />
-              <SidebarItem
-                icon={<PeopleAltIcon />}
-                text="Users"
-                to="/users"
-                active={location.pathname === "/users"}
-              />
-            </>
-          )}
-
-          {(role === "system" || role === "agent") && (
-            <SidebarItem
-              icon={<LocalPolice />}
-              text="Admins"
-              to="/admins"
-              active={location.pathname === "/admins"}
-            />
-          )}
-
-          {role === "system" && (
-            <SidebarItem
-              icon={<GroupWorkIcon />}
-              text="Agents"
-              to="/agents"
-              active={location.pathname === "/agents"}
-            />
-          )}
-          {role !== "employee" && (
-            <SidebarItem
-              icon={<RocketLaunchIcon />}
-              text="Games"
-              to="/games"
-              active={location.pathname === "/games"}
-            />
-          )}
-          <SidebarItem
-            icon={<RsvpIcon />}
-            text="Invite"
-            to="/hagere-invite"
-            active={location.pathname === "/hagere-invite"}
-          />
-
-          {(role === "system" || role === "employee") && (
-            <>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{
-                  px: 1.5,
-                  py: 1,
-                  mt: 2,
-                  display: "block",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                }}
-              >
-                Finance
-              </Typography>
-
-              {(role !== "employee") && (
-                <SidebarItem
-                  icon={<MonetizationOnIcon />}
-                  text="Credits"
-                  to="/credits"
-                  active={location.pathname === "/credits"}
-                />
-              )}
-
-              {/* <SidebarItem
-                 icon={<SavingsIcon />}
-                 text="Deposits"
-                 to="/deposits"
-                 active={location.pathname === "/deposits"}
-               />
-               <SidebarItem
-                 icon={<ShoppingCartCheckoutIcon />}
-                 text="Withdrawals"
-                 to="/withdrawals"
-                 active={location.pathname === "/withdrawals"}
-               /> */}
-              <SidebarItem
-                icon={<AssuredWorkloadIcon />}
-                text="Manual Deposits"
-                to="/manual-deposits"
-                active={location.pathname === "/manual-deposits"}
-              />
-              <SidebarItem
-                icon={<LocalAtmIcon />}
-                text="Manual Withdraws"
-                to="/manual-withdraws"
-                active={location.pathname === "/manual-withdraws"}
-              />
-
-              <SidebarItem
-                icon={<SettingsSuggestIcon />}
-                text="Auto Play"
-                to="/auto-settings"
-                active={location.pathname === "/auto-settings"}
-              />
-            </>
-          )}
-        </Box>
-      </Box>
-
-      {/* Bottom Profile Area */}
       <Box
         sx={{
-          p: 2.5,
-          mx: 2,
-          mb: 2,
-          bgcolor: theme.palette.background.default,
-          borderRadius: 2,
-          boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.05)",
+          px: 4,
+          py: 2,
+          minHeight: theme.layout.topbarHeight,
+          display: 'flex',
+          alignItems: 'center',
+          flexShrink: 0,
+          minWidth: 0,
+          gap: 2.5,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
+        <Box sx={{
+          display: 'grid',
+          placeItems: 'center',
+          width: theme.layout.brandSize,
+          height: theme.layout.brandSize,
+          flexShrink: 0,
+          border: 1,
+          borderColor: 'divider',
+          borderRadius: 1,
+          bgcolor: 'surface.subtle',
+        }}>
+          <BusinessIcon sx={{ color: 'text.secondary', fontSize: theme.layout.navIconSize }} />
+        </Box>
+        <Typography variant="h6" fontWeight={700} sx={{ color: 'text.primary', minWidth: 0, overflowWrap: 'anywhere' }}>
+          Hagere-Online
+        </Typography>
+      </Box>
+
+      <Box
+        component="nav"
+        aria-label="Application navigation"
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          minWidth: 0,
+          overflowY: 'auto',
+          overscrollBehavior: 'contain',
+          scrollbarWidth: 'thin',
+          scrollbarColor: `${theme.palette.divider} transparent`,
+          px: 3,
+          py: 3,
+        }}
+      >
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ px: 3, pt: 1, pb: 2, display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
+        >
+          Super Online
+        </Typography>
+        {legacyItems.map(renderLegacyItem)}
+        {(!hasLegacyAccess || role === 'system' || role === 'employee') && (
+          <>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ px: 3, pt: 3, pb: 2, mt: 3, borderTop: 1, borderColor: 'divider', display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
+            >
+              Finance
+            </Typography>
+            {financeItems.map(renderLegacyItem)}
+          </>
+        )}
+        {!hasLegacyAccess && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 3, py: 2, overflowWrap: 'anywhere' }}>
+            Sign in with a Super Online account to access these pages.
+          </Typography>
+        )}
+        {import.meta.env.DEV && (
+          <>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ px: 3, pt: 3, pb: 2, mt: 3, borderTop: 1, borderColor: 'divider', display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
+            >
+              Marketplace · Preview
+            </Typography>
+            {marketplaceItems.map((item) => (
+              <SidebarItem
+                key={item.label}
+                icon={<item.icon />}
+                text={item.label}
+                to={item.ready && item.to ? `${item.to}${location.search}` : undefined}
+                active={Boolean(item.ready && item.to && (
+                  location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
+                ))}
+                disabled={!item.ready || !item.to}
+                onClick={handleNavigation}
+              />
+            ))}
+            
+          </>
+        )}
+      </Box>
+
+      <Box
+        component="footer"
+        sx={{
+          p: 3,
+          flexShrink: 0,
+          minWidth: 0,
+          bgcolor: 'surface.subtle',
+          borderTop: 1,
+          borderColor: 'divider',
         }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
           <Avatar
             sx={{
-              bgcolor: theme.palette.secondary.main,
-              boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.15)",
-              width: 42,
-              height: 42,
-              fontSize: "1.2rem",
+              bgcolor: 'background.paper',
+              color: 'text.primary',
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: 1,
+              width: theme.layout.avatarSize,
+              height: theme.layout.avatarSize,
+              fontSize: theme.typography.h6.fontSize,
               fontWeight: 600,
             }}
           >
             {avatarLetter}
           </Avatar>
-          <Box flexGrow={1}>
-            <Typography variant="subtitle1" fontWeight={600} noWrap>
+          <Box flexGrow={1} minWidth={0}>
+            <Typography variant="subtitle2" sx={{ overflowWrap: 'anywhere' }}>
               {username}
             </Typography>
             <Typography
               variant="caption"
               color="text.secondary"
               sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
               }}
             >
               <CircleIcon
-                sx={{ fontSize: "8px", color: theme.palette.success.main }}
+                sx={{ fontSize: theme.layout.statusIconSize, flexShrink: 0, color: hasLegacyAccess ? 'success.main' : 'text.disabled' }}
               />
-              {role}
+              <Box component="span" sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+                {role}
+              </Box>
             </Typography>
           </Box>
           <Tooltip title="Logout">
             <IconButton
               onClick={handleLogout}
+              aria-label="Logout"
               sx={{
-                color: theme.palette.error.main,
-                "&:hover": {
-                  bgcolor: alpha(theme.palette.error.main, 0.1),
+                color: 'text.secondary',
+                flexShrink: 0,
+                borderRadius: 1,
+                width: theme.layout.touchTargetSize,
+                height: theme.layout.touchTargetSize,
+                '& .MuiSvgIcon-root': { fontSize: theme.layout.navIconSize },
+                '&:hover': {
+                  color: 'error.main',
+                  bgcolor: 'action.hover',
                 },
               }}
             >
@@ -277,81 +283,116 @@ const MainLayout = ({
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', minWidth: 0, minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
       <CssBaseline />
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
-          // Adjust width and margin based on drawer state only on non-mobile
-          width: { sm: `calc(100% - ${drawerOpen ? drawerWidth : 0}px)` },
-          ml: { sm: `${drawerOpen ? drawerWidth : 0}px` },
+          bgcolor: 'background.paper',
+          color: 'text.primary',
+          backgroundImage: 'none',
+          boxShadow: 'none',
+          borderBottom: 1,
+          borderColor: 'divider',
+          width: isMobile ? '100%' : `calc(100% - ${drawerOpen ? drawerWidth : 0}px)`,
+          ml: isMobile ? 0 : `${drawerOpen ? drawerWidth : 0}px`,
           transition: theme.transitions.create(['margin', 'width'], {
             easing: theme.transitions.easing.sharp,
             duration: drawerOpen ? theme.transitions.duration.enteringScreen : theme.transitions.duration.leavingScreen,
           }),
-          zIndex: theme.zIndex.drawer + 1, // Keep AppBar above drawer
+          zIndex: theme.zIndex.appBar,
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{
+          minWidth: 0,
+          minHeight: { xs: theme.layout.topbarHeight, sm: theme.layout.topbarHeight },
+          px: { xs: 3, sm: 4 },
+          gap: 3,
+          '& .MuiIconButton-root': {
+            width: theme.layout.touchTargetSize,
+            height: theme.layout.touchTargetSize,
+            flexShrink: 0,
+            borderRadius: 1,
+            color: 'text.secondary',
+          },
+          '& .MuiSvgIcon-root': { fontSize: theme.layout.navIconSize },
+        }}>
           <IconButton
             color="inherit"
-            aria-label="toggle drawer"
+            aria-label={drawerOpen ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={drawerOpen}
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2 /* , display: { sm: 'none' } */ }} // Keep toggle always visible if permanent drawer can collapse
           >
             <MenuIcon />
           </IconButton>
           <Typography
-            variant="h6"
-            noWrap
+            variant="body2"
             component="div"
-            sx={{ flexGrow: 1 }}
+            color="text.secondary"
+            sx={{ flexGrow: 1, minWidth: 0, py: 2, fontWeight: 500, overflowWrap: 'anywhere' }}
           >
-
+            {isMarketplace
+              ? `Marketplace · Preview · ${marketplaceUser?.role || 'No scope'}`
+              : `Super Online · ${hasLegacyAccess ? role : 'Guest'}`}
           </Typography>
-          <IconButton color="inherit">
-            <Notifications />
-          </IconButton>
-          <IconButton color="inherit">
-            <AccountCircle />
-          </IconButton>
+          <Tooltip title={themeLabel}>
+            <IconButton color="inherit" onClick={onToggleTheme} aria-label={themeLabel}>
+              {isDark ? <LightModeOutlined /> : <DarkModeOutlined />}
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
+      <Box sx={{ width: isMobile ? 0 : drawerWidth, flexShrink: 0 }}>
         {isMobile ? (
-          // Temporary Drawer for mobile
           <Drawer
             variant="temporary"
             open={drawerOpen}
             onClose={handleDrawerToggle}
-            ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
-            }}
+            ModalProps={{ keepMounted: true }}
+            elevation={0}
             sx={{
-              display: { xs: 'block', sm: 'none' }, // Show only on xs
               '& .MuiDrawer-paper': {
                 boxSizing: 'border-box',
                 width: drawerWidth,
+                maxWidth: '100%',
+                height: '100%',
+                borderRadius: 0,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                bgcolor: 'background.paper',
+                backgroundImage: 'none',
+                boxShadow: 'none',
+                borderRight: 1,
+                borderColor: 'divider',
               },
             }}
           >
             {drawer}
           </Drawer>
         ) : (
-          // Permanent Drawer for desktop (collapsible based on drawerOpen state)
           <Drawer
             variant="permanent"
+            elevation={0}
             sx={{
-              display: { xs: 'none', sm: 'block' }, // Show only on sm and up
               '& .MuiDrawer-paper': {
                 boxSizing: 'border-box',
                 width: drawerWidth,
-                // Use transform to slide in/out based on drawerOpen state
+                height: '100%',
+                borderRadius: 0,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                visibility: drawerOpen ? 'visible' : 'hidden',
+                bgcolor: 'background.paper',
+                backgroundImage: 'none',
+                boxShadow: 'none',
+                borderRight: 1,
+                borderColor: 'divider',
                 transform: drawerOpen ? 'translateX(0)' : `translateX(-${drawerWidth}px)`,
                 transition: theme.transitions.create('transform', {
                   easing: theme.transitions.easing.sharp,
@@ -369,29 +410,30 @@ const MainLayout = ({
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          // Adjust margin based on drawer state only on non-mobile
-          transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: drawerOpen ? theme.transitions.duration.enteringScreen : theme.transitions.duration.leavingScreen,
-          }),
-          marginLeft: { sm: drawerOpen ? 0 : `-${drawerWidth}px` }, // This pulls content left when drawer closes
-          // OR alternative: marginLeft: { sm: 0 } and let the AppBar width handle the space
-          // Test which margin logic works best with your specific drawer animation.
-          // The key is that the AppBar width/margin AND main content width/margin should adjust together.
-          // Let's try adjusting based on AppBar's behaviour:
-          //marginLeft: 0, // Keep margin 0
-          width: { sm: `calc(100% - ${drawerOpen ? drawerWidth : 0}px)` }, // Adjust width like AppBar
-          transition: theme.transitions.create(['margin', 'width'], { // Add width to transition
+          minWidth: 0,
+          p: { xs: 2, sm: 3 },
+          bgcolor: 'background.default',
+          marginLeft: !isMobile && !drawerOpen ? `-${drawerWidth}px` : 0,
+          width: isMobile ? '100%' : `calc(100% - ${drawerOpen ? drawerWidth : 0}px)`,
+          transition: theme.transitions.create(['margin', 'width'], {
             easing: theme.transitions.easing.sharp,
             duration: drawerOpen ? theme.transitions.duration.enteringScreen : theme.transitions.duration.leavingScreen,
           }),
         }}
       >
-        <Toolbar /> {/* Spacer for content below AppBar */}
+        <Toolbar sx={{ minHeight: { xs: theme.layout.topbarHeight, sm: theme.layout.topbarHeight } }} /> {/* Spacer for content below AppBar */}
         <Outlet /> {/* Child routes render here */}
       </Box>
     </Box>
   );
 };
+
+MainLayout.propTypes = {
+  drawerWidth: PropTypes.number.isRequired,
+  isMobile: PropTypes.bool.isRequired,
+  drawerOpen: PropTypes.bool.isRequired,
+  handleDrawerToggle: PropTypes.func.isRequired,
+  onToggleTheme: PropTypes.func.isRequired,
+};
+
 export default MainLayout;

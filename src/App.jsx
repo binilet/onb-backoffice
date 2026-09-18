@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles'; // Assuming theme is created here or imported
+import { lazy, Suspense, useMemo, useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { getPreviewUser } from './marketplace/navigation';
+import { ThemeProvider } from '@mui/material/styles';
+import { getAppTheme } from '../theme';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import CssBaseline from '@mui/material/CssBaseline'; // Keep CssBaseline at top level
 import Box from '@mui/material/Box';
@@ -32,14 +35,27 @@ import AuotoSettingComponent from './components/AutoSettingComponent';
 
 
 
-// Define theme (or import it)
-const theme = createTheme({
-  typography: {
-    fontFamily: `'Inter', sans-serif`,
-  },
-});
+const ShopGamesPreview = import.meta.env.DEV
+  ? lazy(() => import('./components/ShopGames'))
+  : null;
+const ShopListPreview = import.meta.env.DEV
+  ? lazy(() => import('./components/ShopList'))
+  : null;
+const ShopCreatePreview = import.meta.env.DEV
+  ? lazy(() => import('./components/ShopCreate'))
+  : null;
 
-const drawerWidth = 240; // Define drawer width
+const MarketplacePreview = ({ component: Preview, onToggleTheme }) => {
+  const location = useLocation();
+  const currentUser = getPreviewUser(location.search);
+  if (!currentUser) return <NotFoundPage />;
+  return <Preview currentUser={currentUser} onToggleTheme={onToggleTheme} />;
+};
+
+MarketplacePreview.propTypes = {
+  component: PropTypes.elementType.isRequired,
+  onToggleTheme: PropTypes.func.isRequired,
+};
 
 const HomeRedirect = () => {
   const user = useSelector((state) => state.auth._current_user);
@@ -50,6 +66,23 @@ const HomeRedirect = () => {
 };
 
 const App = () => {
+  const [mode, setMode] = useState(() => {
+    try {
+      return localStorage.getItem('admin-theme-mode') === 'dark' ? 'dark' : 'light';
+    } catch {
+      return 'light';
+    }
+  });
+  const theme = useMemo(() => getAppTheme(mode), [mode]);
+  const toggleTheme = () => {
+    const nextMode = mode === 'light' ? 'dark' : 'light';
+    setMode(nextMode);
+    try {
+      localStorage.setItem('admin-theme-mode', nextMode);
+    } catch {
+      return;
+    }
+  };
 
   const [drawerOpen, setDrawerOpen] = useState(true); // Keep drawer open by default on desktop?
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -93,14 +126,33 @@ const App = () => {
           <Route
             element={
               <MainLayout
-                drawerWidth={drawerWidth}
+                drawerWidth={theme.layout.drawerWidth}
                 isMobile={isMobile}
                 drawerOpen={drawerOpen}
                 handleDrawerToggle={handleDrawerToggle}
+                onToggleTheme={toggleTheme}
               />
             }
           >
-            {/* Outlet will render these components within MainLayout */}
+            {import.meta.env.DEV && (
+              <>
+                <Route path="/marketplace/shop-games" element={
+                  <Suspense fallback={<CircularProgress />}>
+                    <MarketplacePreview component={ShopGamesPreview} onToggleTheme={toggleTheme} />
+                  </Suspense>
+                } />
+                <Route path="/marketplace/shops" element={
+                  <Suspense fallback={<CircularProgress />}>
+                    <MarketplacePreview component={ShopListPreview} onToggleTheme={toggleTheme} />
+                  </Suspense>
+                } />
+                <Route path="/marketplace/shops/create" element={
+                  <Suspense fallback={<CircularProgress />}>
+                    <MarketplacePreview component={ShopCreatePreview} onToggleTheme={toggleTheme} />
+                  </Suspense>
+                } />
+              </>
+            )}
             <Route
               path="/"
               element={

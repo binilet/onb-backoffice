@@ -17,10 +17,8 @@ import {
   TableRow,
   TextField,
   Typography,
-  useTheme,
   Avatar,
   Chip,
-  alpha,
   Tabs,
   Tab,
   Button,
@@ -33,47 +31,30 @@ import {
   MonetizationOn as MonetizationOnIcon,
   MoneyOff as MoneyOffIcon,
   NewReleasesSharp as NewIcon,
-  TrendingUp as TrendingUpIcon,
   Search as SearchIcon,
   Edit as EditIcon,
   History as HistoryIcon,
   Person as PersonIcon,
-  PersonAdd as PersonAddIcon,
   Phone as PhoneIcon,
-  AccountBalanceWallet as WalletIcon,
   Download as DownloadIcon,
 } from "@mui/icons-material";
 
+import { numericFontFamily } from "../../../theme";
 import TransactionHistoryModal from "./TransactionHistoryModal";
 
 const UsersTable = ({ users = [], handleEdit, handleTransactionhistory }) => {
-  const theme = useTheme();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(50);
   const [open, setOpen] = useState(false);
 
   const [filteredUsers, setFilteredUsers] = useState(users);
 
-  const handleFilteredUsers = (filtered) =>{
+  const handleFilteredUsers = (filtered) => {
     setFilteredUsers(filtered);
-  }
+  };
 
   const handleHistoryModal = async (user) => {
     await handleTransactionhistory(user);
     setOpen(true);
   };
-
-  /*const filteredUsers = users.filter(
-    (user) =>
-      user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.phone?.toLowerCase().includes(searchQuery.toLowerCase())
-  );*/
-  const paginatedUsers = filteredUsers.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
 
   const totalUsers = filteredUsers.length;
   const activeUsers = filteredUsers.filter((user) => user.isActive).length;
@@ -90,14 +71,12 @@ const UsersTable = ({ users = [], handleEdit, handleTransactionhistory }) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const newUsersCount = filteredUsers.filter((user) => {
-    //console.log(user.createdAt);
     const createdDate = new Date(user.createdAt);
     return createdDate >= today;
   }).length;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1400, mx: "auto" }}>
-      {/* Summary Cards */}
+    <Box>
       <SummaryCards
         totalUsers={totalUsers}
         activeUsers={activeUsers}
@@ -118,6 +97,7 @@ const UsersTable = ({ users = [], handleEdit, handleTransactionhistory }) => {
     </Box>
   );
 };
+
 function SummaryCards({
   totalUsers,
   activeUsers,
@@ -126,158 +106,67 @@ function SummaryCards({
   totalUnhealthyCredit,
   newUsers,
 }) {
-  const theme = useTheme();
-  
   const stats = [
-    {
-      label: "Total Users",
-      value: totalUsers,
-      color: "primary",
-      icon: <PersonIcon />,
-      change: totalUsers !== 0 ? `${((totalUsers / totalUsers) * 100).toFixed(2)}%` : "0%",
-      changeType: "positive",
-    },
-    {
-      label: "Active Users",
-      value: activeUsers,
-      color: "success",
-      icon: <CheckCircleIcon />,
-      change: totalUsers !== 0 ? `${((activeUsers / totalUsers) * 100).toFixed(2)}%` : "0%",
-      changeType: "positive",
-    },
-    {
-      label: "Inactive Users",
-      value: inactiveUsers,
-      color: "error",
-      icon: <CancelIcon />,
-      change: totalUsers !== 0 ? `${((inactiveUsers / totalUsers) * 100).toFixed(2)}%` : "0%",
-      changeType: "negative",
-    },
-    {
-      label: "Healthy Credit",
-      value: `$${totalHealthyCredit?.toLocaleString() || "0"}`,
-      color: "success",
-      icon: <MonetizationOnIcon />,
-      change: totalUnhealthyCredit + totalHealthyCredit !== 0
-        ? `${((totalHealthyCredit / (totalUnhealthyCredit + totalHealthyCredit)) * 100).toFixed(2)}%`
-        : "0%",
-      changeType: "positive",
-    },
-    {
-      label: "Unhealthy Credit",
-      value: `$${totalUnhealthyCredit?.toLocaleString() || "0"}`,
-      color: "warning",
-      icon: <MoneyOffIcon />,
-      change: totalUnhealthyCredit + totalHealthyCredit !== 0
-        ? `${((totalUnhealthyCredit / (totalUnhealthyCredit + totalHealthyCredit)) * 100).toFixed(2)}%`
-        : "0%",
-      changeType: "negative",
-    },
-    {
-      label: "New Users",
-      value: `${newUsers?.toLocaleString() || "0"}`,
-      color: "primary",
-      icon: <NewIcon />,
-      change: totalUsers !== 0 ? `${((newUsers / totalUsers) * 100).toFixed(2)}%` : "0%",
-      changeType: "positive",
-    },
+    { label: "Total users", value: totalUsers?.toLocaleString() || "0", color: "primary.main", icon: <PersonIcon /> },
+    { label: "Active users", value: activeUsers?.toLocaleString() || "0", color: "success.main", icon: <CheckCircleIcon /> },
+    { label: "Inactive users", value: inactiveUsers?.toLocaleString() || "0", color: "error.main", icon: <CancelIcon /> },
+    { label: "Healthy credit", value: totalHealthyCredit?.toLocaleString() || "0", color: "success.main", icon: <MonetizationOnIcon />, numeric: true },
+    { label: "Unhealthy credit", value: totalUnhealthyCredit?.toLocaleString() || "0", color: "warning.main", icon: <MoneyOffIcon />, numeric: true },
+    { label: "New today", value: newUsers?.toLocaleString() || "0", color: "primary.main", icon: <NewIcon /> },
   ];
 
   return (
-    <Grid container spacing={2} sx={{ mb: 3 }}>
+    <Grid container spacing={1} sx={{ mb: 2 }}>
       {stats.map((stat, index) => (
         <Grid item xs={12} sm={6} md={4} lg={2} key={index}>
           <Card
             elevation={0}
             sx={{
-              height: '100%',
-              borderRadius: 2,
-              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              backgroundColor: theme.palette.background.paper,
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: `0 4px 12px ${alpha(theme.palette[stat.color].main, 0.1)}`,
-                borderColor: alpha(theme.palette[stat.color].main, 0.2),
-              },
+              height: "100%",
+              bgcolor: "background.paper",
+              "&:hover": { borderColor: "primary.main" },
             }}
           >
-            <CardContent sx={{ p: 2 }}>
-              {/* Header with icon and change indicator */}
+            <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   mb: 1.5,
                 }}
               >
                 <Box
                   sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 1.5,
-                    backgroundColor: alpha(theme.palette[stat.color].main, 0.1),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: theme.palette[stat.color].main,
-                    '& svg': {
-                      fontSize: 18,
-                    },
+                    width: 32,
+                    height: 32,
+                    borderRadius: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: stat.color,
+                    bgcolor: "background.default",
+                    "& svg": { fontSize: 18 },
                   }}
                 >
                   {stat.icon}
                 </Box>
-                
-                <Chip
-                  size="small"
-                  label={stat.change}
-                  sx={{
-                    height: 20,
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    backgroundColor: alpha(
-                      stat.changeType === 'positive' 
-                        ? theme.palette.success.main 
-                        : theme.palette.error.main, 
-                      0.1
-                    ),
-                    color: stat.changeType === 'positive' 
-                      ? theme.palette.success.main 
-                      : theme.palette.error.main,
-                    border: 'none',
-                    '& .MuiChip-label': {
-                      px: 1,
-                    },
-                  }}
-                />
               </Box>
 
-              {/* Value */}
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 700,
-                  color: theme.palette.text.primary,
+                  fontFamily: stat.numeric ? numericFontFamily : undefined,
+                  color: "text.primary",
                   mb: 0.5,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem' },
                   lineHeight: 1.2,
                 }}
               >
                 {stat.value}
               </Typography>
 
-              {/* Label */}
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontWeight: 500,
-                  fontSize: '0.875rem',
-                  lineHeight: 1.2,
-                }}
-              >
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 {stat.label}
               </Typography>
             </CardContent>
@@ -287,9 +176,8 @@ function SummaryCards({
     </Grid>
   );
 }
-const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange }) => {
-  //const [users] = useState(mockUsers);
-  const [searchQuery, setSearchQuery] = useState("");
+
+const UserList = ({ users, handleEdit, handleHistoryModal, onFilteredUsersChange }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [activeTab, setActiveTab] = useState(0);
@@ -298,7 +186,6 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
   today.setHours(0, 0, 0, 0);
   const [filteredUsers, setFilteredUsers] = useState([]);
 
-  // Get new users (created today)
   const newUsers = useMemo(() => {
     return filteredUsers.filter((user) => {
       const createdDate = new Date(user.createdAt);
@@ -307,10 +194,8 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
     });
   }, [filteredUsers, today]);
 
-  // Get current tab data
   const currentTabData = activeTab === 0 ? filteredUsers : newUsers;
 
-  // Paginate the current tab data
   const paginatedUsers = useMemo(() => {
     return currentTabData.slice(
       page * rowsPerPage,
@@ -329,27 +214,7 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setPage(0); // Reset page when changing tabs
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-    setPage(0); // Reset page when searching
-  };
-
-
-
-  const getRoleColor = (role) => {
-    switch (role?.toLowerCase()) {
-      case "admin":
-        return "error";
-      case "agent":
-        return "warning";
-      case "user":
-        return "info";
-      default:
-        return "default";
-    }
+    setPage(0);
   };
 
   const formatBalance = (balance) => {
@@ -362,7 +227,6 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
   const exportToCSV = () => {
     const currentData = activeTab === 0 ? filteredUsers : newUsers;
 
-    // CSV headers
     const headers = [
       "Username",
       "Phone",
@@ -374,7 +238,6 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
       "Created Date",
     ];
 
-    // Convert data to CSV format
     const csvData = currentData.map((user) => [
       user.username || "",
       user.phone || "",
@@ -386,12 +249,10 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
       new Date(user.createdAt).toLocaleDateString(),
     ]);
 
-    // Combine headers and data
     const csvContent = [headers, ...csvData]
       .map((row) => row.map((field) => `"${field}"`).join(","))
       .join("\n");
 
-    // Create and download file
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -408,252 +269,162 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
-   
   const handleFilteredUsersChange = (filtered) => {
     setFilteredUsers(filtered);
     onFilteredUsersChange(filtered);
   };
 
   return (
-    <Box sx={{ p: 3, bgcolor: "grey.50", minHeight: "100vh" }}>
-      <Card
-        elevation={0}
-        sx={{ borderRadius: 3, border: "1px solid", borderColor: "grey.200" }}
-      >
-        <CardContent sx={{ p: 3 }}>
-          {/* Search Bar */}
-           <SearchBarComponent
+    <Box sx={{ mt: 2 }}>
+      <Card elevation={0}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <SearchBarComponent
             users={users}
             onFilteredUsersChange={handleFilteredUsersChange}
             exportToCSV={exportToCSV}
           />
 
-          {/* Tabs */}
-          <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              sx={{
-                "& .MuiTab-root": {
-                  textTransform: "none",
-                  fontWeight: 500,
-                },
-              }}
-            >
-              <Tab
-                label={
-                  // <Badge
-                  //   badgeContent={filteredUsers.length}
-                  //   color="primary"
-                  //   sx={{ '& .MuiBadge-badge': { right: -12 } }}
-                  // >
-                  <>All Users</>
-                }
-                sx={{ marginRight: 4 }}
-              />
-              <Tab
-                label={
-                  // <Badge
-                  //   badgeContent={newUsers.length}
-                  //   color="success"
-                  //   sx={{ '& .MuiBadge-badge': { right: -12 } }}
-                  // >
-                  <>New Users</>
-                }
-              />
+          <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+            <Tabs value={activeTab} onChange={handleTabChange}>
+              <Tab label="All users" sx={{ mr: 3 }} />
+              <Tab label="New users" />
             </Tabs>
           </Box>
 
-          {/* Table */}
           <TableContainer
             component={Paper}
             elevation={0}
             sx={{
-              borderRadius: 2,
-              border: "1px solid",
-              borderColor: "grey.200",
-              overflow: "hidden",
+              border: 1,
+              borderColor: "divider",
+              bgcolor: "background.paper",
             }}
           >
-            <Table>
+            <Table size="small">
               <TableHead>
-                <TableRow sx={{ bgcolor: "grey.50" }}>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    User
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Contact
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Role
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Agent ID
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Admin ID
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Balance
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Promo Balance
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Invited By
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Status
-                  </TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 600, color: "text.primary" }}
-                    align="center"
-                  >
-                    Actions
-                  </TableCell>
+                <TableRow>
+                  <TableCell>User</TableCell>
+                  <TableCell>Contact</TableCell>
+                  <TableCell>Role</TableCell>
+                  <TableCell>Agent ID</TableCell>
+                  <TableCell>Admin ID</TableCell>
+                  <TableCell align="right">Balance</TableCell>
+                  <TableCell align="right">Promo balance</TableCell>
+                  <TableCell>Invited by</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {paginatedUsers.length > 0 ? (
                   paginatedUsers.map((user) => (
-                    <TableRow
-                      key={user._id}
-                      hover
-                      sx={{
-                        "&:hover": {
-                          bgcolor: "action.hover",
-                        },
-                        "&:last-child td": { border: 0 },
-                      }}
-                    >
+                    <TableRow key={user._id} hover sx={{ "&:last-child td": { border: 0 } }}>
                       <TableCell>
-                        <Stack direction="row" alignItems="center" spacing={2}>
+                        <Stack direction="row" alignItems="center" spacing={1.5}>
                           <Avatar
                             sx={{
-                              bgcolor: "primary.light",
-                              width: 40,
-                              height: 40,
-                              fontSize: "1rem",
+                              bgcolor: "background.default",
+                              color: "primary.main",
+                              width: 32,
+                              height: 32,
+                              fontSize: "0.875rem",
+                              fontWeight: 600,
                             }}
                           >
                             {user.username?.charAt(0).toUpperCase() || "U"}
                           </Avatar>
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight={600}>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="subtitle2" noWrap>
                               {user.username}
                             </Typography>
                             <Typography
                               variant="caption"
                               color="text.secondary"
+                              sx={{ fontFamily: numericFontFamily, fontSize: "0.6875rem" }}
                             >
-                              ID: {user._id}
+                              {user._id}
                             </Typography>
                           </Box>
                         </Stack>
                       </TableCell>
 
                       <TableCell>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <PhoneIcon fontSize="small" color="action" />
-                          <Typography variant="body2">{user.phone}</Typography>
+                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                          <PhoneIcon fontSize="small" color="action" sx={{ fontSize: "1rem" }} />
+                          <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>
+                            {user.phone}
+                          </Typography>
                         </Stack>
                       </TableCell>
 
                       <TableCell>
                         <Chip
                           label={user.role}
-                          color={getRoleColor(user.role)}
                           size="small"
-                          sx={{ fontWeight: 500 }}
+                          variant="outlined"
+                          sx={{ fontWeight: 600, height: 22 }}
                         />
                       </TableCell>
 
                       <TableCell>
-                        <Typography variant="body2" fontFamily="monospace">
+                        <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>
                           {user.agentId}
                         </Typography>
                       </TableCell>
 
                       <TableCell>
-                        <Typography variant="body2" fontFamily="monospace">
+                        <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>
                           {user.adminId}
                         </Typography>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell align="right">
                         <Typography
                           variant="subtitle2"
-                          fontWeight={600}
-                          color={
-                            user.current_balance >= 0
-                              ? "success.main"
-                              : "error.main"
-                          }
+                          sx={{
+                            fontFamily: numericFontFamily,
+                            color: user.current_balance >= 0 ? "text.primary" : "error.main",
+                          }}
                         >
-                          {user.current_balance >= 0 ? "+" : ""}
-                          {formatBalance(user.current_balance)} birr
+                          {formatBalance(user.current_balance)}
                         </Typography>
                       </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="subtitle2"
-                          fontWeight={600}
-                          color={
-                            user.current_balance >= 0
-                              ? "success.main"
-                              : "error.main"
-                          }
-                        >
-                          {user.current_balance >= 0 ? "+" : ""}
-                          {formatBalance(user.promo_balance)} birr
+
+                      <TableCell align="right">
+                        <Typography variant="subtitle2" sx={{ fontFamily: numericFontFamily }}>
+                          {formatBalance(user.promo_balance)}
                         </Typography>
                       </TableCell>
 
                       <TableCell>
-                        <Typography variant="body2" fontFamily="monospace">
-                          {user?.invitedBy || 'N/A'}
+                        <Typography variant="body2" color="text.secondary">
+                          {user?.invitedBy || "—"}
                         </Typography>
                       </TableCell>
 
                       <TableCell>
                         <Chip
+                          icon={user.isActive ? <CheckCircleIcon /> : <CancelIcon />}
                           label={user.isActive ? "Active" : "Inactive"}
-                          color={user.isActive ? "success" : "error"}
+                          color={user.isActive ? "success" : "default"}
                           size="small"
                           variant="outlined"
-                          sx={{ fontWeight: 500 }}
+                          sx={{ fontWeight: 600, height: 22 }}
                         />
                       </TableCell>
 
                       <TableCell align="center">
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          justifyContent="center"
-                        >
-                          <Tooltip title="Edit User">
-                            <IconButton
-                              onClick={() => handleEdit(user)}
-                              size="small"
-                              sx={{
-                                color: "primary.main",
-                                "&:hover": { bgcolor: "primary.lighter" },
-                              }}
-                            >
+                        <Stack direction="row" spacing={0.5} justifyContent="center">
+                          <Tooltip title="Edit">
+                            <IconButton onClick={() => handleEdit(user)} size="small" color="primary">
                               <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="View History">
-                            <IconButton
-                              onClick={() => handleHistoryModal(user)}
-                              size="small"
-                              sx={{
-                                color: "info.main",
-                                "&:hover": { bgcolor: "info.lighter" },
-                              }}
-                            >
+                          <Tooltip title="View history">
+                            <IconButton onClick={() => handleHistoryModal(user)} size="small" color="default">
                               <HistoryIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
@@ -663,11 +434,9 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
-                      <Typography variant="body1" color="text.secondary">
-                        {searchQuery
-                          ? "No users found matching your search criteria"
-                          : "No users found"}
+                    <TableCell colSpan={10} align="center" sx={{ py: 6 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        No users found
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -676,7 +445,6 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
             </Table>
           </TableContainer>
 
-          {/* Pagination */}
           <TablePagination
             component="div"
             count={currentTabData.length}
@@ -685,197 +453,114 @@ const UserList = ({ users, handleEdit, handleHistoryModal,onFilteredUsersChange 
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            sx={{
-              borderTop: "1px solid",
-              borderColor: "grey.200",
-              mt: 0,
-              "& .MuiTablePagination-toolbar": {
-                px: 2,
-                py: 1,
-              },
-            }}
           />
         </CardContent>
       </Card>
     </Box>
   );
 };
-const SearchBarComponent = ({ users, onFilteredUsersChange, exportToCSV }) => {
 
+const SearchBarComponent = ({ users, onFilteredUsersChange, exportToCSV }) => {
   const [generalSearch, setGeneralSearch] = useState("");
   const [agentIdSearch, setAgentIdSearch] = useState("");
   const [adminIdSearch, setAdminIdSearch] = useState("");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [activeTab, setActiveTab] = useState(0);
 
-  const handleGeneralSearchChange = (event) => {
-    setGeneralSearch(event.target.value);
-    setPage(0); // Reset page when searching
-  };
-
-  const handleAgentIdSearchChange = (event) => {
-    setAgentIdSearch(event.target.value);
-    setPage(0); // Reset page when searching
-  };
-
-  const handleAdminIdSearchChange = (event) => {
-    setAdminIdSearch(event.target.value);
-    setPage(0); // Reset page when searching
-  };
-
-  // Filter users based on all search queries
   const filteredUsers = useMemo(() => {
     return users?.filter((user) => {
-      // General search (username, phone, role, invitedBy)
-      const matchesGeneral = !generalSearch || 
+      const matchesGeneral =
+        !generalSearch ||
         user.username?.toLowerCase().includes(generalSearch.toLowerCase()) ||
         user.phone?.toLowerCase().includes(generalSearch.toLowerCase()) ||
         user.role?.toLowerCase().includes(generalSearch.toLowerCase()) ||
         user.invitedBy?.toLowerCase().includes(generalSearch.toLowerCase());
 
-      // Agent ID search
-      const matchesAgentId = !agentIdSearch || 
+      const matchesAgentId =
+        !agentIdSearch ||
         user.agentId?.toLowerCase().includes(agentIdSearch.toLowerCase());
 
-      // Admin ID search
-      const matchesAdminId = !adminIdSearch || 
+      const matchesAdminId =
+        !adminIdSearch ||
         user.adminId?.toLowerCase().includes(adminIdSearch.toLowerCase());
 
       return matchesGeneral && matchesAgentId && matchesAdminId;
     });
   }, [users, generalSearch, agentIdSearch, adminIdSearch]);
 
-  // Call the callback when filtered users change
   React.useEffect(() => {
     if (onFilteredUsersChange) {
       onFilteredUsersChange(filteredUsers);
     }
   }, [filteredUsers, onFilteredUsersChange]);
 
+  const hasFilters = generalSearch || agentIdSearch || adminIdSearch;
+
   return (
     <Box sx={{ mb: 3 }}>
-      <Grid container spacing={2} alignItems="center">
-        {/* General Search */}
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={12} sm={6} md={4}>
           <TextField
             fullWidth
             variant="outlined"
-            size="medium"
-            placeholder="Search by username, phone, role, invited by..."
+            placeholder="Search username, phone, role, invited by…"
             value={generalSearch}
-            onChange={handleGeneralSearchChange}
+            onChange={(e) => setGeneralSearch(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon color="action" />
+                  <SearchIcon color="action" sx={{ fontSize: "1.125rem" }} />
                 </InputAdornment>
               ),
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-              },
             }}
           />
         </Grid>
 
-        {/* Agent ID Search */}
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={3} md={2}>
           <TextField
             fullWidth
             variant="outlined"
-            size="medium"
-            placeholder="Search by agent ID"
+            placeholder="Agent ID"
             value={agentIdSearch}
-            onChange={handleAgentIdSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-              },
-            }}
+            onChange={(e) => setAgentIdSearch(e.target.value)}
           />
         </Grid>
 
-        {/* Admin ID Search */}
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={3} md={2}>
           <TextField
             fullWidth
             variant="outlined"
-            size="medium"
-            placeholder="Search by admin ID"
+            placeholder="Admin ID"
             value={adminIdSearch}
-            onChange={handleAdminIdSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-              },
-            }}
+            onChange={(e) => setAdminIdSearch(e.target.value)}
           />
         </Grid>
 
-        {/* Export Button */}
-        <Grid item xs={12} sm={6} md={3}>
-          <Button
-            fullWidth
-            variant="contained"
-            startIcon={<DownloadIcon />}
-            onClick={exportToCSV}
-            sx={{
-              bgcolor: 'success.main',
-              '&:hover': {
-                bgcolor: 'success.dark',
-              },
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              height: '56px', // Match TextField height
-            }}
-          >
-            Export to CSV
-          </Button>
+        <Grid item xs={12} sm={12} md={4}>
+          <Stack direction="row" spacing={1} alignItems="center" justifyContent={{ md: "flex-end" }}>
+            {hasFilters && (
+              <Typography variant="caption" color="text.secondary">
+                {filteredUsers?.length || 0} match(es)
+              </Typography>
+            )}
+            <Button
+              variant="outlined"
+              color="inherit"
+              onClick={() => {
+                setGeneralSearch("");
+                setAgentIdSearch("");
+                setAdminIdSearch("");
+              }}
+              disabled={!hasFilters}
+            >
+              Clear
+            </Button>
+            <Button variant="contained" startIcon={<DownloadIcon />} onClick={exportToCSV} disableElevation>
+              Export CSV
+            </Button>
+          </Stack>
         </Grid>
       </Grid>
-
-      {/* Search Results Summary */}
-      {(generalSearch || agentIdSearch || adminIdSearch) && (
-        <Box sx={{ mt: 2, p: 1, bgcolor: 'grey.100', borderRadius: 1 }}>
-          <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
-            Found {filteredUsers?.length || 0} user(s)
-            {generalSearch && ` matching "${generalSearch}"`}
-            {agentIdSearch && ` with agent ID "${agentIdSearch}"`}
-            {adminIdSearch && ` with admin ID "${adminIdSearch}"`}
-            {(generalSearch || agentIdSearch || adminIdSearch) && (
-              <Button
-                size="small"
-                onClick={() => {
-                  setGeneralSearch("");
-                  setAgentIdSearch("");
-                  setAdminIdSearch("");
-                }}
-                sx={{ ml: 1, textTransform: 'none', fontSize: '0.75rem' }}
-              >
-                Clear all
-              </Button>
-            )}
-          </Box>
-        </Box>
-      )}
     </Box>
   );
 };
+
 export default UsersTable;

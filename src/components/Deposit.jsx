@@ -479,7 +479,6 @@ const DepositPage = () => {
                       key={deposit.refId}
                       hover
                       sx={{ 
-                        '&:hover': { backgroundColor: '#f9f9f9' }, 
                         transition: 'background-color 0.2s',
                         borderLeft: '4px solid transparent',
                         '&:hover': {

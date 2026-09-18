@@ -54,6 +54,7 @@ import NaturePeopleIcon from '@mui/icons-material/NaturePeople';
 import { useTheme } from '@mui/material/styles';
 
 import JackpotPatternComponent from './jackpotPattern';
+import PatternGrid from './patternGrid';
 import ErrorModal from './ErrorModal';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -80,6 +81,26 @@ import GameDetailsDialog from './AutoGameDetail';
 
 const adjustToGMT3 = (dateString) => {
   return dateString;
+};
+
+const DYNAMIC_PATTERN_LABELS = {
+  any_line: 'Any Line',
+  any_two_line: 'Any Two Line',
+  any_three_line: 'Any Three Line',
+  any_half: 'Any Half',
+};
+
+const dynamicExampleGrid = (dynamicId) => {
+  const highlightedRows = {
+    any_line: [2],
+    any_two_line: [1, 3],
+    any_three_line: [0, 2, 4],
+    any_half: [0, 1, 2],
+  }[dynamicId];
+  if (!highlightedRows) return null;
+  return Array.from({ length: 5 }, (_, row) =>
+    Array.from({ length: 5 }, () => highlightedRows.includes(row))
+  );
 };
 
 //import { get_distinct_branch_names } from 'src/redux/slices/companySlice';
@@ -150,6 +171,9 @@ const AutoSettingComponent = () => {
 
   const [houseBonusBranches, setHouseBonusBranches] = useState([]);
 
+
+  const staticPattern = patterns?.find((p) => String(p.id) === String(patternId));
+  const dynamicExample = dynamicPatternId ? dynamicExampleGrid(dynamicPatternId) : null;
 
   const formatCurrency = (amount) => `$${amount ? amount.toFixed(2) : 0}`;
 
@@ -623,6 +647,51 @@ const AutoSettingComponent = () => {
                   </FormControl>
 
                 </Box>
+              </Grid>
+
+              <Grid item xs={12}>
+                {(patternId || dynamicExample) && (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                    {patternId && (
+                      <Box
+                        sx={{
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderRadius: 1,
+                          p: 1.5,
+                          bgcolor: 'background.paper',
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                          {staticPattern ? `Static pattern — ${staticPattern.name}` : 'Static pattern'}
+                        </Typography>
+                        {staticPattern?.grid ? (
+                          <PatternGrid grid={staticPattern.grid} editable={false} size={20} />
+                        ) : (
+                          <Typography variant="caption" color="text.disabled">
+                            Preview unavailable
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+                    {dynamicExample && (
+                      <Box
+                        sx={{
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderRadius: 1,
+                          p: 1.5,
+                          bgcolor: 'background.paper',
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                          {`Dynamic pattern example — ${DYNAMIC_PATTERN_LABELS[dynamicPatternId] || dynamicPatternId}`}
+                        </Typography>
+                        <PatternGrid grid={dynamicExample} editable={false} size={20} />
+                      </Box>
+                    )}
+                  </Box>
+                )}
               </Grid>
 
               {/* Has Jackpot Section */}

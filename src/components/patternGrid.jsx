@@ -11,9 +11,9 @@ const PatternGrid = ({ grid, editable, onCellClick, size = 50 }) => (
                 sx={{
                   width: size,
                   height: size,
-                  backgroundColor: cell ? 'primary.main' : '#ffffff',
+                  backgroundColor: cell ? 'primary.main' : 'background.default',
                   border: '2px solid',
-                  borderColor: cell ? 'primary.dark' : 'grey.400',
+                  borderColor: cell ? 'primary.dark' : 'divider',
                   borderRadius: editable?'8px':'none',
                   cursor: editable ? 'pointer' : 'default',
                   display: 'flex',
@@ -21,7 +21,7 @@ const PatternGrid = ({ grid, editable, onCellClick, size = 50 }) => (
                   justifyContent: 'center',
                   transition: 'background-color 0.3s ease, border-color 0.3s ease',
                   '&:hover': editable ? {
-                    backgroundColor: cell ? 'primary.light' : 'grey.200',
+                    backgroundColor: cell ? 'primary.light' : 'action.hover',
                   } : {},
                 }}
               />

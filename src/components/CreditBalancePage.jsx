@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -29,6 +29,7 @@ import {
   Info as InfoIcon,
 } from '@mui/icons-material';
 import { fetchCreditBalancesByDateRange, clearBalances } from '../state/slices/creditBalanceSlice';
+import { numericFontFamily } from '../../theme';
 
 const CreditBalancePage = () => {
   const dispatch = useDispatch();
@@ -69,9 +70,17 @@ const CreditBalancePage = () => {
   const summary = calculateSummary();
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4" fontWeight="600" color="text.primary">
+    <Box sx={{
+      p: { xs: 3, md: 4 }, minWidth: 0, color: 'text.primary',
+      '& .MuiCardContent-root': { p: 4, '&:last-child': { pb: 4 } },
+      '& input': { colorScheme: (theme) => theme.palette.mode },
+      '& .MuiTableCell-root': { whiteSpace: 'nowrap' },
+      '& .MuiTableCell-root:nth-of-type(7)': { whiteSpace: 'normal', overflowWrap: 'anywhere' },
+      '& .MuiTableBody-root .MuiTableCell-root:nth-of-type(-n+4)': { fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' },
+      '& .MuiTableRow-root:last-child .MuiTableCell-root': { borderBottom: 0 },
+    }}>
+      <Box sx={{ mb: 4, pb: 3, borderBottom: 1, borderColor: 'divider', display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h2" component="h1" color="text.primary">
           Credit Balance Dashboard
         </Typography>
         <Button
@@ -89,12 +98,12 @@ const CreditBalancePage = () => {
         <Grid item xs={12} md={4}>
           <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'primary.lighter' }}>
+              <Box sx={{ p: 2, borderRadius: 1, bgcolor: 'action.hover' }}>
                 <AccountBalance sx={{ color: 'primary.main' }} />
               </Box>
               <Box>
                 <Typography color="textSecondary" variant="body2">Total Balance</Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>
+<Typography variant="h2" sx={{ mt: 1, fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums', color: 'primary.main', overflowWrap: 'anywhere' }}>
                   ${summary.total.toFixed(2)}
                 </Typography>
               </Box>
@@ -105,12 +114,12 @@ const CreditBalancePage = () => {
         <Grid item xs={12} md={4}>
           <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'success.lighter' }}>
+              <Box sx={{ p: 2, borderRadius: 1, bgcolor: 'action.hover' }}>
                 <TrendingUp sx={{ color: 'success.main' }} />
               </Box>
               <Box>
                 <Typography color="textSecondary" variant="body2">Increased Balances</Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>{summary.increased}</Typography>
+                <Typography variant="h3" sx={{ mt: 1, fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' }}>{summary.increased}</Typography>
               </Box>
             </CardContent>
           </Card>
@@ -119,12 +128,12 @@ const CreditBalancePage = () => {
         <Grid item xs={12} md={4}>
           <Card elevation={0} sx={{ borderRadius: 2, border: 1, borderColor: 'divider' }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ p: 1.5, borderRadius: '50%', bgcolor: 'error.lighter' }}>
+              <Box sx={{ p: 2, borderRadius: 1, bgcolor: 'action.hover' }}>
                 <TrendingDown sx={{ color: 'error.main' }} />
               </Box>
               <Box>
                 <Typography color="textSecondary" variant="body2">Decreased Balances</Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>{summary.decreased}</Typography>
+                <Typography variant="h3" sx={{ mt: 1, fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' }}>{summary.decreased}</Typography>
               </Box>
             </CardContent>
           </Card>
@@ -163,7 +172,7 @@ const CreditBalancePage = () => {
                 onClick={handleDateFilter}
                 startIcon={<DateRange />}
                 fullWidth
-                sx={{ height: '40px' }}
+                sx={{ py: 2 }}
               >
                 Apply Filter
               </Button>
@@ -182,16 +191,16 @@ const CreditBalancePage = () => {
           borderColor: 'divider',
         }}
       >
-        <Table>
+        <Table size="small" aria-label="Credit balance history">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Phone</TableCell>
-              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Current Balance</TableCell>
-              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Previous Balance</TableCell>
-              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Change</TableCell>
-              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Created At</TableCell>
-              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Modified At</TableCell>
-              <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Remark</TableCell>
+              <TableCell>Phone</TableCell>
+              <TableCell align="right">Current Balance</TableCell>
+              <TableCell align="right">Previous Balance</TableCell>
+              <TableCell align="right">Change</TableCell>
+              <TableCell>Created At</TableCell>
+              <TableCell>Modified At</TableCell>
+              <TableCell>Remark</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -213,14 +222,15 @@ const CreditBalancePage = () => {
                     hover
                   >
                     <TableCell>{balance.phone}</TableCell>
-                    <TableCell>${balance.current_balance.toFixed(2)}</TableCell>
-                    <TableCell>${balance.previous_balance.toFixed(2)}</TableCell>
-                    <TableCell>
+                    <TableCell align="right">${balance.current_balance.toFixed(2)}</TableCell>
+                    <TableCell align="right">${balance.previous_balance.toFixed(2)}</TableCell>
+                    <TableCell align="right">
                       <Chip
                         size="small"
                         label={`${change >= 0 ? '+' : ''}${change.toFixed(2)}`}
                         color={change > 0 ? 'success' : change < 0 ? 'error' : 'default'}
-                        sx={{ minWidth: 80 }}
+                        variant="outlined"
+                        sx={{ fontFamily: numericFontFamily, fontVariantNumeric: 'tabular-nums' }}
                       />
                     </TableCell>
                     <TableCell>{balance.created_at ? new Date(balance.created_at).toLocaleString() : 'N/A'}</TableCell>
