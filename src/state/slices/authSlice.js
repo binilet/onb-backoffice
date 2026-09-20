@@ -5,15 +5,17 @@ const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_REACT_APP_API_URL,
 });
 
-axios.interceptors.response.use(
-    (response) => { 
-      if (response.status === 401) {
+const handleExpiredSession = (error) => {
+    if (error.response?.status === 401 && sessionStorage.getItem('token')) {
         sessionStorage.removeItem('token');
-        window.location.href = '/login';
-        return Promise.reject({ message: 'Unauthorized' });
-      }
-      return response;
-    });
+        if (window.location.pathname !== '/login') {
+            window.location.replace('/login?expired=1');
+        }
+    }
+    return Promise.reject(error);
+};
+
+axiosInstance.interceptors.response.use((response) => response, handleExpiredSession);
 
 export const loginUser = createAsyncThunk(
     'auth/loginUser',
@@ -23,8 +25,7 @@ export const loginUser = createAsyncThunk(
             params.append('grant_type','password');
             params.append('username',obj.phone);
             params.append('password',obj.password);
-            const response = await axiosInstance.post
-            ('/auth/login',params.toString(),{
+            const response = await axiosInstance.post('/auth/login', params.toString(), {
                 headers:{
                     'Content-Type':'application/x-www-form-urlencoded'
                 }
@@ -56,6 +57,21 @@ export const fetchUserInfo = createAsyncThunk(
         } catch (error) {
            // console.log(error);
             return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const changePassword = createAsyncThunk(
+    'auth/changePassword',
+    async ({ currentPassword, newPassword }, thunkAPI) => {
+        try {
+            const accessToken = sessionStorage.getItem('token');
+            await axiosInstance.post('/auth/change-password', { currentPassword, newPassword }, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return true;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data?.detail || 'Unable to change password');
         }
     }
 );
@@ -105,6 +121,8 @@ const authSlice = createSlice({
         .addCase(fetchUserInfo.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload?.detail; // Or a separate error state for user info
+            state.token = null;
+            state._current_user = null;
             sessionStorage.removeItem('token'); // Clear token if fetching user info fails
         });
     }

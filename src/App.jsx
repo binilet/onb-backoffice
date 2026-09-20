@@ -13,6 +13,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 // Import your components
 import MainLayout from './MainLayout'; // Adjust path
 import Login from './components/auth/Login';             // Adjust path
+import ForcePasswordChange from './components/auth/ForcePasswordChange';
 import PrivateRoute from './components/auth/PrivateRoute';   // Adjust path
 import DashboardComponent from './components/dashboard'; // Adjust path
 import Users from './components/Users';             // Adjust path
@@ -31,18 +32,18 @@ import ManualDepositsManager from './components/ManualPay';
 import ManualWithdrawManager from './components/manualWithdraw';
 import HagereOnlineInvite from './components/HagereInvite';
 import AuotoSettingComponent from './components/AutoSettingComponent';
+import ShopList from './components/ShopList';
+import StaffList from './components/StaffList';
+import ShopBalance from './components/ShopBalance';
+import PlayerRoomWallets from './components/PlayerRoomWallets';
+import ShopGames from './components/ShopGames';
+import ShopActionLog from './components/ShopActionLog';
 
 
 
 
 const ShopGamesPreview = import.meta.env.DEV
   ? lazy(() => import('./components/ShopGames'))
-  : null;
-const ShopListPreview = import.meta.env.DEV
-  ? lazy(() => import('./components/ShopList'))
-  : null;
-const ShopCreatePreview = import.meta.env.DEV
-  ? lazy(() => import('./components/ShopCreate'))
   : null;
 
 const MarketplacePreview = ({ component: Preview, onToggleTheme }) => {
@@ -61,6 +62,9 @@ const HomeRedirect = () => {
   const user = useSelector((state) => state.auth._current_user);
   if (user?.role === 'employee') {
     return <Navigate to="/hagere-invite" replace />;
+  }
+  if (user?.role === 'cashier') {
+    return <Navigate to="/marketplace/games" replace />;
   }
   return <DashboardComponent />;
 };
@@ -121,6 +125,7 @@ const App = () => {
         <Routes>
           {/* Public route - No Layout */}
           <Route path="/login" element={<Login />} />
+          <Route path="/change-password" element={<PrivateRoute><ForcePasswordChange /></PrivateRoute>} />
           <Route path="*" element={<NotFoundPage />} />
           {/* Routes requiring MainLayout */}
           <Route
@@ -141,22 +146,34 @@ const App = () => {
                     <MarketplacePreview component={ShopGamesPreview} onToggleTheme={toggleTheme} />
                   </Suspense>
                 } />
-                <Route path="/marketplace/shops" element={
-                  <Suspense fallback={<CircularProgress />}>
-                    <MarketplacePreview component={ShopListPreview} onToggleTheme={toggleTheme} />
-                  </Suspense>
-                } />
-                <Route path="/marketplace/shops/create" element={
-                  <Suspense fallback={<CircularProgress />}>
-                    <MarketplacePreview component={ShopCreatePreview} onToggleTheme={toggleTheme} />
-                  </Suspense>
-                } />
               </>
             )}
+            <Route path="/marketplace/shops" element={
+              <PrivateRoute allowedRoles={['system', 'agent']}>
+                <ShopList />
+              </PrivateRoute>
+            } />
+            <Route path="/marketplace/staff" element={
+              <PrivateRoute allowedRoles={['system', 'agent', 'admin']}>
+                <StaffList />
+              </PrivateRoute>
+            } />
+            <Route path="/marketplace/shop-balance" element={
+              <PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier']}>
+                <ShopBalance />
+              </PrivateRoute>
+            } />
+            <Route path="/marketplace/player-room-wallets" element={
+              <PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier']}>
+                <PlayerRoomWallets />
+              </PrivateRoute>
+            } />
+            <Route path="/marketplace/games" element={<PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier']}><ShopGames /></PrivateRoute>} />
+            <Route path="/marketplace/action-log" element={<PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier']}><ShopActionLog /></PrivateRoute>} />
             <Route
               path="/"
               element={
-                <PrivateRoute allowedRoles={['system', 'agent', 'admin', 'employee']}>
+                <PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier', 'employee']}>
                   <HomeRedirect />
                 </PrivateRoute>
               }

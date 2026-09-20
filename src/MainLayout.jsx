@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Outlet } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
@@ -14,8 +15,9 @@ import { useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import SidebarItem from './components/sidebar';
 import { navigationFor, getPreviewUser } from './marketplace/navigation';
+import { getShopBalance } from './marketplace/shopApi';
 
-import { Avatar, Stack } from '@mui/material';
+import { Avatar, ButtonBase, Collapse, Stack } from '@mui/material';
 
 import Box from '@mui/material/Box';
 
@@ -29,8 +31,11 @@ import RsvpIcon from '@mui/icons-material/Rsvp';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import AccountBalanceWalletOutlined from '@mui/icons-material/AccountBalanceWalletOutlined';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ExpandLessOutlined from '@mui/icons-material/ExpandLessOutlined';
+import ExpandMoreOutlined from '@mui/icons-material/ExpandMoreOutlined';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import CircleIcon from '@mui/icons-material/Circle';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -52,13 +57,21 @@ const MainLayout = ({
   const username = user?.username || 'Guest';
   const role = user?.role || 'No Role Assigned';
   const hasLegacyAccess = ['system', 'agent', 'admin', 'employee'].includes(user?.role);
+  const showSuperOnlineNavigation = hasLegacyAccess;
   const avatarLetter = username.charAt(0).toUpperCase() || 'U';
   const marketplaceUser = import.meta.env.DEV ? getPreviewUser(location.search) : null;
   // const marketplaceItems = navigationFor(marketplaceUser?.role);
   const marketplaceItems = navigationFor(role);
-  const isMarketplace = import.meta.env.DEV && location.pathname.startsWith('/marketplace/');
+  const isMarketplace = location.pathname.startsWith('/marketplace/');
+  const [superOnlineOpen, setSuperOnlineOpen] = useState(false);
+  const [marketplaceOpen, setMarketplaceOpen] = useState(false);
+  const [shopBalance, setShopBalance] = useState(null);
   const isDark = theme.palette.mode === 'dark';
   const themeLabel = isDark ? 'Use light theme' : 'Use dark theme';
+  useEffect(() => {
+    if (!['system', 'agent', 'admin', 'cashier'].includes(user?.role) || !user?.phone) { setShopBalance(null); return; }
+    getShopBalance(user.phone).then((balance) => setShopBalance(balance.currentBalance)).catch(() => setShopBalance(null));
+  }, [user?.phone, user?.role]);
   const legacyItems = [
     { text: 'Dashboard', to: '/', icon: QueryStatsIcon, roles: ['system', 'agent', 'admin'] },
     { text: 'Users', to: '/users', icon: PeopleAltIcon, roles: ['system', 'agent', 'admin'] },
@@ -94,6 +107,16 @@ const MainLayout = ({
   );
   const handleLogout = () => {
     dispatch(logout());
+  };
+
+  const sectionToggleSx = {
+    width: '100%',
+    minHeight: theme.layout.navItemHeight,
+    px: 3,
+    color: 'text.secondary',
+    justifyContent: 'space-between',
+    borderRadius: 1,
+    '&:hover': { color: 'text.primary', bgcolor: 'surface.subtle' },
   };
 
   const drawer = (
@@ -157,55 +180,79 @@ const MainLayout = ({
           py: 3,
         }}
       >
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ px: 3, pt: 1, pb: 2, display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
+        {showSuperOnlineNavigation && <>
+        <ButtonBase
+          onClick={() => setSuperOnlineOpen((open) => !open)}
+          aria-expanded={superOnlineOpen}
+          aria-controls="super-online-navigation"
+          sx={sectionToggleSx}
         >
-          Super Online
-        </Typography>
-        {legacyItems.map(renderLegacyItem)}
-        {(!hasLegacyAccess || role === 'system' || role === 'employee') && (
-          <>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ px: 3, pt: 3, pb: 2, mt: 3, borderTop: 1, borderColor: 'divider', display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
+          <Typography component="span" variant="caption" fontWeight={600}>Hagere Online</Typography>
+          {superOnlineOpen ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
+        </ButtonBase>
+        <Collapse in={superOnlineOpen} timeout="auto" id="super-online-navigation">
+          <Box sx={{ pt: 1 }}>
+            {legacyItems.map(renderLegacyItem)}
+            {(!hasLegacyAccess || role === 'system' || role === 'employee') && (
+              <>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ px: 3, pt: 3, pb: 2, mt: 3, borderTop: 1, borderColor: 'divider', display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
+                >
+                  Finance
+                </Typography>
+                {financeItems.map(renderLegacyItem)}
+              </>
+            )}
+            {!hasLegacyAccess && (
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 3, py: 2, overflowWrap: 'anywhere' }}>
+                Sign in with a Super Online account to access these pages.
+              </Typography>
+            )}
+          </Box>
+        </Collapse>
+        </>}
+        {marketplaceItems.length > 0 && (
+          <Box sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: 'divider' }}>
+            <ButtonBase
+              onClick={() => setMarketplaceOpen((open) => !open)}
+              aria-expanded={marketplaceOpen}
+              aria-controls="marketplace-navigation"
+              sx={sectionToggleSx}
             >
-              Finance
-            </Typography>
-            {financeItems.map(renderLegacyItem)}
-          </>
-        )}
-        {!hasLegacyAccess && (
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 3, py: 2, overflowWrap: 'anywhere' }}>
-            Sign in with a Super Online account to access these pages.
-          </Typography>
-        )}
-        {import.meta.env.DEV && (
-          <>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ px: 3, pt: 3, pb: 2, mt: 3, borderTop: 1, borderColor: 'divider', display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
-            >
-              Marketplace · Preview
-            </Typography>
-            {marketplaceItems.map((item) => (
-              <SidebarItem
-                key={item.label}
-                icon={<item.icon />}
-                text={item.label}
-                to={item.ready && item.to ? `${item.to}${location.search}` : undefined}
-                active={Boolean(item.ready && item.to && (
-                  location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
+              <Typography component="span" variant="caption" fontWeight={600}>Hagere Shops</Typography>
+              {marketplaceOpen ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
+            </ButtonBase>
+            <Collapse in={marketplaceOpen} timeout="auto" id="marketplace-navigation">
+              <Box sx={{ pt: 1 }}>
+                {marketplaceItems.map((group) => (
+                  <Box key={group.label} sx={{ '& + &': { mt: 3 } }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ px: 3, pt: 2, pb: 1, display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
+                    >
+                      {group.label}
+                    </Typography>
+                    {group.items.map((item) => (
+                      <SidebarItem
+                        key={item.label}
+                        icon={<item.icon />}
+                        text={item.label}
+                        to={item.ready && item.to ? `${item.to}${location.search}` : undefined}
+                        active={Boolean(item.ready && item.to && (
+                          location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
+                        ))}
+                        disabled={!item.ready || !item.to}
+                        onClick={handleNavigation}
+                      />
+                    ))}
+                  </Box>
                 ))}
-                disabled={!item.ready || !item.to}
-                onClick={handleNavigation}
-              />
-            ))}
-            
-          </>
+              </Box>
+            </Collapse>
+          </Box>
         )}
       </Box>
 
@@ -334,9 +381,17 @@ const MainLayout = ({
             sx={{ flexGrow: 1, minWidth: 0, py: 2, fontWeight: 500, overflowWrap: 'anywhere' }}
           >
             {isMarketplace
-              ? `Marketplace · Preview · ${marketplaceUser?.role || 'No scope'}`
-              : `Super Online · ${hasLegacyAccess ? role : 'Guest'}`}
+              ? `Hagere Shops · ${role || marketplaceUser?.role || 'No scope'}`
+              : `${hasLegacyAccess ? 'Super Online' : 'Marketplace'} · ${hasLegacyAccess ? role : role === 'cashier' ? 'cashier' : 'Guest'}`}
           </Typography>
+          {shopBalance !== null && (
+            <Tooltip title="Your Shop Balance">
+              <Stack direction="row" alignItems="center" gap={1} sx={{ color: 'text.primary', flexShrink: 0 }}>
+                <AccountBalanceWalletOutlined color="primary" />
+                <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap' }}>{Number(shopBalance).toLocaleString()} pts</Typography>
+              </Stack>
+            </Tooltip>
+          )}
           <Tooltip title={themeLabel}>
             <IconButton color="inherit" onClick={onToggleTheme} aria-label={themeLabel}>
               {isDark ? <LightModeOutlined /> : <DarkModeOutlined />}

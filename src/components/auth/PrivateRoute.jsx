@@ -1,14 +1,19 @@
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 const SUPER_ROLES = ['system'];
 
 export default function PrivateRoute({ children, allowedRoles }) {
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth._current_user || {});
+  const location = useLocation();
 
   if (!token) return <Navigate to="/login" replace />;
+
+  if (user?.mustChangePassword && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
+  }
 
   if (allowedRoles && !SUPER_ROLES.includes(user?.role) && !allowedRoles.includes(user?.role)) {
     return <Navigate to="/notfound" replace />;
