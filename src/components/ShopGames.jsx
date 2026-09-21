@@ -631,6 +631,7 @@ export default function ShopGames() {
         <DialogActions>
           {canControlGames && detail && <Button startIcon={<EditOutlined />} onClick={() => openEdit(detail)}>{detail.status === "PENDING" ? "Edit game" : "Edit note"}</Button>}
           {canControlGames && detail && detail.status !== "VOID" && detail.status !== "COMPLETE" && <>
+            {detail.status === "PENDING" && <Button color="success" variant="contained" disabled={lifecycleSaving || detail.isFrozen || !detail.totalWinning} onClick={() => lifecycle("START")}>Start game</Button>}
             <Button disabled={lifecycleSaving} onClick={() => lifecycle(detail.isFrozen ? "UNFREEZE" : "FREEZE")}>{detail.isFrozen ? "Unfreeze" : "Freeze"}</Button>
             <Button color="error" disabled={lifecycleSaving} onClick={() => setVoidConfirm(true)}>Void game</Button>
           </>}
