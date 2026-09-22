@@ -149,31 +149,31 @@ const App = () => {
               </>
             )}
             <Route path="/marketplace/shops" element={
-              <PrivateRoute allowedRoles={['system', 'agent']}>
+              <PrivateRoute allowedRoles={['system', 'agent', 'subagent']}>
                 <ShopList />
               </PrivateRoute>
             } />
             <Route path="/marketplace/staff" element={
-              <PrivateRoute allowedRoles={['system', 'agent', 'admin']}>
+              <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin']}>
                 <StaffList />
               </PrivateRoute>
             } />
             <Route path="/marketplace/shop-balance" element={
-              <PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier']}>
+              <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}>
                 <ShopBalance />
               </PrivateRoute>
             } />
             <Route path="/marketplace/player-room-wallets" element={
-              <PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier']}>
+              <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}>
                 <PlayerRoomWallets />
               </PrivateRoute>
             } />
-            <Route path="/marketplace/games" element={<PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier']}><ShopGames /></PrivateRoute>} />
-            <Route path="/marketplace/action-log" element={<PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier']}><ShopActionLog /></PrivateRoute>} />
+            <Route path="/marketplace/games" element={<PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}><ShopGames /></PrivateRoute>} />
+            <Route path="/marketplace/action-log" element={<PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}><ShopActionLog /></PrivateRoute>} />
             <Route
               path="/"
               element={
-                <PrivateRoute allowedRoles={['system', 'agent', 'admin', 'cashier', 'employee']}>
+                <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier', 'employee']}>
                   <HomeRedirect />
                 </PrivateRoute>
               }
@@ -181,7 +181,7 @@ const App = () => {
             <Route
               path="/users"
               element={
-                <PrivateRoute allowedRoles={['system', 'agent', 'admin']}>
+                <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin']}>
                   <Users />
                 </PrivateRoute>
               }
@@ -189,7 +189,7 @@ const App = () => {
             <Route
               path="/admins"
               element={
-                <PrivateRoute allowedRoles={['system', 'agent']}>
+                <PrivateRoute allowedRoles={['system', 'agent', 'subagent']}>
                   <Admins />
                 </PrivateRoute>
               }
@@ -213,7 +213,7 @@ const App = () => {
             <Route
               path="/games"
               element={
-                <PrivateRoute allowedRoles={['system', 'agent', 'admin']}>
+                <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin']}>
                   <GameGrid />
                 </PrivateRoute>
               }
@@ -262,7 +262,7 @@ const App = () => {
             <Route
               path="/hagere-invite"
               element={
-                <PrivateRoute allowedRoles={['system', 'agent', 'admin', 'employee']}>
+                <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'employee']}>
                   <HagereOnlineInvite />
                 </PrivateRoute>
               }

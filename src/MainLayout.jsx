@@ -56,7 +56,7 @@ const MainLayout = ({
   const user = useSelector((state) => state.auth._current_user);
   const username = user?.username || 'Guest';
   const role = user?.role || 'No Role Assigned';
-  const hasLegacyAccess = ['system', 'agent', 'admin', 'employee'].includes(user?.role);
+  const hasLegacyAccess = ['system', 'agent', 'subagent', 'admin', 'employee'].includes(user?.role);
   const showSuperOnlineNavigation = hasLegacyAccess;
   const avatarLetter = username.charAt(0).toUpperCase() || 'U';
   const marketplaceUser = import.meta.env.DEV ? getPreviewUser(location.search) : null;
@@ -69,16 +69,19 @@ const MainLayout = ({
   const isDark = theme.palette.mode === 'dark';
   const themeLabel = isDark ? 'Use light theme' : 'Use dark theme';
   useEffect(() => {
-    if (!['system', 'agent', 'admin', 'cashier'].includes(user?.role) || !user?.phone) { setShopBalance(null); return; }
-    getShopBalance(user.phone).then((balance) => setShopBalance(balance.currentBalance)).catch(() => setShopBalance(null));
+    if (!['system', 'agent', 'subagent', 'admin', 'cashier'].includes(user?.role) || !user?.phone) { setShopBalance(null); return; }
+    const refreshShopBalance = () => getShopBalance(user.phone).then((balance) => setShopBalance(balance.currentBalance)).catch(() => setShopBalance(null));
+    refreshShopBalance();
+    window.addEventListener('shop-balance-changed', refreshShopBalance);
+    return () => window.removeEventListener('shop-balance-changed', refreshShopBalance);
   }, [user?.phone, user?.role]);
   const legacyItems = [
-    { text: 'Dashboard', to: '/', icon: QueryStatsIcon, roles: ['system', 'agent', 'admin'] },
-    { text: 'Users', to: '/users', icon: PeopleAltIcon, roles: ['system', 'agent', 'admin'] },
-    { text: 'Admins', to: '/admins', icon: LocalPolice, roles: ['system', 'agent'] },
+    { text: 'Dashboard', to: '/', icon: QueryStatsIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
+    { text: 'Users', to: '/users', icon: PeopleAltIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
+    { text: 'Admins', to: '/admins', icon: LocalPolice, roles: ['system', 'agent', 'subagent'] },
     { text: 'Agents', to: '/agents', icon: GroupWorkIcon, roles: ['system'] },
-    { text: 'Games', to: '/games', icon: RocketLaunchIcon, roles: ['system', 'agent', 'admin'] },
-    { text: 'Invite', to: '/hagere-invite', icon: RsvpIcon, roles: ['system', 'agent', 'admin', 'employee'] },
+    { text: 'Games', to: '/games', icon: RocketLaunchIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
+    { text: 'Invite', to: '/hagere-invite', icon: RsvpIcon, roles: ['system', 'agent', 'subagent', 'admin', 'employee'] },
   ];
   const financeItems = [
     { text: 'Credits', to: '/credits', icon: MonetizationOnIcon, roles: ['system'] },

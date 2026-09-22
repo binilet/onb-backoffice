@@ -110,6 +110,10 @@ export const updateUser = createAsyncThunk(
         role: updates.role ?? null,
         phone: updates.phone ?? null,
         agentId: updates.agentId ?? null,
+        shopId: updates.shopId ?? null,
+        branchId: updates.branchId ?? null,
+        parentPhone: updates.parentPhone ?? null,
+        parentCutPercent: updates.parentCutPercent ?? null,
         agentPercent: updates.agentPercent ?? null,
         isActive: updates.isActive ?? null, // Map isActive to is_active
         banUntil: updates.ban_until
@@ -275,12 +279,18 @@ const usersSlice = createSlice({
                 // If not in either, add to users
                 state.users = [...state.users, updatedUser];
               }
+            } else {
+              state.users = state.users.filter((user) => user._id !== updatedUser._id);
+              state.agents = state.agents.filter((user) => user._id !== updatedUser._id);
+              state.admins = state.admins.filter((user) => user._id !== updatedUser._id);
+              if (updatedUser.role === "admin") {
+                state.admins = [...state.admins, updatedUser];
+              }
             }
           })
           .addCase(updateUser.rejected, (state, action) => {
-            //state.update_status = "failed";
-            state.error = 'failed to update user';
-            //console.log(action.payload);
+            state.update_status = "failed";
+            state.error = action.payload || 'Failed to update user';
           })
           .addCase(generate_referral_link.pending, (state) => {
             state.referralUrlLoading = true;

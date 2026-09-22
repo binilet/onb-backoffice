@@ -9,7 +9,7 @@ const today = new Date().toISOString().slice(0, 10);
 const dateTime = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Addis_Ababa' });
 
 export default function ShopActionLog() {
-  const user = useSelector((state) => state.auth._current_user); const role = user?.role; const chooseShop = ['system', 'agent'].includes(role);
+  const user = useSelector((state) => state.auth._current_user); const role = user?.role; const chooseShop = ['system', 'agent', 'subagent'].includes(role);
   const [shops, setShops] = useState([]); const [branches, setBranches] = useState([]); const [logs, setLogs] = useState([]); const [date, setDate] = useState(today); const [shopId, setShopId] = useState(() => chooseShop ? '' : user?.shopId || ''); const [loadingOptions, setLoadingOptions] = useState(true); const [loading, setLoading] = useState(false); const [requested, setRequested] = useState(false); const [error, setError] = useState('');
   useEffect(() => { if (!chooseShop) setShopId(user?.shopId || ''); }, [chooseShop, user?.shopId]);
   useEffect(() => { Promise.all([getShops(), getBranches()]).then(([shopData, branchData]) => { setShops(shopData); setBranches(branchData); }).catch(() => setError('Unable to load shop filters.')).finally(() => setLoadingOptions(false)); }, []);

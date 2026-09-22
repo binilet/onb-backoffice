@@ -1,4 +1,4 @@
-import { Modal, CircularProgress, Box, Grid, Typography, TextField, Button, FormControl, InputLabel, Select, MenuItem, Switch, InputAdornment, IconButton } from '@mui/material';
+import { Modal, CircularProgress, Box, Grid, Typography, TextField, Button, FormControl, InputLabel, Select, MenuItem, Switch, InputAdornment, IconButton, Autocomplete } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { generate_referral_link, updateUser } from '../../state/slices/userSlice';
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { numericFontFamily } from '../../../theme';
+import { getBranches, getShops } from '../../marketplace/shopApi';
 
 const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) => {
 
@@ -25,6 +26,10 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
   const [ban_until, setBanUntil] = React.useState(
     editingUser ? editingUser.ban_until : ""
   );
+  const [shopId, setShopId] = React.useState(editingUser?.shopId || '');
+  const [branchId, setBranchId] = React.useState(editingUser?.branchId || '');
+  const [shops, setShops] = React.useState([]);
+  const [branches, setBranches] = React.useState([]);
 
   useEffect(() => {
     if (editingUser) {
@@ -38,6 +43,8 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
       setBanUntil(editingUser.banUntil);
       setAgentId(editingUser.agentId);
       setAdminId(editingUser.adminId);
+      setShopId(editingUser.shopId || '');
+      setBranchId(editingUser.branchId || '');
     } else {
       setId('');
       setCutPercent('');
@@ -49,6 +56,8 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
       setBanUntil('');
       setAgentId('');
       setAdminId('');
+      setShopId('');
+      setBranchId('');
     }
     setStatus(null);
   }, [editingUser]);
@@ -72,6 +81,16 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
     }
   }, [current_user]);
 
+  React.useEffect(() => {
+    if (!openModal || current_user.role !== 'system') return;
+    Promise.all([getShops(), getBranches()])
+      .then(([shopData, branchData]) => {
+        setShops(shopData);
+        setBranches(branchData);
+      })
+      .catch(() => setStatus('Unable to load Shop assignments.'));
+  }, [current_user.role, openModal]);
+
   const [status, setStatus] = React.useState(null);
   const [copied, setCopied] = React.useState(false);
 
@@ -82,6 +101,10 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
     }
     if (!role) {
       setStatus("Please select a role");
+      return;
+    }
+    if (role === 'cashier' && (!shopId || !branchId)) {
+      setStatus('Select a Shop and branch for the cashier.');
       return;
     }
 
@@ -105,6 +128,8 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
       agentId: agent_id,
       adminId: admin_id,
       adminPercent,
+      shopId: ['admin', 'cashier'].includes(role) ? shopId || null : null,
+      branchId: role === 'cashier' ? branchId || null : null,
     };
 
     if (editingUser) {
@@ -285,24 +310,64 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
               id="role"
               name="role"
               value={role}
-              onChange={(event) => setRole(event.target.value)}
+              onChange={(event) => {
+                const nextRole = event.target.value;
+                setRole(nextRole);
+                if (!['admin', 'cashier'].includes(nextRole)) setShopId('');
+                if (nextRole !== 'cashier') setBranchId('');
+              }}
               label="Role"
               sx={{ borderRadius: 2 }}
             >
-              {current_user.role === "system" && (
-                <MenuItem value="agent">agent</MenuItem>
-
-              )}
-              {current_user.role === "system" && (
-                <MenuItem value="employee">employee</MenuItem>
-
-              )}
-
-              {showFields && <MenuItem value="admin">admin</MenuItem>}
+              {current_user.role === "system" && <MenuItem value="agent">agent</MenuItem>}
+              {current_user.role === "system" && <MenuItem value="subagent">subagent</MenuItem>}
+              {current_user.role === "system" && <MenuItem value="admin">admin</MenuItem>}
+              {current_user.role === "system" && <MenuItem value="cashier">cashier</MenuItem>}
+              {current_user.role === "system" && <MenuItem value="employee">employee</MenuItem>}
               <MenuItem value="user">user</MenuItem>
               {/* <MenuItem value="admin">Admin</MenuItem> */}
             </Select>
           </FormControl>
+
+          {current_user.role === 'system' && ['admin', 'cashier'].includes(role) && (
+            <Autocomplete
+              options={shops}
+              value={shops.find((shop) => shop.shop_id === shopId) || null}
+              onChange={(_, shop) => {
+                setShopId(shop?.shop_id || '');
+                setBranchId('');
+              }}
+              getOptionLabel={(shop) => `${shop.shopName} · ${shop.shop_id}`}
+              isOptionEqualToValue={(option, value) => option.shop_id === value.shop_id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required={role === 'cashier'}
+                  label="Shop"
+                  placeholder="Search by Shop name or ID"
+                />
+              )}
+            />
+          )}
+
+          {current_user.role === 'system' && role === 'cashier' && (
+            <TextField
+              required
+              select
+              label="Branch"
+              value={branchId}
+              onChange={(event) => setBranchId(event.target.value)}
+              disabled={!shopId}
+            >
+              {branches
+                .filter((branch) => branch.shopId === shopId)
+                .map((branch) => (
+                  <MenuItem key={branch.branch_id} value={branch.branch_id}>
+                    {branch.branchName}
+                  </MenuItem>
+                ))}
+            </TextField>
+          )}
 
           <TextField
             name="banUntil"

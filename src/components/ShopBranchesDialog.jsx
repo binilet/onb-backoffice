@@ -24,7 +24,7 @@ function statusFor(branch) {
 
 export default function ShopBranchesDialog({ shop, open, onClose, onChanged }) {
   const role = useSelector((state) => state.auth._current_user?.role);
-  const canManage = role === 'system' || role === 'agent';
+  const canManage = ['system', 'agent', 'subagent'].includes(role);
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

@@ -59,6 +59,10 @@ const dateTime = new Intl.DateTimeFormat("en", {
   timeStyle: "short",
   timeZone: "Africa/Addis_Ababa",
 });
+const requestErrorMessage = (error, fallback) => {
+  const detail = error.response?.data?.detail;
+  return typeof detail === "string" ? detail : detail?.message || fallback;
+};
 
 const initialGameForm = (user) => ({
   shopId: user?.shopId || "",
@@ -155,6 +159,7 @@ export default function ShopGames() {
     [form.pattern, patterns],
   );
   const canControlGames = ["system", "admin", "cashier"].includes(user?.role);
+  const canEditGames = ["admin", "cashier"].includes(user?.role);
   const filteredBranches = useMemo(
     () => branches.filter((branch) => !filters.shopId || branch.shopId === filters.shopId),
     [branches, filters.shopId],
@@ -199,9 +204,10 @@ export default function ShopGames() {
     try {
       const updated = await updateGameLifecycle(detail.game_id, action);
       setDetail(updated);
+      if (action === "START") window.dispatchEvent(new Event("shop-balance-changed"));
       await load(filters);
     } catch (requestError) {
-      setError(requestError.response?.data?.detail || "Unable to update game.");
+      setError(requestErrorMessage(requestError, "Unable to update game."));
     } finally {
       setLifecycleSaving(false);
     }
@@ -279,7 +285,7 @@ export default function ShopGames() {
               Monitor collections, payouts, and game state across your authorized locations.
             </Typography>
           </Box>
-          {canControlGames && <Button variant="contained" startIcon={<AddCircleOutlineOutlined />} onClick={() => setOpen(true)}>
+          {canEditGames && <Button variant="contained" startIcon={<AddCircleOutlineOutlined />} onClick={() => setOpen(true)}>
             New game
           </Button>}
         </Stack>
@@ -384,7 +390,7 @@ export default function ShopGames() {
                 <TableCell align="right" sx={{ fontFamily: numericFontFamily }}>{game.totalCutAmount == null ? "—" : numberFormat.format(game.totalCutAmount)}</TableCell>
                 <TableCell align="right" sx={{ position: "sticky", right: 0, bgcolor: "background.paper", borderLeft: 1, borderColor: "divider" }}>
                   <Stack direction="row" justifyContent="flex-end">
-                    {canControlGames && game.status === "PENDING" && <IconButton aria-label={`Edit game ${game.game_id}`} onClick={() => openEdit(game)} size="small"><EditOutlined fontSize="small" /></IconButton>}
+                    {canEditGames && game.status === "PENDING" && <IconButton aria-label={`Edit game ${game.game_id}`} onClick={() => openEdit(game)} size="small"><EditOutlined fontSize="small" /></IconButton>}
                     <IconButton aria-label={`View game ${game.game_id}`} onClick={() => openDetails(game)} size="small"><VisibilityOutlined fontSize="small" /></IconButton>
                   </Stack>
                 </TableCell>
@@ -629,9 +635,9 @@ export default function ShopGames() {
           )}
         </DialogContent>
         <DialogActions>
-          {canControlGames && detail && <Button startIcon={<EditOutlined />} onClick={() => openEdit(detail)}>{detail.status === "PENDING" ? "Edit game" : "Edit note"}</Button>}
+          {canEditGames && detail && <Button startIcon={<EditOutlined />} onClick={() => openEdit(detail)}>{detail.status === "PENDING" ? "Edit game" : "Edit note"}</Button>}
           {canControlGames && detail && detail.status !== "VOID" && detail.status !== "COMPLETE" && <>
-            {detail.status === "PENDING" && <Button color="success" variant="contained" disabled={lifecycleSaving || detail.isFrozen || !detail.totalWinning} onClick={() => lifecycle("START")}>Start game</Button>}
+            {detail.status === "PENDING" && <Button color="success" variant="contained" disabled={lifecycleSaving || detail.isFrozen} onClick={() => lifecycle("START")}>Start game</Button>}
             <Button disabled={lifecycleSaving} onClick={() => lifecycle(detail.isFrozen ? "UNFREEZE" : "FREEZE")}>{detail.isFrozen ? "Unfreeze" : "Freeze"}</Button>
             <Button color="error" disabled={lifecycleSaving} onClick={() => setVoidConfirm(true)}>Void game</Button>
           </>}

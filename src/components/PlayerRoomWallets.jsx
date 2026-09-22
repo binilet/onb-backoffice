@@ -22,7 +22,7 @@ function initialLookup(role, user) {
 export default function PlayerRoomWallets() {
   const currentUser = useSelector((state) => state.auth._current_user);
   const role = currentUser?.role;
-  const canView = ['system', 'agent', 'admin', 'cashier'].includes(role);
+  const canView = ['system', 'agent', 'subagent', 'admin', 'cashier'].includes(role);
   const canTopUp = role === 'admin' || role === 'cashier';
   const [shops, setShops] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -113,7 +113,7 @@ export default function PlayerRoomWallets() {
     }
   };
 
-  const chooseShop = ['system', 'agent'].includes(role);
+  const chooseShop = ['system', 'agent', 'subagent'].includes(role);
 
   return <MarketplaceLayout title="Player room wallets" subtitle="Look up a player’s separate wallet for a shop. This is distinct from platform Shop Balance." showPreviewNotice={false}>
     {error && <Alert severity="error" variant="outlined" sx={{ mb: 4 }} onClose={() => setError('')}>{error}</Alert>}

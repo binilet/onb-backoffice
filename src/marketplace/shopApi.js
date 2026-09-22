@@ -1,9 +1,11 @@
-import axios from 'axios';
+import axios from "axios";
 
-const shopApi = axios.create({ baseURL: import.meta.env.VITE_REACT_APP_API_URL });
+const shopApi = axios.create({
+  baseURL: import.meta.env.VITE_REACT_APP_API_URL,
+});
 
 shopApi.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('token');
+  const token = sessionStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -11,26 +13,27 @@ shopApi.interceptors.request.use((config) => {
 shopApi.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && sessionStorage.getItem('token')) {
-      sessionStorage.removeItem('token');
-      if (window.location.pathname !== '/login') window.location.replace('/login?expired=1');
+    if (error.response?.status === 401 && sessionStorage.getItem("token")) {
+      sessionStorage.removeItem("token");
+      if (window.location.pathname !== "/login")
+        window.location.replace("/login?expired=1");
     }
     return Promise.reject(error);
   },
 );
 
 export async function getShops() {
-  const response = await shopApi.get('/shop/shops');
+  const response = await shopApi.get("/shop/shops");
   return response.data;
 }
 
 export async function getStaff() {
-  const response = await shopApi.get('/shop/staff');
+  const response = await shopApi.get("/shop/staff");
   return response.data;
 }
 
 export async function createStaff(payload) {
-  const response = await shopApi.post('/shop/staff', payload);
+  const response = await shopApi.post("/shop/staff", payload);
   return response.data;
 }
 
@@ -40,7 +43,7 @@ export async function updateStaff(phone, payload) {
 }
 
 export async function createShop(payload) {
-  const response = await shopApi.post('/shop/shops', payload);
+  const response = await shopApi.post("/shop/shops", payload);
   return response.data;
 }
 
@@ -54,12 +57,15 @@ export async function deleteShop(shopId) {
 }
 
 export async function getBranches() {
-  const response = await shopApi.get('/shop/branches');
+  const response = await shopApi.get("/shop/branches");
   return response.data;
 }
 
 export async function createBranch(shopId, payload) {
-  const response = await shopApi.post(`/shop/shops/${shopId}/branches`, payload);
+  const response = await shopApi.post(
+    `/shop/shops/${shopId}/branches`,
+    payload,
+  );
   return response.data;
 }
 
@@ -78,38 +84,60 @@ export async function getShopBalance(phone) {
 }
 
 export async function getShopBalanceLedgers(params) {
-  const response = await shopApi.get('/shop/balance-ledgers', { params });
+  const response = await shopApi.get("/shop/balance-ledgers", { params });
   return response.data;
 }
 
 export async function transferShopBalance(payload) {
-  const response = await shopApi.post('/shop/balances/transfers', payload);
+  const response = await shopApi.post("/shop/balances/transfers", payload);
   return response.data;
 }
 
 export async function getPlayerRoomWallet(playerPhone, params) {
-  const response = await shopApi.get(`/shop/player-room-wallets/${playerPhone}`, { params });
+  const response = await shopApi.get(
+    `/shop/player-room-wallets/${playerPhone}`,
+    { params },
+  );
   return response.data;
 }
 
 export async function getPlayerRoomWalletLedgers(playerPhone, params) {
-  const response = await shopApi.get(`/shop/player-room-wallets/${playerPhone}/ledgers`, { params });
+  const response = await shopApi.get(
+    `/shop/player-room-wallets/${playerPhone}/ledgers`,
+    { params },
+  );
   return response.data;
 }
 
 export async function topUpPlayerRoomWallet(payload) {
-  const response = await shopApi.post('/shop/player-room-wallets/topups', payload);
+  const response = await shopApi.post(
+    "/shop/player-room-wallets/topups",
+    payload,
+  );
   return response.data;
 }
 
 export async function getPlayerRoomWallets() {
-  const response = await shopApi.get('/shop/player-room-wallets');
+  const response = await shopApi.get("/shop/player-room-wallets");
   return response.data;
 }
 
-export async function getGames(params) { return (await shopApi.get('/shop/games', { params })).data; }
-export async function createGame(payload) { return (await shopApi.post('/shop/games', payload)).data; }
-export async function updateGame(gameId, payload) { return (await shopApi.patch(`/shop/games/${gameId}`, payload)).data; }
-export async function getGameParticipants(gameId) { return (await shopApi.get(`/shop/games/${gameId}/participants`)).data; }
-export async function updateGameLifecycle(gameId, action) { return (await shopApi.patch(`/shop/games/${gameId}/lifecycle`, { action })).data; }
-export async function getActionLogs(params) { return (await shopApi.get('/shop/action-logs', { params })).data; }
+export async function getGames(params) {
+  return (await shopApi.get("/shop/games", { params })).data;
+}
+export async function createGame(payload) {
+  return (await shopApi.post("/shop/games", payload)).data;
+}
+export async function updateGame(gameId, payload) {
+  return (await shopApi.patch(`/shop/games/${gameId}`, payload)).data;
+}
+export async function getGameParticipants(gameId) {
+  return (await shopApi.get(`/shop/games/${gameId}/participants`)).data;
+}
+export async function updateGameLifecycle(gameId, action) {
+  return (await shopApi.patch(`/shop/games/${gameId}/lifecycle`, { action }))
+    .data;
+}
+export async function getActionLogs(params) {
+  return (await shopApi.get("/shop/action-logs", { params })).data;
+}
