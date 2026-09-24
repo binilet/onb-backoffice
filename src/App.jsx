@@ -36,6 +36,8 @@ import ShopList from './components/ShopList';
 import StaffList from './components/StaffList';
 import ShopBalance from './components/ShopBalance';
 import PlayerRoomWallets from './components/PlayerRoomWallets';
+import DepositApprovals from './components/DepositApprovals';
+import WithdrawalApprovals from './components/WithdrawalApprovals';
 import ShopGames from './components/ShopGames';
 import ShopActionLog from './components/ShopActionLog';
 
@@ -168,6 +170,12 @@ const App = () => {
                 <PlayerRoomWallets />
               </PrivateRoute>
             } />
+            <Route path="/marketplace/deposit-approvals" element={
+              <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}>
+                <DepositApprovals />
+              </PrivateRoute>
+            } />
+            <Route path="/marketplace/withdrawal-approvals" element={<PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}><WithdrawalApprovals /></PrivateRoute>} />
             <Route path="/marketplace/games" element={<PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}><ShopGames /></PrivateRoute>} />
             <Route path="/marketplace/action-log" element={<PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}><ShopActionLog /></PrivateRoute>} />
             <Route

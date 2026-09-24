@@ -116,9 +116,17 @@ export async function topUpPlayerRoomWallet(payload) {
   );
   return response.data;
 }
+export async function getPlayerRoomDeposits(params = {}) {
+  return (await shopApi.get("/shop/player-room-deposits", { params: { status: "PENDING", ...params } })).data;
+}
+export async function decidePlayerRoomDeposit(depositId, payload) {
+  return (await shopApi.patch(`/shop/player-room-deposits/${depositId}`, payload)).data;
+}
+export async function getPlayerRoomWithdrawals(params = {}) { return (await shopApi.get("/shop/player-room-withdrawals", { params: { status: "PENDING", ...params } })).data; }
+export async function disbursePlayerRoomWithdrawal(withdrawalId) { return (await shopApi.patch(`/shop/player-room-withdrawals/${withdrawalId}/disburse`)).data; }
 
-export async function getPlayerRoomWallets() {
-  const response = await shopApi.get("/shop/player-room-wallets");
+export async function getPlayerRoomWallets(params = {}) {
+  const response = await shopApi.get("/shop/player-room-wallets", { params });
   return response.data;
 }
 

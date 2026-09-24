@@ -4,6 +4,7 @@ import GroupsOutlined from "@mui/icons-material/GroupsOutlined";
 import SavingsOutlined from "@mui/icons-material/SavingsOutlined";
 import AccountBalanceWalletOutlined from "@mui/icons-material/AccountBalanceWalletOutlined";
 import FactCheckOutlined from "@mui/icons-material/FactCheckOutlined";
+import PendingActionsOutlined from "@mui/icons-material/PendingActionsOutlined";
 
 export const MARKETPLACE_ROLES = ["system", "agent", "subagent", "admin", "cashier"];
 
@@ -37,6 +38,14 @@ export const navigationGroups = [
         roles: ["system", "agent", "subagent", "admin", "cashier"],
         ready: true,
       },
+      {
+        label: "Deposit approvals",
+        to: "/marketplace/deposit-approvals",
+        icon: PendingActionsOutlined,
+        roles: ["system", "agent", "subagent", "admin", "cashier"],
+        ready: true,
+      },
+      { label: "Withdrawal approvals", to: "/marketplace/withdrawal-approvals", icon: PendingActionsOutlined, roles: ["system", "agent", "subagent", "admin", "cashier"], ready: true },
       {
         label: "Player room wallets",
         to: "/marketplace/player-room-wallets",

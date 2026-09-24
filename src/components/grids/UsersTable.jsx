@@ -42,7 +42,7 @@ import {
 import { numericFontFamily } from "../../../theme";
 import TransactionHistoryModal from "./TransactionHistoryModal";
 
-const UsersTable = ({ users = [], handleEdit, handleTransactionhistory }) => {
+const UsersTable = ({ users = [], handleEdit, handleTransactionhistory, filterPanel }) => {
   const [open, setOpen] = useState(false);
 
   const [filteredUsers, setFilteredUsers] = useState(users);
@@ -85,6 +85,8 @@ const UsersTable = ({ users = [], handleEdit, handleTransactionhistory }) => {
         totalUnhealthyCredit={totalUnhealthyCredit}
         newUsers={newUsersCount}
       />
+
+      {filterPanel}
 
       <UserList
         users={users}

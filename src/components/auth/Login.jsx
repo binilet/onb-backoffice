@@ -14,13 +14,18 @@ import {
   IconButton,
   Container,
   Alert,
+  FormControl,
+  MenuItem,
+  Select,
 } from '@mui/material';
 import {
   Visibility,
   VisibilityOff,
   Phone as PhoneIcon,
   LockOutlined as LockIcon,
+  TranslateOutlined,
 } from '@mui/icons-material';
+import { languageOptions, useLanguage } from '../../i18n';
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -31,10 +36,11 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const sessionExpired = new URLSearchParams(location.search).get('expired') === '1';
+  const { language, setLanguage, t } = useLanguage();
 
   const handleLogin = async () => {
     if (!phone || !password) {
-      return alert('Please enter both phone number and password.');
+      return alert(t('requiredCredentials'));
     }
     const result = await dispatch(loginUser({ phone, password: password.trim() }));
     if (loginUser.fulfilled.match(result)) {
@@ -76,12 +82,26 @@ export default function Login() {
       }}
     >
       <Container maxWidth="sm" sx={{ px: 0 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+          <FormControl size="small" sx={{ minWidth: 148 }}>
+            <Select
+              value={language}
+              onChange={(event) => setLanguage(event.target.value)}
+              aria-label={t('language')}
+              startAdornment={<TranslateOutlined fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />}
+            >
+              {languageOptions.map((option) => (
+                <MenuItem key={option.code} value={option.code}>{option.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
         <Box sx={{ mb: 8, textAlign: 'center' }}>
           <Typography variant="h2" fontWeight={700} color="text.primary">
-            Hagere Online
+            {t('hagereOnline')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-            Admin console — sign in to continue
+            {t('adminConsole')}
           </Typography>
         </Box>
 
@@ -97,19 +117,19 @@ export default function Login() {
         >
           <Box sx={{ mb: 5 }}>
             <Typography variant="h4" fontWeight={700} color="text.primary">
-              Sign in
+              {t('signIn')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              Use your registered phone number and password.
+              {t('signInHelp')}
             </Typography>
           </Box>
 
           <Divider sx={{ mb: 4 }} />
 
-          {sessionExpired && <Alert severity="info" variant="outlined" sx={{ mb: 3 }}>Your session expired. Please sign in again.</Alert>}
+          {sessionExpired && <Alert severity="info" variant="outlined" sx={{ mb: 3 }}>{t('expired')}</Alert>}
 
           <TextField
-            label="Phone number"
+            label={t('phoneNumber')}
             fullWidth
             variant="outlined"
             value={phone}
@@ -126,7 +146,7 @@ export default function Login() {
           />
 
           <TextField
-            label="Password"
+            label={t('password')}
             type={showPassword ? 'text' : 'password'}
             fullWidth
             variant="outlined"
@@ -145,7 +165,7 @@ export default function Login() {
                     onClick={handleTogglePasswordVisibility}
                     edge="end"
                     size="small"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
@@ -169,7 +189,7 @@ export default function Login() {
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={20} color="inherit" /> : 'Sign in'}
+            {loading ? <CircularProgress size={20} color="inherit" /> : t('signIn')}
           </Button>
         </Paper>
 
@@ -178,7 +198,7 @@ export default function Login() {
           color="text.secondary"
           sx={{ display: 'block', textAlign: 'center', mt: 4 }}
         >
-          Hagere Online admin console · Authorized personnel only
+          {t('authorizedOnly')}
         </Typography>
       </Container>
     </Box>

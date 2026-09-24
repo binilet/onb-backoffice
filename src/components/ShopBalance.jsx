@@ -30,7 +30,6 @@ import MarketplaceLayout from "../marketplace/MarketplaceLayout";
 import {
   getShopBalance,
   getShopBalanceLedgers,
-  getShops,
   getStaff,
   transferShopBalance,
 } from "../marketplace/shopApi";
@@ -79,9 +78,9 @@ function newIdempotencyKey() {
 }
 
 function recipientRolesFor(role) {
-  if (role === "system") return ["agent", "subagent", "admin"];
-  if (role === "agent") return ["subagent", "admin"];
-  if (role === "subagent") return ["admin"];
+  if (role === "system") return ["agent", "subagent", "admin", "cashier"];
+  if (role === "agent") return ["subagent", "admin", "cashier"];
+  if (role === "subagent") return ["admin", "cashier"];
   if (role === "admin") return ["cashier"];
   return [];
 }
@@ -89,7 +88,6 @@ function recipientRolesFor(role) {
 function initialTransfer(role, currentUser) {
   return {
     toPhone: "",
-    shopId: role === "admin" ? currentUser?.shopId || "" : "",
     amount: "",
     idempotencyKey: newIdempotencyKey(),
   };
@@ -101,8 +99,8 @@ export default function ShopBalance() {
   const canView = ["system", "agent", "subagent", "admin", "cashier"].includes(role);
   const canTransfer = recipientRolesFor(role).length > 0;
   const [staff, setStaff] = useState([]);
-  const [shops, setShops] = useState([]);
   const [balances, setBalances] = useState({});
+  const [currentUserBalance, setCurrentUserBalance] = useState(null);
   const [balancesLoaded, setBalancesLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [ledgers, setLedgers] = useState([]);
@@ -132,10 +130,10 @@ export default function ShopBalance() {
     setLoading(true);
     setError("");
     try {
-      const [staffData, ledgerData, shopData] = await Promise.all([
+      const [staffData, ledgerData, ownBalance] = await Promise.all([
         getStaff(),
         getShopBalanceLedgers(ledgerQuery(ledgerFilters)),
-        ["system", "agent", "subagent"].includes(role) ? getShops() : Promise.resolve([]),
+        getShopBalance(currentUser.phone),
       ]);
       const scopedStaff = staffData.some(
         (person) => person.phone === currentUser.phone,
@@ -144,7 +142,7 @@ export default function ShopBalance() {
         : [currentUser, ...staffData];
       setStaff(scopedStaff);
       setLedgers(ledgerData);
-      setShops(shopData);
+      setCurrentUserBalance(ownBalance.currentBalance);
     } catch (requestError) {
       setError(apiError(requestError, "Unable to load shop balances."));
     } finally {
@@ -203,10 +201,6 @@ export default function ShopBalance() {
       ),
     [ledgers],
   );
-  const selectedShop = useMemo(
-    () => shops.find((shop) => shop.shop_id === transfer.shopId),
-    [shops, transfer.shopId],
-  );
   const recipients = useMemo(() => {
     const allowedRoles = recipientRolesFor(role);
     const candidates = staff.filter((person) =>
@@ -219,20 +213,14 @@ export default function ShopBalance() {
           person.agentId === currentUser?.phone ||
           person.adminId === currentUser?.phone,
       );
-    if (!selectedShop) return [];
-    return candidates.filter(
-      (person) =>
-        person.phone === (selectedShop.representativePhone || selectedShop.agentId),
-    );
-  }, [currentUser?.phone, role, selectedShop, staff]);
+    return candidates;
+  }, [currentUser?.phone, role, staff]);
   const selectedRecipient = useMemo(
     () => recipients.find((person) => person.phone === transfer.toPhone),
     [recipients, transfer.toPhone],
   );
   const appliedPercent =
-    role === "system"
-      ? Number(selectedShop?.systemCutPercent || 0)
-      : role === "admin"
+    role === "admin"
         ? 100
         : Number(
             selectedRecipient?.parentCutPercent ||
@@ -257,7 +245,6 @@ export default function ShopBalance() {
     setTransfer((current) => ({
       ...current,
       [field]: event.target.value,
-      ...(field === "shopId" ? { toPhone: "" } : {}),
     }));
   const setLedgerFilter = (field) => (event) =>
     setLedgerFilterDraft((current) => ({
@@ -285,7 +272,6 @@ export default function ShopBalance() {
       role === "system"
         ? {
             toPhone: transfer.toPhone,
-            shopId: transfer.shopId,
             etbAmount: Number(transfer.amount),
             idempotencyKey: transfer.idempotencyKey,
           }
@@ -316,7 +302,7 @@ export default function ShopBalance() {
     transfer.toPhone &&
     transfer.amount &&
     Number(transfer.amount) > 0 &&
-    (role !== "system" || transfer.shopId);
+    true;
 
   return (
     <MarketplaceLayout
@@ -374,7 +360,7 @@ export default function ShopBalance() {
             >
               <Box>
                 <Typography component="h2" variant="h3">
-                  Balances in your scope
+                  Balances in your scope · Your Shop balance: {currentUserBalance == null ? "—" : pointsFormat.format(currentUserBalance)}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Balances are shown in points.
@@ -614,40 +600,8 @@ export default function ShopBalance() {
           <DialogTitle>Transfer shop balance</DialogTitle>
           <DialogContent>
             <Stack gap={4} sx={{ pt: 1 }}>
-              {role === "system" && (
-                <>
-                  <Autocomplete
-                    options={shops}
-                    getOptionLabel={(shop) =>
-                      `${shop.shopName} · ${shop.address}`
-                    }
-                    value={selectedShop || null}
-                    onChange={(_, shop) =>
-                      setTransfer((current) => ({
-                        ...current,
-                        shopId: shop?.shop_id || "",
-                        toPhone: "",
-                      }))
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        required
-                        label="Shop"
-                        placeholder="Search shop name or address"
-                      />
-                    )}
-                  />
-                  <Alert severity="info" variant="outlined">
-                    The backend converts ETB to points using this shop’s current
-                    system cut percentage (
-                    {selectedShop?.systemCutPercent ?? "—"}%).
-                  </Alert>
-                </>
-              )}
               <Autocomplete
                 options={recipients}
-                disabled={role === "system" && !transfer.shopId}
                 getOptionLabel={(person) =>
                   `${person.username || person.phone} · ${person.phone} · ${person.role}`
                 }
@@ -680,8 +634,8 @@ export default function ShopBalance() {
                 onChange={setTransferField("amount")}
                 helperText={
                   role === "system"
-                    ? "The backend calculates the credited points."
-                    : "Points are debited from your balance."
+                    ? "The backend calculates the credited points from this recipient's assigned cut."
+                    : "Points are debited from your balance using this recipient's assigned cut."
                 }
               />
               <TextField

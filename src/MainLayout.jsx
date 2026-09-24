@@ -10,6 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import LightModeOutlined from '@mui/icons-material/LightModeOutlined';
+import TranslateOutlined from '@mui/icons-material/TranslateOutlined';
 import { useTheme } from '@mui/material/styles';
 import { useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -17,7 +18,7 @@ import SidebarItem from './components/sidebar';
 import { navigationFor, getPreviewUser } from './marketplace/navigation';
 import { getShopBalance } from './marketplace/shopApi';
 
-import { Avatar, ButtonBase, Collapse, Stack } from '@mui/material';
+import { Avatar, ButtonBase, Collapse, FormControl, MenuItem, Select, Stack } from '@mui/material';
 
 import Box from '@mui/material/Box';
 
@@ -41,6 +42,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 import BusinessIcon from '@mui/icons-material/Business';
 import Tooltip from '@mui/material/Tooltip';
 import { logout } from './state/slices/authSlice';
+import { languageOptions, useLanguage } from './i18n';
 
 const MainLayout = ({
   drawerWidth,
@@ -52,10 +54,11 @@ const MainLayout = ({
   const theme = useTheme();
   const location = useLocation();
   const dispatch = useDispatch();
+  const { language, setLanguage, t } = useLanguage();
 
   const user = useSelector((state) => state.auth._current_user);
-  const username = user?.username || 'Guest';
-  const role = user?.role || 'No Role Assigned';
+  const username = user?.username || t('guest');
+  const role = user?.role || t('noScope');
   const hasLegacyAccess = ['system', 'agent', 'subagent', 'admin', 'employee'].includes(user?.role);
   const showSuperOnlineNavigation = hasLegacyAccess;
   const avatarLetter = username.charAt(0).toUpperCase() || 'U';
@@ -67,7 +70,7 @@ const MainLayout = ({
   const [marketplaceOpen, setMarketplaceOpen] = useState(false);
   const [shopBalance, setShopBalance] = useState(null);
   const isDark = theme.palette.mode === 'dark';
-  const themeLabel = isDark ? 'Use light theme' : 'Use dark theme';
+  const themeLabel = isDark ? t('useLightTheme') : t('useDarkTheme');
   useEffect(() => {
     if (!['system', 'agent', 'subagent', 'admin', 'cashier'].includes(user?.role) || !user?.phone) { setShopBalance(null); return; }
     const refreshShopBalance = () => getShopBalance(user.phone).then((balance) => setShopBalance(balance.currentBalance)).catch(() => setShopBalance(null));
@@ -76,18 +79,18 @@ const MainLayout = ({
     return () => window.removeEventListener('shop-balance-changed', refreshShopBalance);
   }, [user?.phone, user?.role]);
   const legacyItems = [
-    { text: 'Dashboard', to: '/', icon: QueryStatsIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
-    { text: 'Users', to: '/users', icon: PeopleAltIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
-    { text: 'Admins', to: '/admins', icon: LocalPolice, roles: ['system', 'agent', 'subagent'] },
-    { text: 'Agents', to: '/agents', icon: GroupWorkIcon, roles: ['system'] },
-    { text: 'Games', to: '/games', icon: RocketLaunchIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
-    { text: 'Invite', to: '/hagere-invite', icon: RsvpIcon, roles: ['system', 'agent', 'subagent', 'admin', 'employee'] },
+    { text: t('dashboard'), to: '/', icon: QueryStatsIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
+    { text: t('users'), to: '/users', icon: PeopleAltIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
+    { text: t('admins'), to: '/admins', icon: LocalPolice, roles: ['system', 'agent', 'subagent'] },
+    { text: t('agents'), to: '/agents', icon: GroupWorkIcon, roles: ['system'] },
+    { text: t('games'), to: '/games', icon: RocketLaunchIcon, roles: ['system', 'agent', 'subagent', 'admin'] },
+    { text: t('invite'), to: '/hagere-invite', icon: RsvpIcon, roles: ['system', 'agent', 'subagent', 'admin', 'employee'] },
   ];
   const financeItems = [
-    { text: 'Credits', to: '/credits', icon: MonetizationOnIcon, roles: ['system'] },
-    { text: 'Manual Deposits', to: '/manual-deposits', icon: AssuredWorkloadIcon, roles: ['system', 'employee'] },
-    { text: 'Manual Withdraws', to: '/manual-withdraws', icon: LocalAtmIcon, roles: ['system', 'employee'] },
-    { text: 'Auto Play', to: '/auto-settings', icon: SettingsSuggestIcon, roles: ['system', 'employee'] },
+    { text: t('credits'), to: '/credits', icon: MonetizationOnIcon, roles: ['system'] },
+    { text: t('manualDeposits'), to: '/manual-deposits', icon: AssuredWorkloadIcon, roles: ['system', 'employee'] },
+    { text: t('manualWithdraws'), to: '/manual-withdraws', icon: LocalAtmIcon, roles: ['system', 'employee'] },
+    { text: t('autoPlay'), to: '/auto-settings', icon: SettingsSuggestIcon, roles: ['system', 'employee'] },
   ];
   const handleNavigation = (event) => {
     if (isMobile && drawerOpen && !event.defaultPrevented && event.button === 0 &&
@@ -164,7 +167,7 @@ const MainLayout = ({
           <BusinessIcon sx={{ color: 'text.secondary', fontSize: theme.layout.navIconSize }} />
         </Box>
         <Typography variant="h6" fontWeight={700} sx={{ color: 'text.primary', minWidth: 0, overflowWrap: 'anywhere' }}>
-          Hagere-Online
+          {t('hagereOnline')}
         </Typography>
       </Box>
 
@@ -190,7 +193,7 @@ const MainLayout = ({
           aria-controls="super-online-navigation"
           sx={sectionToggleSx}
         >
-          <Typography component="span" variant="caption" fontWeight={600}>Hagere Online</Typography>
+          <Typography component="span" variant="caption" fontWeight={600}>{t('hagereOnline')}</Typography>
           {superOnlineOpen ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
         </ButtonBase>
         <Collapse in={superOnlineOpen} timeout="auto" id="super-online-navigation">
@@ -203,14 +206,14 @@ const MainLayout = ({
                   color="text.secondary"
                   sx={{ px: 3, pt: 3, pb: 2, mt: 3, borderTop: 1, borderColor: 'divider', display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
                 >
-                  Finance
+                  {t('finance')}
                 </Typography>
                 {financeItems.map(renderLegacyItem)}
               </>
             )}
             {!hasLegacyAccess && (
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 3, py: 2, overflowWrap: 'anywhere' }}>
-                Sign in with a Super Online account to access these pages.
+                {t('signInHelp')}
               </Typography>
             )}
           </Box>
@@ -224,7 +227,7 @@ const MainLayout = ({
               aria-controls="marketplace-navigation"
               sx={sectionToggleSx}
             >
-              <Typography component="span" variant="caption" fontWeight={600}>Hagere Shops</Typography>
+              <Typography component="span" variant="caption" fontWeight={600}>{t('hagereShops')}</Typography>
               {marketplaceOpen ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
             </ButtonBase>
             <Collapse in={marketplaceOpen} timeout="auto" id="marketplace-navigation">
@@ -236,13 +239,13 @@ const MainLayout = ({
                       color="text.secondary"
                       sx={{ px: 3, pt: 2, pb: 1, display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
                     >
-                      {group.label}
+                    {t(group.label === 'Shop management' ? 'shopManagement' : group.label === 'Balances' ? 'balances' : group.label === 'Games' ? 'games' : 'actionLog')}
                     </Typography>
                     {group.items.map((item) => (
                       <SidebarItem
                         key={item.label}
                         icon={<item.icon />}
-                        text={item.label}
+                        text={t({ Shops: 'shops', Staff: 'staff', 'Shop balance': 'shopBalance', 'Deposit approvals': 'depositApprovals', 'Player room wallets': 'playerRoomWallets', Games: 'games', 'Action log': 'actionLog' }[item.label] || item.label)}
                         to={item.ready && item.to ? `${item.to}${location.search}` : undefined}
                         active={Boolean(item.ready && item.to && (
                           location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
@@ -307,10 +310,10 @@ const MainLayout = ({
               </Box>
             </Typography>
           </Box>
-          <Tooltip title="Logout">
+          <Tooltip title={t('logout')}>
             <IconButton
               onClick={handleLogout}
-              aria-label="Logout"
+              aria-label={t('logout')}
               sx={{
                 color: 'text.secondary',
                 flexShrink: 0,
@@ -370,7 +373,7 @@ const MainLayout = ({
         }}>
           <IconButton
             color="inherit"
-            aria-label={drawerOpen ? 'Close navigation' : 'Open navigation'}
+            aria-label={drawerOpen ? t('closeNavigation') : t('openNavigation')}
             aria-expanded={drawerOpen}
             edge="start"
             onClick={handleDrawerToggle}
@@ -384,17 +387,33 @@ const MainLayout = ({
             sx={{ flexGrow: 1, minWidth: 0, py: 2, fontWeight: 500, overflowWrap: 'anywhere' }}
           >
             {isMarketplace
-              ? `Hagere Shops · ${role || marketplaceUser?.role || 'No scope'}`
-              : `${hasLegacyAccess ? 'Super Online' : 'Marketplace'} · ${hasLegacyAccess ? role : role === 'cashier' ? 'cashier' : 'Guest'}`}
+              ? `${t('hagereShops')} · ${role || marketplaceUser?.role || t('noScope')}`
+              : `${hasLegacyAccess ? t('hagereOnline') : t('shopManagement')} · ${hasLegacyAccess ? role : role === 'cashier' ? 'cashier' : t('guest')}`}
           </Typography>
           {shopBalance !== null && (
-            <Tooltip title="Your Shop Balance">
+            <Tooltip title={t('shopBalance')}>
               <Stack direction="row" alignItems="center" gap={1} sx={{ color: 'text.primary', flexShrink: 0 }}>
                 <AccountBalanceWalletOutlined color="primary" />
                 <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap' }}>{Number(shopBalance).toLocaleString()} pts</Typography>
               </Stack>
             </Tooltip>
           )}
+          <FormControl size="small" sx={{ minWidth: { xs: 64, sm: 132 }, flexShrink: 0 }}>
+            <Select
+              value={language}
+              onChange={(event) => setLanguage(event.target.value)}
+              aria-label={t('language')}
+              startAdornment={<TranslateOutlined fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />}
+              sx={{ height: theme.layout.touchTargetSize, '& .MuiSelect-select': { py: 0, pr: { xs: '20px !important', sm: '32px !important' } } }}
+            >
+              {languageOptions.map((option) => (
+                <MenuItem key={option.code} value={option.code}>
+                  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{option.label}</Box>
+                  <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>{option.shortLabel}</Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Tooltip title={themeLabel}>
             <IconButton color="inherit" onClick={onToggleTheme} aria-label={themeLabel}>
               {isDark ? <LightModeOutlined /> : <DarkModeOutlined />}

@@ -28,7 +28,6 @@ import {
 } from "@mui/material";
 import CasinoOutlined from "@mui/icons-material/CasinoOutlined";
 import EmojiEventsOutlined from "@mui/icons-material/EmojiEventsOutlined";
-import SavingsOutlined from "@mui/icons-material/SavingsOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import AddCircleOutlineOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
 import EditOutlined from "@mui/icons-material/EditOutlined";
@@ -67,6 +66,7 @@ const requestErrorMessage = (error, fallback) => {
 const initialGameForm = (user) => ({
   shopId: user?.shopId || "",
   branchId: user?.branchId || "",
+  gameName: "",
   pattern: "",
   dynamicPattern: "",
   startMode: "MANUAL",
@@ -79,6 +79,7 @@ const initialGameForm = (user) => ({
 
 const editFormFor = (game) => ({
   pattern: game.pattern || "",
+  gameName: game.gameName || "",
   dynamicPattern: game.dynamicPattern || "",
   startMode: game.startMode,
   scheduledStartAt: game.scheduledStartAt ? new Date(game.scheduledStartAt).toISOString().slice(0, 16) : "",
@@ -179,6 +180,7 @@ export default function ShopGames() {
     try {
       const created = await createGame({
         ...form,
+        gameName: form.gameName.trim(),
         pattern: form.pattern || null,
         dynamicPattern: form.dynamicPattern || null,
         betAmount: Number(form.betAmount),
@@ -227,6 +229,7 @@ export default function ShopGames() {
     setError("");
     try {
       const payload = editingGame.status === "PENDING" ? {
+        gameName: editForm.gameName.trim(),
         pattern: editForm.pattern || null,
         dynamicPattern: editForm.dynamicPattern || null,
         startMode: editForm.startMode,
@@ -301,11 +304,6 @@ export default function ShopGames() {
             label="Total winnings"
             value={total("totalWinning")}
           />
-          <Summary
-            icon={<SavingsOutlined />}
-            label="Total cut"
-            value={total("totalCutAmount")}
-          />
         </Stack>
         </Box>
         <Divider />
@@ -367,7 +365,6 @@ export default function ShopGames() {
               <TableCell>Status</TableCell>
               <TableCell align="right">Stake</TableCell>
               <TableCell align="right">Payout</TableCell>
-              <TableCell align="right">Cut</TableCell>
               <TableCell align="right" sx={{ position: "sticky", right: 0, bgcolor: "background.paper", borderLeft: 1, borderColor: "divider" }}>Details</TableCell>
             </TableRow>
           </TableHead>
@@ -375,7 +372,8 @@ export default function ShopGames() {
             {games.map((game) => (
               <TableRow key={game.game_id} hover sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                 <TableCell>
-                  <Typography variant="body2" sx={{ fontFamily: numericFontFamily }}>{game.game_id.slice(0, 8).toUpperCase()}</Typography>
+                  <Typography variant="body2" fontWeight={700}>{game.gameName || "Untitled game"}</Typography>
+                  <Typography variant="caption" sx={{ fontFamily: numericFontFamily }}>{game.game_id.slice(0, 8).toUpperCase()}</Typography>
                   <Typography variant="caption" color="text.secondary">{game.dynamicPattern || "Static pattern"}</Typography>
                 </TableCell>
                 <TableCell>
@@ -387,7 +385,6 @@ export default function ShopGames() {
                 </TableCell>
                 <TableCell align="right" sx={{ fontFamily: numericFontFamily }}>{numberFormat.format(game.betAmount)}</TableCell>
                 <TableCell align="right" sx={{ fontFamily: numericFontFamily }}>{game.totalWinning == null ? "—" : numberFormat.format(game.totalWinning)}</TableCell>
-                <TableCell align="right" sx={{ fontFamily: numericFontFamily }}>{game.totalCutAmount == null ? "—" : numberFormat.format(game.totalCutAmount)}</TableCell>
                 <TableCell align="right" sx={{ position: "sticky", right: 0, bgcolor: "background.paper", borderLeft: 1, borderColor: "divider" }}>
                   <Stack direction="row" justifyContent="flex-end">
                     {canEditGames && game.status === "PENDING" && <IconButton aria-label={`Edit game ${game.game_id}`} onClick={() => openEdit(game)} size="small"><EditOutlined fontSize="small" /></IconButton>}
@@ -396,7 +393,7 @@ export default function ShopGames() {
                 </TableCell>
               </TableRow>
             ))}
-            {!games.length && <TableRow><TableCell colSpan={7} align="center" sx={{ py: 10 }}><Typography variant="subtitle1">No games match this view</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Adjust the date or location filters to review another period.</Typography></TableCell></TableRow>}
+            {!games.length && <TableRow><TableCell colSpan={6} align="center" sx={{ py: 10 }}><Typography variant="subtitle1">No games match this view</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Adjust the date or location filters to review another period.</Typography></TableCell></TableRow>}
           </TableBody>
         </Table>
         </TableContainer>}
@@ -412,6 +409,7 @@ export default function ShopGames() {
           <DialogContent>
             <Stack gap={3} sx={{ pt: 1 }}>
               <Box><Typography variant="h5">Location</Typography><Typography variant="body2" color="text.secondary">Set the shop and branch that will host this game.</Typography></Box>
+              <TextField required label="Game name" value={form.gameName} onChange={(e) => setForm({ ...form, gameName: e.target.value })} helperText="This name is shown to players and in game details." />
               <TextField
                 select
                 required
@@ -553,6 +551,7 @@ export default function ShopGames() {
             <Stack gap={3} sx={{ pt: 1 }}>
               <Alert severity="info" variant="outlined">Configuration is editable while a game is pending. The operational note remains editable after start.</Alert>
               <TextField label="Location" value={editingGame ? `${shopName(editingGame.shopId)} · ${branchName(editingGame.branchId)}` : ""} disabled />
+              <TextField required disabled={editingGame?.status !== "PENDING"} label="Game name" value={editForm?.gameName || ""} onChange={(event) => setEditForm((current) => ({ ...current, gameName: event.target.value }))} />
               <TextField select disabled={editingGame?.status !== "PENDING"} label="Static pattern" value={editForm?.pattern || ""} onChange={(event) => setEditForm((current) => ({ ...current, pattern: event.target.value, dynamicPattern: event.target.value ? "" : current.dynamicPattern }))}>
                 <MenuItem value="">None</MenuItem>
                 {patterns.map((pattern) => <MenuItem key={pattern.id} value={pattern.id}>{pattern.name}</MenuItem>)}
@@ -582,13 +581,11 @@ export default function ShopGames() {
             <Stack gap={3}>
               <Stack direction="row" gap={1} flexWrap="wrap">
                 <GameStatusChips game={detail} />
-                <Chip label={`Cut ${detail.totalCutPercent}%`} />
               </Stack>
-              <Box><Typography variant="h3">{shopName(detail.shopId)}</Typography><Typography variant="body2" color="text.secondary">{branchName(detail.branchId)} · Created by {detail.createdByPhone}</Typography></Box>
+              <Box><Typography variant="h3">{detail.gameName || "Untitled game"}</Typography><Typography variant="body1">{shopName(detail.shopId)}</Typography><Typography variant="body2" color="text.secondary">{branchName(detail.branchId)} · Created by {detail.createdByPhone}</Typography></Box>
               <Stack direction={{ xs: "column", sm: "row" }} gap={2} divider={<Divider flexItem orientation="vertical" />}>
                 <DetailMetric label="Stake per cartela" value={numberFormat.format(detail.betAmount)} />
                 <DetailMetric label="Total payout" value={detail.totalWinning == null ? "Pending" : numberFormat.format(detail.totalWinning)} />
-                <DetailMetric label="Total cut" value={detail.totalCutAmount == null ? "Pending" : numberFormat.format(detail.totalCutAmount)} />
               </Stack>
               <Paper variant="outlined" sx={{ p: 3 }}>
                 <Typography variant="h5">Pattern and timing</Typography>

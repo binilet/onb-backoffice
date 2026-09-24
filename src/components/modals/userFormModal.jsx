@@ -16,8 +16,10 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
   const [agent_id, setAgentId] = React.useState(editingUser ? editingUser.agentId : '');
   const [admin_id, setAdminId] = React.useState(editingUser ? editingUser.adminId : '');
   const [cutPercent, setCutPercent] = React.useState(editingUser ? editingUser.agentPercent : '');
+  const [parentCutPercent, setParentCutPercent] = React.useState(editingUser ? editingUser.parentCutPercent || '' : '');
   const [verified, setVerified] = React.useState(editingUser ? editingUser.verified : false);
   const [isActive, setIsActive] = React.useState(editingUser ? editingUser.isActive : false);
+  const [forShop, setForShop] = React.useState(editingUser ? editingUser.forShop : false);
   const [role, setRole] = React.useState(editingUser ? editingUser.role : 'user');
   const [username, setUsername] = React.useState(editingUser ? editingUser.username : '');
   const [phone, setPhone] = React.useState(
@@ -35,8 +37,10 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
     if (editingUser) {
       setId(editingUser._id);
       setCutPercent(editingUser.agentPercent);
+      setParentCutPercent(editingUser.parentCutPercent || '');
       setVerified(editingUser.verified);
       setIsActive(editingUser.isActive);
+      setForShop(Boolean(editingUser.forShop));
       setRole(editingUser.role);
       setUsername(editingUser.username);
       setPhone(editingUser.phone);
@@ -48,8 +52,10 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
     } else {
       setId('');
       setCutPercent('');
+      setParentCutPercent('');
       setVerified(false);
       setIsActive(false);
+      setForShop(false);
       setRole('');
       setUsername('');
       setPhone('');
@@ -119,7 +125,9 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
 
     const userData = {
       agentPercent,
+      parentCutPercent: ['agent', 'subagent', 'admin', 'cashier'].includes(role) ? Number(parentCutPercent) : null,
       verified,
+      forShop,
       isActive,
       role,
       username,
@@ -350,6 +358,21 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
             />
           )}
 
+          {current_user.role === "system" && ['agent', 'subagent', 'admin', 'cashier'].includes(role) && (
+            <TextField
+              required
+              name="parentCutPercent"
+              label="Assigned cut percent"
+              type="number"
+              helperText="The recipient's cut must be greater than zero."
+              inputProps={{ min: 0.000001, step: "any" }}
+              fullWidth
+              value={parentCutPercent}
+              onChange={(event) => setParentCutPercent(event.target.value)}
+              sx={{ minWidth: 0 }}
+            />
+          )}
+
           {current_user.role === 'system' && role === 'cashier' && (
             <TextField
               required
@@ -450,7 +473,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
             </Typography>
             <Switch
               checked={isActive}
-              onChange={() => setIsActive(event.target.checked)}
+              onChange={(event) => setIsActive(event.target.checked)}
               inputProps={{ "aria-label": "isActive" }}
               name="isActive"
             />
@@ -462,11 +485,22 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
             </Typography>
             <Switch
               checked={verified}
-              onChange={() => setVerified(event.target.checked)}
+              onChange={(event) => setVerified(event.target.checked)}
               inputProps={{ "aria-label": "verified" }}
               name="verified"
             />
           </Grid>
+          {current_user.role === "system" && <Grid item xs={6}>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              Shop staff
+            </Typography>
+            <Switch
+              checked={forShop}
+              onChange={(event) => setForShop(event.target.checked)}
+              inputProps={{ "aria-label": "forShop" }}
+              name="forShop"
+            />
+          </Grid>}
 
         </Grid>
 

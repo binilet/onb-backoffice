@@ -15,6 +15,7 @@ import {
   MenuItem,
   Paper,
   Stack,
+  Switch,
   Tab,
   Table,
   TableBody,
@@ -56,10 +57,15 @@ const apiError = (error, fallback) => error.response?.data?.detail || fallback;
 
 function rolesFor(role) {
   if (role === "system") return ["agent", "subagent", "admin", "cashier"];
-  if (role === "agent") return ["subagent", "admin"];
-  if (role === "subagent") return ["admin"];
+  if (role === "agent") return ["subagent", "admin", "cashier"];
+  if (role === "subagent") return ["admin", "cashier"];
   if (role === "admin") return ["cashier"];
   return [];
+}
+
+function requiresAssignedCut(assignerRole, recipientRole) {
+  return ["system", "agent", "subagent"].includes(assignerRole) &&
+    ["agent", "subagent", "admin", "cashier"].includes(recipientRole);
 }
 
 export default function StaffList() {
@@ -88,6 +94,7 @@ export default function StaffList() {
     parentCutPercent: "",
     role: "",
     shopId: "",
+    forShop: true,
   });
   const [updating, setUpdating] = useState(false);
 
@@ -182,6 +189,7 @@ export default function StaffList() {
       parentCutPercent: person.parentCutPercent || "",
       role: person.role,
       shopId: person.shopId || "",
+      forShop: true,
     });
     setError("");
   };
@@ -220,10 +228,13 @@ export default function StaffList() {
       username: form.username.trim(),
       password: form.password,
       role: form.role,
+      isActive: true,
+      verified: true,
+      forShop: true,
       shopId: ["agent", "subagent"].includes(form.role) ? null : form.shopId || null,
       branchId: form.role === "cashier" ? form.branchId : null,
       parentCutPercent:
-        ["agent", "subagent"].includes(role) && ["subagent", "admin"].includes(form.role)
+        requiresAssignedCut(role, form.role)
           ? Number(form.parentCutPercent)
           : null,
     };
@@ -244,8 +255,7 @@ export default function StaffList() {
   const showShopSelect =
     (form.role === "admin" || form.role === "cashier") && role !== "admin";
   const cutRequired =
-    ["agent", "subagent"].includes(role) &&
-    ["subagent", "admin"].includes(form.role);
+    requiresAssignedCut(role, form.role);
   const editBranches = useMemo(
     () => branches.filter((branch) => branch.shopId === editForm.shopId),
     [branches, editForm.shopId],
@@ -277,14 +287,14 @@ export default function StaffList() {
       payload.branchId = editForm.branchId;
     if (editingPerson.phone !== currentUser?.phone) {
       payload.isActive = editForm.isActive;
+      payload.forShop = editForm.forShop;
       payload.banUntil = editForm.banUntil
         ? new Date(editForm.banUntil).toISOString()
         : null;
       if (editForm.password) payload.password = editForm.password;
       if (
-        ["agent", "subagent"].includes(role) &&
-        editingPerson.parentPhone === currentUser?.phone &&
-        ["subagent", "admin"].includes(editForm.role)
+        requiresAssignedCut(role, editForm.role) &&
+        (role === "system" || editingPerson.parentPhone === currentUser?.phone)
       )
         payload.parentCutPercent = Number(editForm.parentCutPercent);
     }
@@ -422,6 +432,7 @@ export default function StaffList() {
                   <TableRow>
                     <TableCell>Staff member</TableCell>
                     <TableCell>Role</TableCell>
+                    <TableCell align="right">Assigned cut</TableCell>
                     <TableCell>Shop</TableCell>
                     <TableCell>Branch</TableCell>
                     <TableCell>Created</TableCell>
@@ -445,6 +456,14 @@ export default function StaffList() {
                       </TableCell>
                       <TableCell>
                         <Chip size="small" label={person.role} />
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ fontFamily: numericFontFamily, whiteSpace: "nowrap" }}
+                      >
+                        {person.parentCutPercent == null
+                          ? "—"
+                          : `${person.parentCutPercent}%`}
                       </TableCell>
                       <TableCell>
                         {shopNames[person.shopId] || person.shopId || "—"}
@@ -475,7 +494,7 @@ export default function StaffList() {
                   ))}
                   {!filteredStaff.length && (
                     <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
+                      <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
                         <Typography variant="subtitle1">
                           No staff found
                         </Typography>
@@ -564,8 +583,8 @@ export default function StaffList() {
                 <TextField
                   required
                   type="number"
-                  label="Your cut percentage"
-                  helperText="This percentage controls the balance multiplier when you transfer to this account."
+                  label="Assigned cut percentage"
+                  helperText="The recipient's credited balance is calculated from this cut. It cannot be lower than your own cut."
                   inputProps={{ min: 0.000001, step: "any" }}
                   value={form.parentCutPercent}
                   onChange={setField("parentCutPercent")}
@@ -709,13 +728,13 @@ export default function StaffList() {
                 )}
               {editingPerson?.phone !== currentUser?.phone && (
                 <>
-                  {["agent", "subagent"].includes(role) &&
-                    editingPerson?.parentPhone === currentUser?.phone &&
-                    ["subagent", "admin"].includes(editForm.role) && (
+                  {requiresAssignedCut(role, editForm.role) &&
+                    (role === "system" || editingPerson?.parentPhone === currentUser?.phone) && (
                       <TextField
                         required
                         type="number"
-                        label="Your cut percentage"
+                        label="Assigned cut percentage"
+                        helperText="It cannot be lower than your own assigned cut percentage."
                         inputProps={{ min: 0.000001, step: "any" }}
                         value={editForm.parentCutPercent}
                         onChange={setEditField("parentCutPercent")}
@@ -730,6 +749,29 @@ export default function StaffList() {
                     <MenuItem value="true">Active</MenuItem>
                     <MenuItem value="false">Inactive</MenuItem>
                   </TextField>
+                  <Box>
+                    <Typography variant="body2" fontWeight={700}>
+                      Shop staff access
+                    </Typography>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Switch
+                        checked={editForm.forShop}
+                        onChange={(event) =>
+                          setEditForm((current) => ({
+                            ...current,
+                            forShop: event.target.checked,
+                          }))
+                        }
+                        inputProps={{ "aria-label": "Shop staff access" }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        {editForm.forShop ? "Included in shop staff" : "Legacy user only"}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">
+                      Removing access keeps this account in Legacy Users but removes it from this Staff directory.
+                    </Typography>
+                  </Box>
                   <TextField
                     label="Banned until"
                     type="datetime-local"
@@ -754,7 +796,10 @@ export default function StaffList() {
                 (editForm.password && editForm.password.length < 6) ||
                 (editForm.role === "cashier" &&
                   editingPerson?.phone !== currentUser?.phone &&
-                  (!editForm.shopId || !editForm.branchId))
+                  (!editForm.shopId || !editForm.branchId)) ||
+                (requiresAssignedCut(role, editForm.role) &&
+                  (role === "system" || editingPerson?.parentPhone === currentUser?.phone) &&
+                  !(Number(editForm.parentCutPercent) > 0))
               }
             >
               {updating ? "Saving…" : "Save changes"}

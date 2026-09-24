@@ -47,7 +47,6 @@ import ShopBranchesDialog from "./ShopBranchesDialog";
 const initialForm = {
   representativePhone: "",
   shopName: "",
-  systemCutPercent: "",
   address: "",
   isActive: true,
   banUntil: "",
@@ -63,7 +62,6 @@ function toForm(shop) {
   return {
     representativePhone: shop.representativePhone || shop.agentId,
     shopName: shop.shopName,
-    systemCutPercent: String(shop.systemCutPercent),
     address: shop.address,
     isActive: shop.isActive,
     banUntil: shop.banUntil ? shop.banUntil.slice(0, 16) : "",
@@ -180,7 +178,6 @@ export default function ShopList() {
     const payload = {
       representativePhone: form.representativePhone,
       shopName: form.shopName.trim(),
-      systemCutPercent: Number(form.systemCutPercent),
       address: form.address.trim(),
       isActive: form.isActive,
       banUntil: form.banUntil ? new Date(form.banUntil).toISOString() : null,
@@ -319,7 +316,6 @@ export default function ShopList() {
                   <TableRow>
                     <TableCell>Shop</TableCell>
                     <TableCell>Representative</TableCell>
-                    <TableCell align="right">System cut</TableCell>
                     <TableCell>Branches</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>Created</TableCell>
@@ -354,12 +350,6 @@ export default function ShopList() {
                           <Typography variant="caption" display="block" color="text.secondary">
                             {shop.representativeRole || "agent"}
                           </Typography>
-                        </TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{ fontFamily: numericFontFamily }}
-                        >
-                          {shop.systemCutPercent}%
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -419,7 +409,7 @@ export default function ShopList() {
                   })}
                   {!filteredShops.length && (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
+                      <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
                         <Typography variant="subtitle1">
                           No shops found
                         </Typography>
@@ -467,14 +457,6 @@ export default function ShopList() {
                 )}
               />
               <TextField
-                required
-                label="System cut percent"
-                type="number"
-                inputProps={{ min: 0.000001, step: "any" }}
-                value={form.systemCutPercent}
-                onChange={setField("systemCutPercent")}
-              />
-              <TextField
                 select
                 label="Status"
                 value={String(form.isActive)}
@@ -503,8 +485,7 @@ export default function ShopList() {
                 saving ||
                 !form.representativePhone ||
                 !form.shopName.trim() ||
-                !form.address.trim() ||
-                !form.systemCutPercent
+                !form.address.trim()
               }
             >
               {saving

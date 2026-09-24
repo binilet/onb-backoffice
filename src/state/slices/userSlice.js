@@ -37,10 +37,10 @@ axios.interceptors.response.use(
 
 export const get_users_by_role_user = createAsyncThunk(
   "/users/get_users_by_role_user",
-  async (_, thunkAPI) => {
+  async (filters = {}, thunkAPI) => {
     try {
       const response = await axiosInstance.get("/users/all_users_by_role", {
-        params: { role: 'user' },
+        params: { role: 'user', ...filters },
       });
       return response.data;
     } catch (err) {
@@ -120,6 +120,7 @@ export const updateUser = createAsyncThunk(
           ? new Date(updates.ban_until).toISOString() // Convert to ISO 8601
           : null,
         verified: updates.verified ?? null,
+        forShop: updates.forShop ?? null,
         adminId:updates.adminId,
         adminPercent:updates.adminPercent
       };
