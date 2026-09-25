@@ -260,24 +260,15 @@ export default function ShopList() {
             direction="row"
             alignItems="center"
             justifyContent="space-between"
-            gap={3}
+            gap={1.5}
             flexWrap="wrap"
-            sx={{ p: 4 }}
+            sx={{ p: 2 }}
           >
-            <Box>
-              <Typography component="h2" variant="h3">
-                Shop directory
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                role="status"
-              >
+            <Typography variant="caption" color="text.secondary" role="status">
                 {filteredShops.length}{" "}
                 {filteredShops.length === 1 ? "shop" : "shops"}
-              </Typography>
-            </Box>
-            <Stack direction="row" gap={3} flexWrap="wrap">
+            </Typography>
+            <Stack direction="row" gap={1} flexWrap="wrap">
               <TextField
                 label="Search shops"
                 value={search}
@@ -302,7 +293,7 @@ export default function ShopList() {
             </Stack>
           </Stack>
           {loading ? (
-            <Stack alignItems="center" justifyContent="center" sx={{ py: 10 }}>
+            <Stack alignItems="center" justifyContent="center" sx={{ py: 6 }}>
               <CircularProgress size={32} />
             </Stack>
           ) : (

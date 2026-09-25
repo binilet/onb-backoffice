@@ -237,7 +237,7 @@ export default function PlayerRoomWallets() {
         <Alert
           severity="error"
           variant="outlined"
-          sx={{ mb: 4 }}
+          sx={{ mb: 2 }}
           onClose={() => setError("")}
         >
           {error}
@@ -247,7 +247,7 @@ export default function PlayerRoomWallets() {
         <Alert
           severity="success"
           variant="outlined"
-          sx={{ mb: 4 }}
+          sx={{ mb: 2 }}
           onClose={() => setNotice("")}
         >
           {notice}
@@ -262,20 +262,12 @@ export default function PlayerRoomWallets() {
         </Paper>
       )}
       {canView && (
-        <Stack gap={3}>
+        <Stack gap={2}>
           <Tabs value={walletTab} onChange={(_, value) => setWalletTab(value)}>
             <Tab value="lookup" label="Find a wallet" />
             <Tab value="directory" label="Search wallet directory" />
           </Tabs>
           <Paper variant="outlined" sx={{ overflow: "hidden", display: walletTab === "directory" ? "block" : "none" }}>
-            <Box sx={{ p: 4 }}>
-              <Typography component="h2" variant="h3">
-                Search wallet directory
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Enter at least three phone digits. Results are loaded on demand, never as a full wallet dump.
-              </Typography>
-            </Box>
             {loadingOptions ? (
               <Stack alignItems="center" sx={{ py: 6 }}>
                 <CircularProgress size={32} />

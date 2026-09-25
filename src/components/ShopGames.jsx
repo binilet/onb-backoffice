@@ -272,28 +272,22 @@ export default function ShopGames() {
           {error}
         </Alert>
       )}
-      <Paper variant="outlined" sx={{ overflow: "hidden", mb: 4 }}>
+      <Paper variant="outlined" sx={{ overflow: "hidden", mb: 2 }}>
         <Stack
           direction="row"
           justifyContent="space-between"
           alignItems="center"
           flexWrap="wrap"
-          gap={3}
-          sx={{ p: { xs: 3, md: 5 }, bgcolor: "surface.subtle" }}
+          gap={1.5}
+          sx={{ p: 2 }}
         >
-          <Box>
-            <Typography variant="caption" color="text.secondary">GAME OPERATIONS</Typography>
-            <Typography variant="h2" sx={{ mt: 1 }}>Game money collection</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Monitor collections, payouts, and game state across your authorized locations.
-            </Typography>
-          </Box>
+          <Typography variant="caption" color="text.secondary">{games.length} games</Typography>
           {canEditGames && <Button variant="contained" startIcon={<AddCircleOutlineOutlined />} onClick={() => setOpen(true)}>
             New game
           </Button>}
         </Stack>
-        <Box sx={{ px: { xs: 3, md: 5 }, py: 3 }}>
-        <Stack direction="row" gap={2} flexWrap="wrap">
+        <Box sx={{ px: 2, py: 1.5 }}>
+        <Stack direction="row" gap={1} flexWrap="wrap">
           <Summary
             icon={<CasinoOutlined />}
             label="Games"

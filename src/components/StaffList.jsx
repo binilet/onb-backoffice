@@ -350,26 +350,17 @@ export default function StaffList() {
             direction="row"
             alignItems="center"
             justifyContent="space-between"
-            gap={3}
+            gap={1.5}
             flexWrap="wrap"
-            sx={{ p: 4 }}
+            sx={{ p: 2 }}
           >
-            <Box>
-              <Typography component="h2" variant="h3">
-                Staff directory
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                role="status"
-              >
+            <Typography variant="caption" color="text.secondary" role="status">
                 {filteredStaff.length}{" "}
                 {filteredStaff.length === 1
                   ? "staff account"
                   : "staff accounts"}
-              </Typography>
-            </Box>
-            <Stack direction="row" gap={3} flexWrap="wrap">
+            </Typography>
+            <Stack direction="row" gap={1} flexWrap="wrap">
               <TextField
                 label="Search staff"
                 value={search}
@@ -418,7 +409,7 @@ export default function StaffList() {
             />
           </Tabs>
           {loading ? (
-            <Stack alignItems="center" justifyContent="center" sx={{ py: 10 }}>
+            <Stack alignItems="center" justifyContent="center" sx={{ py: 6 }}>
               <CircularProgress size={32} />
             </Stack>
           ) : (
@@ -494,7 +485,7 @@ export default function StaffList() {
                   ))}
                   {!filteredStaff.length && (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
+                      <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
                         <Typography variant="subtitle1">
                           No staff found
                         </Typography>
@@ -584,7 +575,6 @@ export default function StaffList() {
                   required
                   type="number"
                   label="Assigned cut percentage"
-                  helperText="The recipient's credited balance is calculated from this cut. It cannot be lower than your own cut."
                   inputProps={{ min: 0.000001, step: "any" }}
                   value={form.parentCutPercent}
                   onChange={setField("parentCutPercent")}
@@ -734,7 +724,6 @@ export default function StaffList() {
                         required
                         type="number"
                         label="Assigned cut percentage"
-                        helperText="It cannot be lower than your own assigned cut percentage."
                         inputProps={{ min: 0.000001, step: "any" }}
                         value={editForm.parentCutPercent}
                         onChange={setEditField("parentCutPercent")}

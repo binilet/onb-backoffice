@@ -314,7 +314,7 @@ export default function ShopBalance() {
         <Alert
           severity="error"
           variant="outlined"
-          sx={{ mb: 4 }}
+          sx={{ mb: 2 }}
           onClose={() => setError("")}
         >
           {error}
@@ -324,7 +324,7 @@ export default function ShopBalance() {
         <Alert
           severity="success"
           variant="outlined"
-          sx={{ mb: 4 }}
+          sx={{ mb: 2 }}
           onClose={() => setNotice("")}
         >
           {notice}
@@ -339,7 +339,7 @@ export default function ShopBalance() {
         </Paper>
       )}
       {canView && (
-        <Stack gap={5}>
+        <Stack gap={2}>
           <Paper variant="outlined">
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pr: 2 }}>
               <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)} aria-label="Shop balance sections">
@@ -354,21 +354,18 @@ export default function ShopBalance() {
               direction="row"
               alignItems="center"
               justifyContent="space-between"
-              gap={3}
+              gap={1.5}
               flexWrap="wrap"
-              sx={{ p: 4 }}
+              sx={{ p: 2 }}
             >
               <Box>
-                <Typography component="h2" variant="h3">
-                  Balances in your scope · Your Shop balance: {currentUserBalance == null ? "—" : pointsFormat.format(currentUserBalance)}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Balances are shown in points.
+                <Typography component="h2" variant="subtitle1" fontWeight={800}>
+                  Your balance: {currentUserBalance == null ? "—" : pointsFormat.format(currentUserBalance)}
                 </Typography>
               </Box>
               <Stack
                 direction="row"
-                gap={3}
+                gap={1}
                 flexWrap="wrap"
                 alignItems="center"
               >
@@ -381,12 +378,12 @@ export default function ShopBalance() {
               </Stack>
             </Stack>
             {!balancesLoaded ? (
-              <Box sx={{ py: 8, textAlign: "center" }}><Typography variant="subtitle1">Balances are hidden</Typography><Typography variant="body2" color="text.secondary">Enter a phone number or leave it empty to show every balance in your scope.</Typography></Box>
+              <Box sx={{ py: 4, textAlign: "center" }}><Typography variant="body2" color="text.secondary">No balances loaded</Typography></Box>
             ) : loading ? (
               <Stack
                 alignItems="center"
                 justifyContent="center"
-                sx={{ py: 10 }}
+                sx={{ py: 6 }}
               >
                 <CircularProgress size={32} />
               </Stack>
@@ -445,22 +442,15 @@ export default function ShopBalance() {
             )}
           </Paper>}
           {activeTab === 0 && <Paper variant="outlined" sx={{ overflow: "hidden" }}>
-            <Box sx={{ p: 4 }}>
-              <Typography component="h2" variant="h3">
-                Transfer ledger
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Immutable records of shop-balance transfers in your authorized
-                scope.
-              </Typography>
+            <Box sx={{ p: 2 }}>
               <Box
                 component="form"
                 onSubmit={applyLedgerFilters}
-                sx={{ mt: 3 }}
+                sx={{ mt: 0 }}
               >
                 <Stack
                   direction="row"
-                  gap={3}
+                  gap={1}
                   flexWrap="wrap"
                   alignItems="center"
                 >
@@ -490,13 +480,13 @@ export default function ShopBalance() {
                   </Button>
                 </Stack>
               </Box>
-              <Stack direction="row" gap={5} flexWrap="wrap" sx={{ mt: 3 }}>
+              <Stack direction="row" gap={3} flexWrap="wrap" sx={{ mt: 1.5 }}>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
                     Total points
                   </Typography>
                   <Typography
-                    variant="h3"
+                    variant="h5"
                     sx={{ fontFamily: numericFontFamily }}
                   >
                     {pointsFormat.format(ledgerTotals.points)}
@@ -507,7 +497,7 @@ export default function ShopBalance() {
                     Total ETB
                   </Typography>
                   <Typography
-                    variant="h3"
+                    variant="h5"
                     sx={{ fontFamily: numericFontFamily }}
                   >
                     {pointsFormat.format(ledgerTotals.etb)}
@@ -632,17 +622,11 @@ export default function ShopBalance() {
                 label={amountLabel}
                 value={transfer.amount}
                 onChange={setTransferField("amount")}
-                helperText={
-                  role === "system"
-                    ? "The backend calculates the credited points from this recipient's assigned cut."
-                    : "Points are debited from your balance using this recipient's assigned cut."
-                }
               />
               <TextField
                 label="Idempotency key"
                 value={transfer.idempotencyKey}
                 InputProps={{ readOnly: true }}
-                helperText="Generated for this transfer to prevent duplicate crediting."
               />
             </Stack>
           </DialogContent>
