@@ -14,6 +14,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
   const dispatch = useDispatch();
   const [id, setId] = React.useState(editingUser ? editingUser._id : '');
   const [agent_id, setAgentId] = React.useState(editingUser ? editingUser.agentId : '');
+  const [subagent_id, setSubagentId] = React.useState(editingUser?.subagentId || '');
   const [admin_id, setAdminId] = React.useState(editingUser ? editingUser.adminId : '');
   const [cutPercent, setCutPercent] = React.useState(editingUser ? editingUser.agentPercent : '');
   const [parentCutPercent, setParentCutPercent] = React.useState(editingUser ? editingUser.parentCutPercent || '' : '');
@@ -46,6 +47,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
       setPhone(editingUser.phone);
       setBanUntil(editingUser.banUntil);
       setAgentId(editingUser.agentId);
+      setSubagentId(editingUser.subagentId || '');
       setAdminId(editingUser.adminId);
       setShopId(editingUser.shopId || '');
       setBranchId(editingUser.branchId || '');
@@ -61,6 +63,7 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
       setPhone('');
       setBanUntil('');
       setAgentId('');
+      setSubagentId('');
       setAdminId('');
       setShopId('');
       setBranchId('');
@@ -133,8 +136,10 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
       username,
       phone,
       ban_until,
-      agentId: agent_id,
-      adminId: admin_id,
+      agentId: agent_id || undefined,
+      subagentId: subagent_id || undefined,
+      adminId: admin_id || undefined,
+      ownerPhone: admin_id || subagent_id || agent_id || undefined,
       adminPercent,
       shopId: ['admin', 'cashier'].includes(role) ? shopId || null : null,
       branchId: role === 'cashier' ? branchId || null : null,
@@ -358,13 +363,34 @@ const UserFormModal = ({ openModal, handleCloseModal, editingUser, isMobile }) =
             />
           )}
 
+          {current_user.role === "system" && (
+            <TextField
+              name="subagentPhone"
+              label="Subagent Phone"
+              fullWidth
+              value={subagent_id}
+              onChange={(event) => {
+                const input = event.target.value;
+                if (/^\d{0,10}$/.test(input)) setSubagentId(input);
+              }}
+              inputProps={{ maxLength: 10 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ minWidth: 0 }}
+            />
+          )}
+
           {current_user.role === "system" && ['agent', 'subagent', 'admin', 'cashier'].includes(role) && (
             <TextField
               required
               name="parentCutPercent"
               label="Assigned cut percent"
               type="number"
-              helperText="The recipient's cut must be greater than zero."
               inputProps={{ min: 0.000001, step: "any" }}
               fullWidth
               value={parentCutPercent}

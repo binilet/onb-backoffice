@@ -28,6 +28,8 @@ import {
 } from "@mui/material";
 import CasinoOutlined from "@mui/icons-material/CasinoOutlined";
 import EmojiEventsOutlined from "@mui/icons-material/EmojiEventsOutlined";
+import AccountBalanceWalletOutlined from "@mui/icons-material/AccountBalanceWalletOutlined";
+import SavingsOutlined from "@mui/icons-material/SavingsOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import AddCircleOutlineOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
 import EditOutlined from "@mui/icons-material/EditOutlined";
@@ -89,6 +91,14 @@ const editFormFor = (game) => ({
   note: game.note || "",
 });
 
+const initialFiltersFor = () => ({
+  startDate: today,
+  endDate: today,
+  shopId: "",
+  branchId: "",
+  gameStatus: "",
+});
+
 export default function ShopGames() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth._current_user);
@@ -96,18 +106,8 @@ export default function ShopGames() {
   const [shops, setShops] = useState([]);
   const [branches, setBranches] = useState([]);
   const [games, setGames] = useState([]);
-  const [filters, setFilters] = useState({
-    startDate: today,
-    endDate: today,
-    shopId: "",
-    branchId: "",
-  });
-  const initialFilters = useRef({
-    startDate: today,
-    endDate: today,
-    shopId: "",
-    branchId: "",
-  });
+  const [filters, setFilters] = useState(initialFiltersFor);
+  const initialFilters = useRef(initialFiltersFor());
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -122,13 +122,14 @@ export default function ShopGames() {
 
   const load = useCallback(async (activeFilters) => {
     setLoading(true);
-    setError("");
-    try {
+      setError("");
+      try {
       const params = {
-        startAt: `${activeFilters.startDate}T00:00:00+03:00`,
-        endAt: `${activeFilters.endDate}T23:59:59+03:00`,
+        ...(activeFilters.startDate && { startAt: `${activeFilters.startDate}T00:00:00+03:00` }),
+        ...(activeFilters.endDate && { endAt: `${activeFilters.endDate}T23:59:59+03:00` }),
         ...(activeFilters.shopId && { shopId: activeFilters.shopId }),
         ...(activeFilters.branchId && { branchId: activeFilters.branchId }),
+        ...(activeFilters.gameStatus && { gameStatus: activeFilters.gameStatus }),
       };
       const [gameData, shopData, branchData] = await Promise.all([
         getGames(params),
@@ -294,9 +295,19 @@ export default function ShopGames() {
             value={games.length}
           />
           <Summary
+            icon={<AccountBalanceWalletOutlined />}
+            label="Total bets"
+            value={numberFormat.format(total("totalBets"))}
+          />
+          <Summary
             icon={<EmojiEventsOutlined />}
             label="Total winnings"
-            value={total("totalWinning")}
+            value={numberFormat.format(total("totalWinning"))}
+          />
+          <Summary
+            icon={<SavingsOutlined />}
+            label="Total cut"
+            value={numberFormat.format(total("totalCutAmount"))}
           />
         </Stack>
         </Box>
@@ -335,7 +346,19 @@ export default function ShopGames() {
               </MenuItem>
             ))}
           </TextField>
-          <Autocomplete options={filteredBranches} disabled={!filters.shopId} getOptionLabel={(branch) => branch.branchName} value={filteredBranches.find((branch) => branch.branch_id === filters.branchId) || null} onChange={(_, branch) => setFilters({ ...filters, branchId: branch?.branch_id || "" })} renderInput={(params) => <TextField {...params} label="Branch" placeholder="Search branch" />} sx={{ minWidth: 200 }} />
+          <TextField
+            select
+            label="Game state"
+            value={filters.gameStatus}
+            onChange={(e) => setFilters({ ...filters, gameStatus: e.target.value })}
+          >
+            <MenuItem value="">All states</MenuItem>
+            <MenuItem value="PENDING">Pending</MenuItem>
+            <MenuItem value="ACTIVE">Active</MenuItem>
+            <MenuItem value="COMPLETE">Completed</MenuItem>
+            <MenuItem value="VOID">Void</MenuItem>
+          </TextField>
+          <Autocomplete options={filteredBranches} disabled={!filters.shopId && user?.role !== "system"} getOptionLabel={(branch) => branch.branchName} value={filteredBranches.find((branch) => branch.branch_id === filters.branchId) || null} onChange={(_, branch) => setFilters({ ...filters, branchId: branch?.branch_id || "" })} renderInput={(params) => <TextField {...params} label="Branch" placeholder="Search branch" />} sx={{ minWidth: 200 }} />
           <Button variant="outlined" onClick={() => load(filters)} disabled={loading}>
             Apply filters
           </Button>
@@ -357,6 +380,7 @@ export default function ShopGames() {
               <TableCell>Game</TableCell>
               <TableCell>Location / start</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Created</TableCell>
               <TableCell align="right">Stake</TableCell>
               <TableCell align="right">Payout</TableCell>
               <TableCell align="right" sx={{ position: "sticky", right: 0, bgcolor: "background.paper", borderLeft: 1, borderColor: "divider" }}>Details</TableCell>
@@ -377,6 +401,9 @@ export default function ShopGames() {
                 <TableCell>
                   <GameStatusChips game={game} />
                 </TableCell>
+                <TableCell sx={{ fontFamily: numericFontFamily, whiteSpace: "nowrap" }}>
+                  {dateTime.format(new Date(game.createdAt))}
+                </TableCell>
                 <TableCell align="right" sx={{ fontFamily: numericFontFamily }}>{numberFormat.format(game.betAmount)}</TableCell>
                 <TableCell align="right" sx={{ fontFamily: numericFontFamily }}>{game.totalWinning == null ? "—" : numberFormat.format(game.totalWinning)}</TableCell>
                 <TableCell align="right" sx={{ position: "sticky", right: 0, bgcolor: "background.paper", borderLeft: 1, borderColor: "divider" }}>
@@ -387,7 +414,7 @@ export default function ShopGames() {
                 </TableCell>
               </TableRow>
             ))}
-            {!games.length && <TableRow><TableCell colSpan={6} align="center" sx={{ py: 10 }}><Typography variant="subtitle1">No games match this view</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Adjust the date or location filters to review another period.</Typography></TableCell></TableRow>}
+            {!games.length && <TableRow><TableCell colSpan={7} align="center" sx={{ py: 10 }}><Typography variant="subtitle1">No games match this view</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Adjust the date, location, or state filters to review another period.</Typography></TableCell></TableRow>}
           </TableBody>
         </Table>
         </TableContainer>}
@@ -403,7 +430,7 @@ export default function ShopGames() {
           <DialogContent>
             <Stack gap={3} sx={{ pt: 1 }}>
               <Box><Typography variant="h5">Location</Typography><Typography variant="body2" color="text.secondary">Set the shop and branch that will host this game.</Typography></Box>
-              <TextField required label="Game name" value={form.gameName} onChange={(e) => setForm({ ...form, gameName: e.target.value })} helperText="This name is shown to players and in game details." />
+              <TextField required label="Game name" value={form.gameName} onChange={(e) => setForm({ ...form, gameName: e.target.value })} />
               <TextField
                 select
                 required
@@ -423,7 +450,6 @@ export default function ShopGames() {
               <TextField
                 select
                 label="Static pattern"
-                helperText={form.dynamicPattern ? "Clear the dynamic pattern to use a static pattern." : "Choose one static pattern, or use a dynamic pattern below."}
                 value={form.pattern}
                 onChange={(e) => setForm({ ...form, pattern: e.target.value, dynamicPattern: e.target.value ? "" : form.dynamicPattern })}
               >
@@ -458,7 +484,6 @@ export default function ShopGames() {
               <TextField
                 select
                 label="Dynamic pattern"
-                helperText={form.pattern ? "Clear the static pattern to use a dynamic pattern." : "Choose one dynamic pattern, or use a static pattern above."}
                 value={form.dynamicPattern}
                 onChange={(e) =>
                   setForm({ ...form, dynamicPattern: e.target.value, pattern: e.target.value ? "" : form.pattern })
@@ -499,7 +524,6 @@ export default function ShopGames() {
                 multiline
                 minRows={3}
                 label="Game note"
-                helperText="Optional operational context. System lifecycle messages will also appear here."
                 value={form.note}
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
               />
@@ -562,7 +586,7 @@ export default function ShopGames() {
               <TextField required disabled={editingGame?.status !== "PENDING"} type="number" inputProps={{ min: 0.000001, step: "any" }} label="Bet amount" value={editForm?.betAmount || ""} onChange={(event) => setEditForm((current) => ({ ...current, betAmount: event.target.value }))} />
               <TextField disabled={editingGame?.status !== "PENDING"} type="number" inputProps={{ min: 0, step: "any" }} label="Total winning" value={editForm?.totalWinning || ""} onChange={(event) => setEditForm((current) => ({ ...current, totalWinning: event.target.value }))} />
               <TextField required disabled={editingGame?.status !== "PENDING"} type="number" inputProps={{ min: 10, step: "any" }} label="Total cut percent" value={editForm?.totalCutPercent || ""} onChange={(event) => setEditForm((current) => ({ ...current, totalCutPercent: event.target.value }))} />
-              <TextField multiline minRows={4} label="Game note" helperText="Manual notes and system lifecycle messages are retained here." value={editForm?.note || ""} onChange={(event) => setEditForm((current) => ({ ...current, note: event.target.value }))} />
+              <TextField multiline minRows={4} label="Game note" value={editForm?.note || ""} onChange={(event) => setEditForm((current) => ({ ...current, note: event.target.value }))} />
             </Stack>
           </DialogContent>
           <DialogActions><Button color="inherit" onClick={() => setEditingGame(null)} disabled={savingEdit}>Cancel</Button><Button type="submit" variant="contained" disabled={savingEdit || (editingGame?.status === "PENDING" && (!hasEditPattern || !editForm?.betAmount || !editForm?.totalCutPercent || (editForm?.startMode === "TIMER" && !editForm?.scheduledStartAt)))}>{savingEdit ? "Saving…" : "Save game"}</Button></DialogActions>

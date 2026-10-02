@@ -58,10 +58,11 @@ const MainLayout = ({
 
   const user = useSelector((state) => state.auth._current_user);
   const username = user?.username || t('guest');
+  const displayName = user?.phone || username;
   const role = user?.role || t('noScope');
   const hasLegacyAccess = ['system', 'agent', 'subagent', 'admin', 'employee'].includes(user?.role);
   const showSuperOnlineNavigation = hasLegacyAccess;
-  const avatarLetter = username.charAt(0).toUpperCase() || 'U';
+  const avatarLetter = displayName.charAt(0).toUpperCase() || 'U';
   const marketplaceUser = import.meta.env.DEV ? getPreviewUser(location.search) : null;
   // const marketplaceItems = navigationFor(marketplaceUser?.role);
   const marketplaceItems = navigationFor(role);
@@ -291,7 +292,7 @@ const MainLayout = ({
           </Avatar>
           <Box flexGrow={1} minWidth={0}>
             <Typography variant="subtitle2" sx={{ overflowWrap: 'anywhere' }}>
-              {username}
+              {displayName}
             </Typography>
             <Typography
               variant="caption"

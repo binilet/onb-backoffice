@@ -110,9 +110,11 @@ export const updateUser = createAsyncThunk(
         role: updates.role ?? null,
         phone: updates.phone ?? null,
         agentId: updates.agentId ?? null,
+        subagentId: updates.subagentId ?? null,
         shopId: updates.shopId ?? null,
         branchId: updates.branchId ?? null,
         parentPhone: updates.parentPhone ?? null,
+        ownerPhone: updates.ownerPhone ?? null,
         parentCutPercent: updates.parentCutPercent ?? null,
         agentPercent: updates.agentPercent ?? null,
         isActive: updates.isActive ?? null, // Map isActive to is_active

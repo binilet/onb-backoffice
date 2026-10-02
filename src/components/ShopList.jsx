@@ -79,7 +79,8 @@ export default function ShopList() {
   const currentUser = useSelector((state) => state.auth._current_user);
   const role = currentUser?.role;
   const canManage = role === "system";
-  const canView = ["system", "agent", "subagent"].includes(role);
+  const canManageBranches = ["system", "agent", "subagent", "admin"].includes(role);
+  const canView = ["system", "agent", "subagent", "admin", "cashier"].includes(role);
   const [shops, setShops] = useState([]);
   const [representatives, setRepresentatives] = useState([]);
   const [branchCounts, setBranchCounts] = useState({});
@@ -365,14 +366,16 @@ export default function ShopList() {
                           {dateTime.format(new Date(shop.createdAt))}
                         </TableCell>
                         <TableCell align="right">
-                          <Tooltip title="Manage branches">
-                            <IconButton
-                              aria-label={`Manage branches for ${shop.shopName}`}
-                              onClick={() => setBranchShop(shop)}
-                            >
-                              <AccountTreeOutlined />
-                            </IconButton>
-                          </Tooltip>
+                          {canManageBranches && (
+                            <Tooltip title="Manage branches">
+                              <IconButton
+                                aria-label={`Manage branches for ${shop.shopName}`}
+                                onClick={() => setBranchShop(shop)}
+                              >
+                                <AccountTreeOutlined />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           {canManage && (
                             <>
                               <Tooltip title="Edit shop">
@@ -435,18 +438,22 @@ export default function ShopList() {
                 value={form.address}
                 onChange={setField("address")}
               />
-              <Autocomplete
-                options={representatives}
-                value={representatives.find((person) => person.phone === form.representativePhone) || null}
-                onChange={(_, person) =>
-                  setForm((current) => ({ ...current, representativePhone: person?.phone || "" }))
-                }
-                getOptionLabel={(person) => `${person.username || person.phone} · ${person.phone} · ${person.role}`}
-                isOptionEqualToValue={(option, value) => option.phone === value.phone}
-                renderInput={(params) => (
-                  <TextField {...params} required label="Shop representative" placeholder="Search name, phone, or role" />
-                )}
-              />
+              {canManage ? (
+                <Autocomplete
+                  options={representatives}
+                  value={representatives.find((person) => person.phone === form.representativePhone) || null}
+                  onChange={(_, person) =>
+                    setForm((current) => ({ ...current, representativePhone: person?.phone || "" }))
+                  }
+                  getOptionLabel={(person) => `${person.username || person.phone} · ${person.phone} · ${person.role}`}
+                  isOptionEqualToValue={(option, value) => option.phone === value.phone}
+                  renderInput={(params) => (
+                    <TextField {...params} required label="Shop representative" placeholder="Search name, phone, or role" />
+                  )}
+                />
+              ) : (
+                <TextField label="Shop representative" value={form.representativePhone} disabled />
+              )}
               <TextField
                 select
                 label="Status"

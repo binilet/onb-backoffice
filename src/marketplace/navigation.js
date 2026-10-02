@@ -1,4 +1,5 @@
 import StoreOutlined from "@mui/icons-material/StoreOutlined";
+import ImageOutlined from "@mui/icons-material/ImageOutlined";
 import SportsEsportsOutlined from "@mui/icons-material/SportsEsportsOutlined";
 import GroupsOutlined from "@mui/icons-material/GroupsOutlined";
 import SavingsOutlined from "@mui/icons-material/SavingsOutlined";
@@ -12,11 +13,12 @@ export const navigationGroups = [
   {
     label: "Shop management",
     items: [
+      { label: "media.title", to: "/marketplace/site-media", icon: ImageOutlined, roles: ["system"], ready: true },
       {
         label: "Shops",
         to: "/marketplace/shops",
         icon: StoreOutlined,
-        roles: ["system", "agent", "subagent"],
+        roles: ["system", "agent", "subagent", "admin", "cashier"],
         ready: true,
       },
       {

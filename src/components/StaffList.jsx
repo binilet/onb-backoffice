@@ -47,6 +47,7 @@ const initialForm = {
   role: "",
   shopId: "",
   branchId: "",
+  ownerPhone: "",
   parentCutPercent: "",
 };
 const dateTime = new Intl.DateTimeFormat("en", {
@@ -66,6 +67,17 @@ function rolesFor(role) {
 function requiresAssignedCut(assignerRole, recipientRole) {
   return ["system", "agent", "subagent"].includes(assignerRole) &&
     ["agent", "subagent", "admin", "cashier"].includes(recipientRole);
+}
+
+function ownerRolesFor(staffRole) {
+  if (staffRole === "subagent") return ["agent"];
+  if (staffRole === "admin") return ["agent", "subagent"];
+  if (staffRole === "cashier") return ["agent", "subagent", "admin"];
+  return [];
+}
+
+function ownerPhoneFor(person) {
+  return person.parentPhone || person.adminId || person.subagentId || person.agentId || "";
 }
 
 export default function StaffList() {
@@ -95,6 +107,7 @@ export default function StaffList() {
     role: "",
     shopId: "",
     forShop: true,
+    ownerPhone: "",
   });
   const [updating, setUpdating] = useState(false);
 
@@ -134,16 +147,25 @@ export default function StaffList() {
       ),
     [branches],
   );
+  const staffByPhone = useMemo(
+    () =>
+      Object.fromEntries(
+        [...staff, currentUser]
+          .filter((person) => person?.phone)
+          .map((person) => [person.phone, person]),
+      ),
+    [currentUser, staff],
+  );
   const searchedStaff = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
     return query
       ? staff.filter((person) =>
-          `${person.username} ${person.phone} ${person.role} ${shopNames[person.shopId] || person.shopId || ""} ${branchNames[person.branchId] || person.branchId || ""}`
+          `${person.username} ${person.phone} ${person.role} ${ownerPhoneFor(person)} ${staffByPhone[ownerPhoneFor(person)]?.username || ""} ${shopNames[person.shopId] || person.shopId || ""} ${branchNames[person.branchId] || person.branchId || ""}`
             .toLocaleLowerCase()
             .includes(query),
         )
       : staff;
-  }, [branchNames, search, shopNames, staff]);
+  }, [branchNames, search, shopNames, staff, staffByPhone]);
   const staffCounts = useMemo(
     () =>
       staff.reduce(
@@ -162,16 +184,51 @@ export default function StaffList() {
         : searchedStaff.filter((person) => person.role === roleTab),
     [roleTab, searchedStaff],
   );
+  const renderOwner = (person) => {
+    const ownerPhone = ownerPhoneFor(person);
+    const owner = staffByPhone[ownerPhone];
+    const rootOwner = !ownerPhone && person.role === "agent";
+    return (
+      <>
+        <Typography variant="body2">
+          {owner?.username || (rootOwner ? "System" : ownerPhone || "—")}
+        </Typography>
+        {ownerPhone && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontFamily: numericFontFamily, whiteSpace: "nowrap" }}
+          >
+            {owner?.role ? `${owner.role} · ` : ""}{ownerPhone}
+          </Typography>
+        )}
+      </>
+    );
+  };
   const formBranches = useMemo(
     () => branches.filter((branch) => branch.shopId === form.shopId),
     [branches, form.shopId],
+  );
+  const ownerOptions = useMemo(
+    () => [
+      ...(role === "system" && currentUser?.phone ? [currentUser] : []),
+      ...Object.values(staffByPhone).filter((person) =>
+        ownerRolesFor(form.role).includes(person.role),
+      ),
+    ].filter((person, index, list) => list.findIndex((candidate) => candidate.phone === person.phone) === index),
+    [currentUser, form.role, role, staffByPhone],
   );
 
   const openCreate = () => {
     const availableRoles = rolesFor(role);
     const defaultRole = availableRoles[0] || "";
     const defaultShopId = role === "admin" ? currentUser?.shopId || "" : "";
-    setForm({ ...initialForm, role: defaultRole, shopId: defaultShopId });
+    setForm({
+      ...initialForm,
+      role: defaultRole,
+      shopId: defaultShopId,
+      ownerPhone: role === "system" ? currentUser?.phone || "" : "",
+    });
     setError("");
     setFormOpen(true);
   };
@@ -190,6 +247,7 @@ export default function StaffList() {
       role: person.role,
       shopId: person.shopId || "",
       forShop: true,
+      ownerPhone: ownerPhoneFor(person),
     });
     setError("");
   };
@@ -200,7 +258,8 @@ export default function StaffList() {
     setForm((current) => {
       const next = { ...current, [field]: event.target.value };
       if (field === "role" && ["agent", "subagent"].includes(event.target.value))
-        return { ...next, shopId: "", branchId: "" };
+        return { ...next, shopId: "", branchId: "", ownerPhone: "" };
+      if (field === "role") return { ...next, ownerPhone: "" };
       if (field === "shopId") return { ...next, branchId: "" };
       return next;
     });
@@ -211,10 +270,16 @@ export default function StaffList() {
           ? event.target.value === "true"
           : event.target.value;
       const next = { ...current, [field]: value };
-      if (field === "role" && ["agent", "subagent"].includes(value))
-        return { ...next, shopId: "", branchId: "" };
-      if (field === "role" && value !== "cashier")
-        return { ...next, branchId: "" };
+      if (field === "role") {
+        next.ownerPhone = "";
+        if (["agent", "subagent"].includes(value)) {
+          next.shopId = "";
+          next.branchId = "";
+        } else if (value !== "cashier") {
+          next.branchId = "";
+        }
+        return next;
+      }
       if (field === "shopId") return { ...next, branchId: "" };
       return next;
     });
@@ -231,6 +296,7 @@ export default function StaffList() {
       isActive: true,
       verified: true,
       forShop: true,
+      ownerPhone: form.ownerPhone || null,
       shopId: ["agent", "subagent"].includes(form.role) ? null : form.shopId || null,
       branchId: form.role === "cashier" ? form.branchId : null,
       parentCutPercent:
@@ -260,6 +326,15 @@ export default function StaffList() {
     () => branches.filter((branch) => branch.shopId === editForm.shopId),
     [branches, editForm.shopId],
   );
+  const editOwnerOptions = useMemo(
+    () => [
+      ...(role === "system" && currentUser?.phone ? [currentUser] : []),
+      ...Object.values(staffByPhone).filter((person) =>
+        ownerRolesFor(editForm.role).includes(person.role),
+      ),
+    ].filter((person, index, list) => list.findIndex((candidate) => candidate.phone === person.phone) === index),
+    [currentUser, editForm.role, role, staffByPhone],
+  );
   const canEdit = (person) =>
     role !== "cashier" || person.phone === currentUser?.phone;
   const canChangeRole = (person) =>
@@ -280,6 +355,8 @@ export default function StaffList() {
         : null;
       payload.branchId = editForm.role === "cashier" ? editForm.branchId : null;
     }
+    if (role === "system" && ownerRolesFor(editForm.role).length > 0)
+      payload.ownerPhone = editForm.ownerPhone || null;
     if (
       editForm.role === "cashier" &&
       editingPerson.phone !== currentUser?.phone
@@ -423,7 +500,9 @@ export default function StaffList() {
                   <TableRow>
                     <TableCell>Staff member</TableCell>
                     <TableCell>Role</TableCell>
+                    <TableCell>Reports to</TableCell>
                     <TableCell align="right">Assigned cut</TableCell>
+                    <TableCell align="right">Available shop balance</TableCell>
                     <TableCell>Shop</TableCell>
                     <TableCell>Branch</TableCell>
                     <TableCell>Created</TableCell>
@@ -448,6 +527,9 @@ export default function StaffList() {
                       <TableCell>
                         <Chip size="small" label={person.role} />
                       </TableCell>
+                      <TableCell>
+                        {renderOwner(person)}
+                      </TableCell>
                       <TableCell
                         align="right"
                         sx={{ fontFamily: numericFontFamily, whiteSpace: "nowrap" }}
@@ -455,6 +537,12 @@ export default function StaffList() {
                         {person.parentCutPercent == null
                           ? "—"
                           : `${person.parentCutPercent}%`}
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ fontFamily: numericFontFamily, whiteSpace: "nowrap" }}
+                      >
+                        {Number(person.availableShopBalance || 0).toLocaleString()} pts
                       </TableCell>
                       <TableCell>
                         {shopNames[person.shopId] || person.shopId || "—"}
@@ -485,7 +573,7 @@ export default function StaffList() {
                   ))}
                   {!filteredStaff.length && (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                      <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
                         <Typography variant="subtitle1">
                           No staff found
                         </Typography>
@@ -524,7 +612,6 @@ export default function StaffList() {
                 required
                 label="Temporary password"
                 type="password"
-                helperText="At least 6 characters"
                 value={form.password}
                 onChange={setField("password")}
               />
@@ -541,6 +628,31 @@ export default function StaffList() {
                   </MenuItem>
                 ))}
               </TextField>
+              {role === "system" && (
+                <Autocomplete
+                  options={ownerOptions}
+                  value={
+                    ownerOptions.find((person) => person.phone === form.ownerPhone) || null
+                  }
+                  onChange={(_, person) =>
+                    setForm((current) => ({
+                      ...current,
+                      ownerPhone: person?.phone || "",
+                    }))
+                  }
+                  getOptionLabel={(person) =>
+                    `${person.username || person.phone} · ${person.phone} · ${person.role}`
+                  }
+                  isOptionEqualToValue={(option, value) => option.phone === value.phone}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Owner"
+                      placeholder="Search owner name or phone"
+                    />
+                  )}
+                />
+              )}
               {showShopSelect && (
                 <Autocomplete
                   options={shops}
@@ -648,7 +760,6 @@ export default function StaffList() {
                 <TextField
                   label="Reset temporary password"
                   type="password"
-                  helperText="Leave blank to keep the password. If set, the staff member must change it after signing in."
                   value={editForm.password}
                   onChange={setEditField("password")}
                 />
@@ -667,6 +778,31 @@ export default function StaffList() {
                     </MenuItem>
                   ))}
                 </TextField>
+              )}
+              {role === "system" && (
+                <Autocomplete
+                  options={editOwnerOptions}
+                  value={
+                    editOwnerOptions.find((person) => person.phone === editForm.ownerPhone) || null
+                  }
+                  onChange={(_, person) =>
+                    setEditForm((current) => ({
+                      ...current,
+                      ownerPhone: person?.phone || "",
+                    }))
+                  }
+                  getOptionLabel={(person) =>
+                    `${person.username || person.phone} · ${person.phone} · ${person.role}`
+                  }
+                  isOptionEqualToValue={(option, value) => option.phone === value.phone}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Owner"
+                      placeholder="Search owner name or phone"
+                    />
+                  )}
+                />
               )}
               {canChangeRole(editingPerson) &&
                 ["admin", "cashier"].includes(editForm.role) &&

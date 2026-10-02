@@ -33,6 +33,7 @@ import ManualWithdrawManager from './components/manualWithdraw';
 import HagereOnlineInvite from './components/HagereInvite';
 import AuotoSettingComponent from './components/AutoSettingComponent';
 import ShopList from './components/ShopList';
+import SiteMedia from './components/SiteMedia';
 import StaffList from './components/StaffList';
 import ShopBalance from './components/ShopBalance';
 import PlayerRoomWallets from './components/PlayerRoomWallets';
@@ -151,10 +152,11 @@ const App = () => {
               </>
             )}
             <Route path="/marketplace/shops" element={
-              <PrivateRoute allowedRoles={['system', 'agent', 'subagent']}>
+              <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin', 'cashier']}>
                 <ShopList />
               </PrivateRoute>
             } />
+            <Route path="/marketplace/site-media" element={<PrivateRoute allowedRoles={['system']}><SiteMedia /></PrivateRoute>} />
             <Route path="/marketplace/staff" element={
               <PrivateRoute allowedRoles={['system', 'agent', 'subagent', 'admin']}>
                 <StaffList />

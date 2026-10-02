@@ -85,7 +85,18 @@ function recipientRolesFor(role) {
   return [];
 }
 
-function initialTransfer(role, currentUser) {
+function isDirectTransferRecipient(role, currentPhone, person) {
+  if (role === "admin") {
+    return (
+      person.role === "cashier" &&
+      (person.parentPhone === currentPhone || person.adminId === currentPhone)
+    );
+  }
+  // Match the backend's legacy-aware direct-parent lookup for agent levels.
+  return (person.parentPhone || person.agentId) === currentPhone;
+}
+
+function initialTransfer() {
   return {
     toPhone: "",
     amount: "",
@@ -119,9 +130,7 @@ export default function ShopBalance() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [transferOpen, setTransferOpen] = useState(false);
-  const [transfer, setTransfer] = useState(() =>
-    initialTransfer(role, currentUser),
-  );
+  const [transfer, setTransfer] = useState(initialTransfer);
   const [sending, setSending] = useState(false);
   const [confirmTransfer, setConfirmTransfer] = useState(false);
 
@@ -148,7 +157,7 @@ export default function ShopBalance() {
     } finally {
       setLoading(false);
     }
-  }, [canView, currentUser, ledgerFilters, role]);
+  }, [canView, currentUser, ledgerFilters]);
 
   useEffect(() => {
     loadBalances();
@@ -208,33 +217,12 @@ export default function ShopBalance() {
     );
     if (role !== "system")
       return candidates.filter(
-        (person) =>
-          person.parentPhone === currentUser?.phone ||
-          person.agentId === currentUser?.phone ||
-          person.adminId === currentUser?.phone,
+        (person) => isDirectTransferRecipient(role, currentUser?.phone, person),
       );
     return candidates;
   }, [currentUser?.phone, role, staff]);
-  const selectedRecipient = useMemo(
-    () => recipients.find((person) => person.phone === transfer.toPhone),
-    [recipients, transfer.toPhone],
-  );
-  const appliedPercent =
-    role === "admin"
-        ? 100
-        : Number(
-            selectedRecipient?.parentCutPercent ||
-              selectedRecipient?.adminPercent ||
-              selectedRecipient?.agentPercent ||
-              0,
-          );
-  const estimatedCredit =
-    Number(transfer.amount) > 0 && appliedPercent > 0
-      ? Number(transfer.amount) * (100 / appliedPercent)
-      : 0;
-
   const openTransfer = () => {
-    setTransfer(initialTransfer(role, currentUser));
+    setTransfer(initialTransfer());
     setError("");
     setTransferOpen(true);
   };
@@ -659,16 +647,6 @@ export default function ShopBalance() {
             </strong>{" "}
             to{" "}
             <strong>{staffNames[transfer.toPhone] || transfer.toPhone}</strong>?
-          </Typography>
-          <Alert severity="info" sx={{ mt: 2 }}>
-            At {appliedPercent || "—"}%, the recipient will receive <strong>{pointsFormat.format(estimatedCredit)} points</strong>.
-          </Alert>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ display: "block", mt: 2 }}
-          >
-            This creates an immutable balance ledger entry.
           </Typography>
         </DialogContent>
         <DialogActions>

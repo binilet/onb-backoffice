@@ -1,4 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import mediaEn from "./locales/siteMedia/en.json";
+import mediaAm from "./locales/siteMedia/am.json";
+import mediaOm from "./locales/siteMedia/om.json";
+const mediaTranslations = { en: mediaEn, am: mediaAm, om: mediaOm };
 
 export const languageOptions = [
   { code: "en", label: "English", shortLabel: "EN" },
@@ -170,7 +174,9 @@ export function LanguageProvider({ children }) {
   const value = useMemo(() => ({
     language,
     setLanguage,
-    t: (key) => translations[language]?.[key] || translations.en[key] || key,
+    t: (key) => key.startsWith("media.")
+      ? mediaTranslations[language]?.[key.slice(6)] || mediaEn[key.slice(6)] || key
+      : translations[language]?.[key] || translations.en[key] || key,
   }), [language]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

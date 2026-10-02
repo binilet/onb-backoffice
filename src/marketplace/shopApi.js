@@ -27,6 +27,22 @@ export async function getShops() {
   return response.data;
 }
 
+export async function getSiteMedia() {
+  return (await shopApi.get('/admin/site-media')).data;
+}
+export async function uploadSiteMedia(formData) {
+  return (await shopApi.post('/admin/site-media', formData)).data;
+}
+export async function updateSiteMedia(id, payload) {
+  return (await shopApi.patch(`/admin/site-media/${id}`, payload)).data;
+}
+export async function deleteSiteMedia(id) {
+  return (await shopApi.delete(`/admin/site-media/${id}`)).data;
+}
+export async function resetSiteMedia(slot) {
+  return (await shopApi.post(`/admin/site-media/slots/${slot}/reset`)).data;
+}
+
 export async function getStaff() {
   const response = await shopApi.get("/shop/staff");
   return response.data;
