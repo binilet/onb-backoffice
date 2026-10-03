@@ -686,7 +686,7 @@ function Summary({ icon, label, value }) {
 
 function GameStatusChips({ game }) {
   const statusColor = game.status === "COMPLETE" ? "success" : game.status === "VOID" ? "error" : game.status === "ACTIVE" ? "primary" : "default";
-  return <Stack direction="row" gap={1} flexWrap="wrap"><Chip size="small" color={statusColor} label={game.status} />{game.isFrozen && <Chip size="small" color="warning" label="FROZEN" />}</Stack>;
+  return <Stack direction="row" gap={1} flexWrap="wrap"><Chip size="small" color={statusColor} label={game.status} />{game.isFrozen && <Chip size="small" color="warning" label={game.runnerRecoveryRequired ? "RESTART REVIEW" : "FROZEN"} />}</Stack>;
 }
 
 function DetailMetric({ label, value }) {
