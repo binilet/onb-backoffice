@@ -165,3 +165,23 @@ export async function updateGameLifecycle(gameId, action) {
 export async function getActionLogs(params) {
   return (await shopApi.get("/shop/action-logs", { params })).data;
 }
+
+export async function getShopTelegram(shopId) {
+  const response = await shopApi.get(`/shop/shops/${shopId}/telegram`);
+  return response.data;
+}
+
+export async function createShopTelegramLinkCode(shopId, target) {
+  const response = await shopApi.post(`/shop/shops/${shopId}/telegram/${target}/link-code`);
+  return response.data;
+}
+
+export async function sendShopTelegramTest(shopId, target) {
+  const response = await shopApi.post(`/shop/shops/${shopId}/telegram/${target}/test`);
+  return response.data;
+}
+
+export async function unlinkShopTelegram(shopId, target) {
+  const response = await shopApi.delete(`/shop/shops/${shopId}/telegram/${target}`);
+  return response.data;
+}

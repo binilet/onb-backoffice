@@ -32,6 +32,7 @@ import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import EditOutlined from "@mui/icons-material/EditOutlined";
 import SearchOutlined from "@mui/icons-material/SearchOutlined";
 import ContentCopyOutlined from "@mui/icons-material/ContentCopyOutlined";
+import NotificationsActiveOutlined from "@mui/icons-material/NotificationsActiveOutlined";
 import { numericFontFamily } from "../../theme";
 import MarketplaceLayout from "../marketplace/MarketplaceLayout";
 import {
@@ -43,6 +44,7 @@ import {
   updateShop,
 } from "../marketplace/shopApi";
 import ShopBranchesDialog from "./ShopBranchesDialog";
+import ShopTelegramDialog from "./ShopTelegramDialog";
 
 const initialForm = {
   representativePhone: "",
@@ -95,6 +97,7 @@ export default function ShopList() {
   const [shopToDelete, setShopToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [branchShop, setBranchShop] = useState(null);
+  const [telegramShop, setTelegramShop] = useState(null);
 
   const loadShops = useCallback(async () => {
     if (!canView) return;
@@ -376,6 +379,16 @@ export default function ShopList() {
                               </IconButton>
                             </Tooltip>
                           )}
+                          {canManageBranches && (
+                            <Tooltip title="Telegram notifications">
+                              <IconButton
+                                aria-label={`Telegram notifications for ${shop.shopName}`}
+                                onClick={() => setTelegramShop(shop)}
+                              >
+                                <NotificationsActiveOutlined />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           {canManage && (
                             <>
                               <Tooltip title="Edit shop">
@@ -531,6 +544,11 @@ export default function ShopList() {
         open={Boolean(branchShop)}
         onClose={() => setBranchShop(null)}
         onChanged={loadShops}
+      />
+      <ShopTelegramDialog
+        shop={telegramShop}
+        open={Boolean(telegramShop)}
+        onClose={() => setTelegramShop(null)}
       />
     </MarketplaceLayout>
   );
