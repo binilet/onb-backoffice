@@ -9,7 +9,8 @@ export default function PrivateRoute({ children, allowedRoles }) {
   const user = useSelector((state) => state.auth._current_user || {});
   const location = useLocation();
 
-  if (!token) return <Navigate to="/login" replace />;
+  // Remember the page (e.g. an approval link from Telegram) to return to after login.
+  if (!token) return <Navigate to="/login" replace state={{ from: location }} />;
 
   if (user?.mustChangePassword && location.pathname !== '/change-password') {
     return <Navigate to="/change-password" replace />;

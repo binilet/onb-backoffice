@@ -36,6 +36,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const sessionExpired = new URLSearchParams(location.search).get('expired') === '1';
+  const from = location.state?.from;
+  const returnTo = from?.pathname && from.pathname !== '/login' ? `${from.pathname}${from.search || ''}` : '/';
   const { language, setLanguage, t } = useLanguage();
 
   const handleLogin = async () => {
@@ -52,7 +54,7 @@ export default function Login() {
         } else if (user.role === 'employee') {
           navigate('/hagere-invite');
         } else {
-          navigate('/');
+          navigate(returnTo, { replace: true });
         }
       } else {
         navigate('/');

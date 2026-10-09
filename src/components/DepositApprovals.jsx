@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Alert,
   Box,
@@ -42,9 +43,23 @@ const dayEnd = (date) =>
     new Date(`${date}T00:00:00+03:00`).getTime() + 86400000,
   ).toISOString();
 
+const TABS = ["TELEBIRR", "CASH", "APPROVED", "DECLINED"];
+// Highlight for the request a Telegram link points at.
+const focusRowSx = {
+  "&.Mui-selected, &.Mui-selected:hover": {
+    bgcolor: "action.selected",
+    boxShadow: (theme) => `inset 4px 0 0 ${theme.palette.warning.main}`,
+  },
+};
+const isDay = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value || "");
+
 export default function DepositApprovals() {
-  const [tab, setTab] = useState("TELEBIRR");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  // Telegram "Go for approval" links open ?tab=…&date=…&focus=<deposit id>.
+  const [searchParams] = useSearchParams();
+  const focusId = searchParams.get("focus");
+  const focusRef = useRef(null);
+  const [tab, setTab] = useState(() => (TABS.includes(searchParams.get("tab")) ? searchParams.get("tab") : "TELEBIRR"));
+  const [date, setDate] = useState(() => (isDay(searchParams.get("date")) ? searchParams.get("date") : new Date().toISOString().slice(0, 10)));
   const [items, setItems] = useState([]);
   const [branches, setBranches] = useState([]);
   const [shops, setShops] = useState([]);
@@ -81,6 +96,10 @@ export default function DepositApprovals() {
   useEffect(() => {
     load();
   }, [load]);
+  useEffect(() => {
+    if (!loading) focusRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [loading, items]);
+  const focusMissing = Boolean(focusId) && !loading && !items.some((item) => item.id === focusId);
 
   const branchNames = useMemo(
     () =>
@@ -128,6 +147,11 @@ export default function DepositApprovals() {
       {notice && (
         <Alert severity="success" sx={{ mb: 3 }} onClose={() => setNotice("")}>
           {notice}
+        </Alert>
+      )}
+      {focusMissing && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          The deposit from the Telegram link is not in this list. It may already be reviewed, or it is outside your shop scope.
         </Alert>
       )}
       <Paper variant="outlined" sx={{ overflow: "hidden" }}>
@@ -219,7 +243,13 @@ export default function DepositApprovals() {
               </TableHead>
               <TableBody>
                 {items.map((item) => (
-                  <TableRow key={item.id} hover>
+                  <TableRow
+                    key={item.id}
+                    hover
+                    selected={item.id === focusId}
+                    sx={focusRowSx}
+                    ref={item.id === focusId ? focusRef : undefined}
+                  >
                     <TableCell>
                       <Typography
                         fontWeight={700}
@@ -264,7 +294,8 @@ export default function DepositApprovals() {
                       {money.format(item.amount)}
                     </TableCell>
                     <TableCell align="right">
-                      {item.status === "PENDING" ? (
+                      {/* Failed receipt checks stay reviewable by staff. */}
+                      {["PENDING", "FAILED"].includes(item.status) ? (
                         <Stack
                           direction="row"
                           justifyContent="flex-end"
